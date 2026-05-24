@@ -1,0 +1,1785 @@
+<!DOCTYPE html>
+<html lang="en" style="color-scheme:light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="color-scheme" content="light">
+<title>OrcaLearn — AI Homeschool dApp</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --purple:#7c3aed;--purple-dark:#6d28d9;--purple-light:#ede9fe;
+  --blue:#2563eb;--blue-light:#dbeafe;
+  --text:#1e1b4b;--text-muted:#6b7280;--border:#e5e7eb;--bg:#f5f3ff;
+}
+html,body{min-height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:16px;}
+
+/* LANDING */
+#landing{min-height:100vh;background:linear-gradient(160deg,#fce4ec 0%,#f3e5f5 40%,#ede9fe 65%,#dbeafe 100%);display:flex;flex-direction:column;}
+.landing-nav{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(255,255,255,0.85);backdrop-filter:blur(8px);border-bottom:1px solid rgba(255,255,255,0.5);position:sticky;top:0;z-index:10;}
+.nav-brand{display:flex;align-items:center;gap:8px;}
+.nav-logo{width:32px;height:32px;border-radius:8px;object-fit:cover;}
+.nav-logo-emoji{font-size:28px;line-height:1;}
+.nav-brand-name{font-weight:700;font-size:16px;color:var(--text);}
+.landing-hero{flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;padding:40px 24px 80px;gap:22px;}
+.hero-inner{width:100%;max-width:640px;display:flex;flex-direction:column;align-items:center;gap:22px;}
+.hero-logo{width:120px;height:120px;border-radius:24px;box-shadow:0 8px 32px rgba(124,58,237,0.2);object-fit:cover;}
+.hero-logo-emoji{font-size:80px;line-height:1;filter:drop-shadow(0 8px 20px rgba(124,58,237,0.3));}
+.landing-title{font-size:40px;font-weight:800;line-height:1.15;color:var(--text);}
+.title-gradient{background:linear-gradient(135deg,#7c3aed,#2563eb);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.landing-subtitle{font-size:17px;color:#374151;max-width:100%;line-height:1.65;}
+.landing-pills{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;width:100%;}
+.pill{background:rgba(255,255,255,0.85);border:1px solid rgba(255,255,255,0.7);border-radius:999px;padding:9px 18px;font-size:14px;font-weight:500;color:#374151;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;border-radius:12px;font-weight:600;cursor:pointer;transition:all 0.15s;text-decoration:none;font-family:inherit;}
+.btn:active{transform:scale(0.97);}
+.btn-primary{background:linear-gradient(135deg,#7c3aed,#6d28d9);color:white;box-shadow:0 4px 14px rgba(124,58,237,0.35);}
+.btn-primary:hover{background:linear-gradient(135deg,#6d28d9,#5b21b6);}
+.btn-secondary{background:#f3f4f6;color:#374151;}
+.btn-secondary:hover{background:#e5e7eb;}
+.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--text-muted);font-size:13px;}
+.btn-danger{background:#fee2e2;color:#dc2626;}
+.btn-sm{padding:7px 14px;font-size:13px;border-radius:10px;}
+.btn-large{padding:18px 32px;font-size:19px;border-radius:16px;width:100%;max-width:100%;}
+.btn-green{background:#059669;color:white;box-shadow:0 4px 12px rgba(5,150,105,0.3);}
+.btn-green:hover{background:#047857;}
+.btn-purple-solid{background:var(--purple);color:white;}
+.btn-purple-solid:hover{background:var(--purple-dark);}
+.btn-blue{background:#2563eb;color:white;}
+.btn-blue:hover{background:#1d4ed8;}
+.landing-note{font-size:13px;color:#6b7280;}
+.aivm-badge{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#1e1b4b,#312e81);color:white;border-radius:999px;padding:6px 14px;font-size:12px;font-weight:600;letter-spacing:0.02em;}
+
+/* APP SHELL */
+#app{min-height:100vh;background:var(--bg);display:flex;flex-direction:column;padding-bottom:64px;}
+.app-nav{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:white;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10;gap:8px;}
+.nav-wallet{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.wallet-addr{font-size:11px;color:var(--text-muted);font-family:monospace;}
+.paid-badge{background:#d1fae5;color:#065f46;border-radius:999px;padding:3px 8px;font-size:11px;font-weight:700;}
+.free-badge{background:#fef9c3;color:#713f12;border-radius:999px;padding:3px 8px;font-size:11px;font-weight:700;}
+.tab-content{flex:1;}
+.tab-section{padding:20px 18px;max-width:760px;margin:0 auto;width:100%;}
+
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid var(--border);display:flex;z-index:10;box-shadow:0 -4px 12px rgba(0,0,0,0.06);}
+.bottom-nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:10px 4px;border:none;background:none;cursor:pointer;transition:all 0.15s;color:#9ca3af;}
+.bottom-nav-btn.active{color:var(--purple);}
+.bottom-nav-btn:active{background:#f3f0ff;}
+.nav-icon{font-size:22px;line-height:1;}
+.nav-label{font-size:12px;font-weight:600;}
+
+/* CARDS */
+.card{background:white;border-radius:16px;padding:20px;border:1px solid var(--border);box-shadow:0 1px 4px rgba(0,0,0,0.04);}
+.card+.card{margin-top:14px;}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.section-title{font-size:20px;font-weight:700;color:var(--text);}
+
+/* HOME */
+.students-row{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;}
+.students-row::-webkit-scrollbar{display:none;}
+.student-chip{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 14px;border-radius:14px;border:2px solid var(--border);background:white;cursor:pointer;transition:all 0.15s;min-width:70px;}
+.student-chip.active{border-color:var(--purple);background:var(--purple-light);}
+.student-avatar{font-size:28px;line-height:1;}
+.student-chip-name{font-size:12px;font-weight:600;color:var(--text);text-align:center;max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.student-chip-grade{font-size:11px;color:var(--text-muted);}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
+.stat-card{background:white;border-radius:14px;padding:18px 14px;border:1px solid var(--border);text-align:center;}
+.stat-card-num{font-size:34px;font-weight:800;color:var(--purple);}
+.stat-card-label{font-size:13px;color:var(--text-muted);margin-top:4px;}
+.quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.action-card{background:white;border-radius:16px;padding:22px 16px;border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;gap:10px;cursor:pointer;transition:all 0.15s;text-align:center;}
+.action-card:hover{border-color:var(--purple);background:var(--purple-light);}
+.action-card:active{transform:scale(0.97);}
+.action-icon{font-size:36px;}
+.action-title{font-size:15px;font-weight:700;color:var(--text);}
+.action-sub{font-size:12px;color:var(--text-muted);}
+.free-banner{background:linear-gradient(135deg,var(--purple-light),var(--blue-light));border:1px solid #c4b5fd;border-radius:14px;padding:12px 16px;display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+.free-banner-icon{font-size:24px;}
+.free-banner-text{flex:1;}
+.free-banner-title{font-size:14px;font-weight:700;color:var(--text);}
+.free-banner-sub{font-size:12px;color:var(--text-muted);}
+.pay-banner{background:linear-gradient(135deg,#fef3c7,#fde68a);border:1px solid #f59e0b;border-radius:14px;padding:12px 16px;display:flex;align-items:center;gap:12px;margin-bottom:16px;cursor:pointer;}
+.pay-banner:hover{opacity:0.92;}
+
+/* LESSONS / PLANS */
+.plan-card{background:white;border-radius:16px;padding:18px;border:1px solid var(--border);margin-bottom:12px;cursor:pointer;transition:all 0.15s;}
+.plan-card:hover{border-color:var(--purple);box-shadow:0 2px 8px rgba(124,58,237,0.1);}
+.plan-card-header{display:flex;align-items:flex-start;gap:14px;}
+.plan-subject-icon{font-size:36px;flex-shrink:0;}
+.plan-card-info{flex:1;min-width:0;}
+.plan-card-title{font-size:16px;font-weight:700;color:var(--text);}
+.plan-card-meta{font-size:13px;color:var(--text-muted);margin-top:4px;}
+.plan-progress-bar{margin-top:10px;height:6px;background:#e5e7eb;border-radius:3px;overflow:hidden;}
+.plan-progress-fill{height:100%;background:linear-gradient(90deg,var(--purple),var(--blue));border-radius:3px;transition:width 0.4s;}
+.plan-progress-label{font-size:11px;color:var(--text-muted);margin-top:4px;}
+
+/* FORMS */
+.form-group{display:flex;flex-direction:column;gap:8px;}
+.form-label{font-size:14px;font-weight:600;color:#374151;}
+.form-input,.form-select,.form-textarea{width:100%;padding:13px 16px;border:1.5px solid var(--border);border-radius:12px;font-size:16px;font-family:inherit;color:var(--text);background:white;outline:none;transition:border-color 0.15s;}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--purple);}
+.form-textarea{min-height:100px;resize:vertical;}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;background:white;border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;}
+.toggle-label{font-size:14px;color:var(--text);}
+.toggle{position:relative;width:44px;height:24px;}
+.toggle input{opacity:0;width:0;height:0;}
+.toggle-slider{position:absolute;inset:0;background:#d1d5db;border-radius:12px;transition:0.2s;cursor:pointer;}
+.toggle-slider:before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:white;border-radius:50%;transition:0.2s;}
+.toggle input:checked+.toggle-slider{background:var(--purple);}
+.toggle input:checked+.toggle-slider:before{transform:translateX(20px);}
+
+/* QUIZ */
+.quiz-setup{display:flex;flex-direction:column;gap:18px;}
+.quiz-meta{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);}
+.quiz-progress{font-size:13px;color:var(--text-muted);font-weight:600;}
+.quiz-timer{font-size:18px;font-weight:800;color:var(--purple);font-variant-numeric:tabular-nums;}
+.quiz-timer.warn{color:#dc2626;}
+.quiz-question{background:white;border-radius:16px;padding:28px 24px;text-align:center;border:1px solid var(--border);font-size:20px;font-weight:700;color:var(--text);line-height:1.5;}
+.quiz-choices{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.choice-btn{padding:18px 14px;border:2px solid var(--border);border-radius:14px;background:white;font-size:16px;font-weight:600;color:var(--text);cursor:pointer;transition:all 0.15s;font-family:inherit;text-align:center;line-height:1.3;}
+.choice-btn:hover:not(:disabled){border-color:var(--purple);background:var(--purple-light);}
+.choice-btn.correct{border-color:#059669;background:#d1fae5;color:#065f46;}
+.choice-btn.wrong{border-color:#dc2626;background:#fee2e2;color:#991b1b;}
+.choice-btn.reveal{border-color:#059669;background:#d1fae5;color:#065f46;}
+.choice-btn:disabled{cursor:default;}
+.quiz-feedback{text-align:center;padding:16px;border-radius:14px;font-size:16px;font-weight:700;}
+.quiz-feedback.correct{background:#d1fae5;color:#065f46;}
+.quiz-feedback.wrong{background:#fee2e2;color:#991b1b;}
+.quiz-score-card{background:white;border-radius:20px;padding:28px 20px;text-align:center;border:2px solid var(--purple);}
+.score-big{font-size:56px;font-weight:900;color:var(--purple);line-height:1;}
+.score-grade{font-size:28px;font-weight:800;color:var(--text);margin:4px 0;}
+.score-label{font-size:16px;color:var(--text-muted);}
+.quiz-history-item{display:flex;align-items:center;gap:14px;padding:14px 16px;background:white;border-radius:12px;margin-bottom:10px;border:1px solid var(--border);}
+.history-icon{font-size:28px;}
+.history-info{flex:1;}
+.history-title{font-size:15px;font-weight:600;color:var(--text);}
+.history-sub{font-size:13px;color:var(--text-muted);}
+.history-score{font-size:20px;font-weight:800;color:var(--purple);}
+
+/* STUDENTS */
+.student-card{background:white;border-radius:16px;padding:18px 20px;border:1px solid var(--border);display:flex;align-items:center;gap:16px;margin-bottom:12px;}
+.student-card-avatar{font-size:46px;}
+.student-card-info{flex:1;}
+.student-card-name{font-size:18px;font-weight:700;color:var(--text);}
+.student-card-grade{font-size:14px;color:var(--text-muted);margin-top:4px;}
+.student-card-actions{display:flex;gap:8px;}
+
+/* MODALS */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:100;display:flex;align-items:flex-end;}
+@media(min-width:600px){.modal-overlay{align-items:center;justify-content:center;padding:20px;}}
+.modal{background:white;border-radius:24px 24px 0 0;width:100%;max-width:540px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden;}
+@media(min-width:600px){.modal{border-radius:20px;}}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:20px 22px 16px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.modal-header h3{font-size:20px;font-weight:700;color:var(--text);}
+.modal-close{width:36px;height:36px;border:none;background:#f3f4f6;border-radius:10px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--text-muted);}
+.modal-body{flex:1;overflow-y:auto;padding:22px;display:flex;flex-direction:column;gap:18px;}
+.modal-footer{padding:16px 22px;border-top:1px solid var(--border);display:flex;gap:12px;flex-shrink:0;}
+.modal-footer .btn{flex:1;padding:15px;font-size:16px;}
+.avatar-picker{display:flex;flex-wrap:wrap;gap:8px;}
+.avatar-opt{width:44px;height:44px;border-radius:12px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer;transition:all 0.15s;}
+.avatar-opt.selected{border-color:var(--purple);background:var(--purple-light);}
+
+/* PLAN VIEWER */
+.plan-viewer-text{white-space:pre-wrap;font-size:15px;line-height:1.8;color:#374151;font-family:inherit;}
+.plan-days-checklist{display:flex;flex-direction:column;gap:8px;margin-top:16px;}
+.day-check{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#f9fafb;border-radius:10px;border:1px solid var(--border);}
+.day-check input[type=checkbox]{width:20px;height:20px;accent-color:var(--purple);cursor:pointer;}
+.day-check label{font-size:14px;font-weight:600;color:var(--text);cursor:pointer;}
+.day-check.completed{background:#f0fdf4;border-color:#86efac;}
+.day-check.completed label{color:#15803d;}
+
+/* LOADING */
+.spinner{width:40px;height:40px;border:3px solid var(--purple-light);border-top-color:var(--purple);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading-state{text-align:center;padding:32px 16px;display:flex;flex-direction:column;align-items:center;gap:14px;}
+.loading-state p{font-size:14px;color:var(--text-muted);}
+.loading-state h4{font-size:15px;font-weight:700;color:var(--text);}
+
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:40px 16px;color:var(--text-muted);}
+.empty-state-icon{font-size:48px;margin-bottom:12px;}
+.empty-state h3{font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px;}
+.empty-state p{font-size:14px;margin-bottom:20px;}
+
+/* TOAST */
+#toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:#1e1b4b;color:white;padding:10px 20px;border-radius:24px;font-size:14px;font-weight:500;z-index:200;opacity:0;transition:all 0.3s;white-space:nowrap;max-width:90vw;}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+#toast.error{background:#dc2626;}
+
+/* REPORT BUTTONS */
+.report-btns{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;}
+.report-btns .btn{flex:1;min-width:130px;padding:11px 14px;font-size:14px;}
+
+/* UTILS */
+.hidden{display:none!important;}
+.mt-4{margin-top:16px;}
+.mt-2{margin-top:8px;}
+.mb-4{margin-bottom:16px;}
+.text-center{text-align:center;}
+.text-muted{color:var(--text-muted);font-size:13px;}
+.divider{height:1px;background:var(--border);margin:16px 0;}
+.info-box{background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px;font-size:13px;color:#1e40af;line-height:1.5;}
+.warn-box{background:#fef9c3;border:1px solid #fde047;border-radius:10px;padding:12px;font-size:13px;color:#713f12;line-height:1.5;}
+
+@media(min-width:600px){
+  .landing-title{font-size:52px;}
+  .landing-subtitle{font-size:18px;}
+  .tab-section{padding:28px 24px;}
+}
+@media(min-width:900px){
+  .quick-actions{grid-template-columns:1fr 1fr 1fr 1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- LANDING -->
+<div id="landing">
+  <nav class="landing-nav">
+    <div class="nav-brand">
+      <img src="orcalearn-logo.png" class="nav-logo" alt="OrcaLearn" onerror="this.style.display='none'">
+      <span class="nav-brand-name">OrcaLearn</span>
+    </div>
+    <button class="btn btn-primary btn-sm" onclick="connectWallet()" id="nav-connect-btn">Connect Wallet</button>
+  </nav>
+  <main class="landing-hero">
+    <div class="hero-inner">
+      <img src="orcalearn-logo.png" class="hero-logo" alt="OrcaLearn" onerror="this.outerHTML='<div style=\'font-size:80px\'>🐋</div>'">
+      <h1 class="landing-title">Homeschooling,<br><span class="title-gradient">Made Simple</span></h1>
+      <p class="landing-subtitle">AI-powered lesson plans, progress tracking, and everything your family needs — all in one friendly place. Free to start.</p>
+      <div class="landing-pills">
+        <span class="pill">🤖 AI Lesson Plans</span>
+        <span class="pill">📊 Progress Tracking</span>
+        <span class="pill">👨‍👩‍👧 Multiple Students</span>
+        <span class="pill">🎯 Any Subject</span>
+        <span class="pill">📱 Your Data, Your Device</span>
+        <span class="pill">⚡ Lightchain AIVM</span>
+      </div>
+      <button class="btn btn-primary btn-large" onclick="connectWallet()" id="hero-connect-btn">🐋 Connect Wallet — It's Free</button>
+      <p class="landing-note">✨ First 5 lessons &amp; quizzes are completely free • No wallet needed to start</p>
+      <button class="btn btn-secondary btn-sm mt-2" onclick="startFree()">📚 Continue Without Wallet</button>
+      <div class="aivm-badge mt-2">⚡ Powered by Lightchain AIVM</div>
+    </div>
+  </main>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none">
+  <nav class="app-nav">
+    <div class="nav-brand" onclick="goLanding()" style="cursor:pointer" title="Home">
+      <img src="orcalearn-logo.png" class="nav-logo" alt="OrcaLearn" onerror="this.style.display='none'">
+      <span class="nav-brand-name" style="font-size:15px">OrcaLearn</span>
+    </div>
+    <div class="nav-wallet">
+      <span id="nav-payment-badge"></span>
+      <span id="nav-wallet-addr" class="wallet-addr"></span>
+      <button class="btn btn-outline btn-sm" id="btn-disconnect" onclick="disconnectWallet()" style="display:none">Disconnect</button>
+    </div>
+  </nav>
+  <div id="tab-content" class="tab-content">
+    <div id="tab-home" class="tab-section"><div id="home-content"></div></div>
+    <div id="tab-lessons" class="tab-section" style="display:none">
+      <div class="section-header">
+        <h2 class="section-title">&#x1F4DA; Lessons</h2>
+        <button class="btn btn-primary btn-sm" onclick="openGenerateModal()">+ New Lesson</button>
+      </div>
+      <div id="lessons-list"></div>
+    </div>
+    <div id="tab-quiz" class="tab-section" style="display:none"><div id="quiz-content"></div></div>
+    <div id="tab-students" class="tab-section" style="display:none">
+      <div class="section-header">
+        <h2 class="section-title">&#x1F464; Students</h2>
+        <button class="btn btn-primary btn-sm" onclick="openStudentModal()">+ Add Student</button>
+      </div>
+      <div id="students-list"></div>
+    </div>
+  </div>
+  <nav class="bottom-nav">
+    <button class="bottom-nav-btn active" onclick="showTab('home')" data-tab="home"><span class="nav-icon">&#x1F3E0;</span><span class="nav-label">Home</span></button>
+    <button class="bottom-nav-btn" onclick="showTab('lessons')" data-tab="lessons"><span class="nav-icon">&#x1F4DA;</span><span class="nav-label">Lessons</span></button>
+    <button class="bottom-nav-btn" onclick="showTab('quiz')" data-tab="quiz"><span class="nav-icon">&#x1F9EE;</span><span class="nav-label">Quiz</span></button>
+    <button class="bottom-nav-btn" onclick="showTab('students')" data-tab="students"><span class="nav-icon">&#x1F464;</span><span class="nav-label">Students</span></button>
+  </nav>
+</div>
+
+<!-- MODAL: STUDENT -->
+<div id="modal-student" class="modal-overlay" style="display:none" onclick="overlayClose(event,'modal-student')">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-student-title">Add Student</h3>
+      <button class="modal-close" onclick="closeModal('modal-student')">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="student-edit-id">
+      <div class="form-group"><label class="form-label">Name</label><input type="text" id="student-name" class="form-input" placeholder="Student name"></div>
+      <div class="form-group"><label class="form-label">Grade</label>
+        <select id="student-grade" class="form-select">
+          <option value="1">Grade 1 (age 6-7)</option><option value="2">Grade 2 (age 7-8)</option>
+          <option value="3" selected>Grade 3 (age 8-9)</option><option value="4">Grade 4 (age 9-10)</option>
+          <option value="5">Grade 5 (age 10-11)</option><option value="6">Grade 6 (age 11-12)</option>
+          <option value="7">Grade 7 (age 12-13)</option><option value="8">Grade 8 (age 13-14)</option>
+          <option value="9">Grade 9 (age 14-15)</option><option value="10">Grade 10 (age 15-16)</option>
+          <option value="11">Grade 11 (age 16-17)</option><option value="12">Grade 12 (age 17-18)</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Avatar</label>
+        <div class="avatar-picker" id="avatar-picker">
+          <div class="avatar-opt selected" data-emoji="&#x1F981;" onclick="selectAvatar(this)">&#x1F981;</div>
+          <div class="avatar-opt" data-emoji="&#x1F43A;" onclick="selectAvatar(this)">&#x1F43A;</div>
+          <div class="avatar-opt" data-emoji="&#x1F98A;" onclick="selectAvatar(this)">&#x1F98A;</div>
+          <div class="avatar-opt" data-emoji="&#x1F43C;" onclick="selectAvatar(this)">&#x1F43C;</div>
+          <div class="avatar-opt" data-emoji="&#x1F428;" onclick="selectAvatar(this)">&#x1F428;</div>
+          <div class="avatar-opt" data-emoji="&#x1F984;" onclick="selectAvatar(this)">&#x1F984;</div>
+          <div class="avatar-opt" data-emoji="&#x1F436;" onclick="selectAvatar(this)">&#x1F436;</div>
+          <div class="avatar-opt" data-emoji="&#x1F431;" onclick="selectAvatar(this)">&#x1F431;</div>
+          <div class="avatar-opt" data-emoji="&#x1F42C;" onclick="selectAvatar(this)">&#x1F42C;</div>
+          <div class="avatar-opt" data-emoji="&#x1F98B;" onclick="selectAvatar(this)">&#x1F98B;</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-student')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveStudent()">Save Student</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: GENERATE -->
+<div id="modal-generate" class="modal-overlay" style="display:none" onclick="overlayClose(event,'modal-generate')">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>&#x1F916; Generate Lesson Plan</h3>
+      <button class="modal-close" onclick="closeModal('modal-generate')">&#x2715;</button>
+    </div>
+    <div class="modal-body" id="generate-modal-body">
+      <div class="form-group"><label class="form-label">Student</label>
+        <select id="gen-student" class="form-select" onchange="updateGenGrade()"></select>
+      </div>
+      <div class="form-group"><label class="form-label">Subject</label>
+        <select id="gen-subject" class="form-select">
+          <option value="math">&#x1F522; Mathematics</option>
+          <option value="science">&#x1F52C; Science</option>
+          <option value="english">&#x1F4D6; English</option>
+          <option value="history">&#x1F3DB;&#xFE0F; History</option>
+          <option value="geography">&#x1F30D; Geography</option>
+          <option value="art">&#x1F3A8; Art</option>
+          <option value="music">&#x1F3B5; Music</option>
+          <option value="pe">&#x26BD; Physical Education</option>
+          <option value="coding">&#x1F4BB; Coding</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Grade</label>
+        <select id="gen-grade" class="form-select">
+          <option value="1">Grade 1</option><option value="2">Grade 2</option>
+          <option value="3" selected>Grade 3</option><option value="4">Grade 4</option>
+          <option value="5">Grade 5</option><option value="6">Grade 6</option>
+          <option value="7">Grade 7</option><option value="8">Grade 8</option>
+          <option value="9">Grade 9</option><option value="10">Grade 10</option>
+          <option value="11">Grade 11</option><option value="12">Grade 12</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Plan Length</label>
+        <select id="gen-days" class="form-select">
+          <option value="5">5 days (1 week)</option>
+          <option value="10">10 days (2 weeks)</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Goals / Notes (optional)</label>
+        <textarea id="gen-goals" class="form-textarea" placeholder="e.g. Focus on fractions, struggling with reading comprehension..."></textarea>
+      </div>
+    </div>
+    <div id="generate-modal-footer" class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-generate')">Cancel</button>
+      <button class="btn btn-primary" onclick="startGenerate()">&#x1F680; Generate Plan</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: VIEW PLAN -->
+<div id="modal-plan" class="modal-overlay" style="display:none" onclick="overlayClose(event,'modal-plan')">
+  <div class="modal" style="max-height:92vh">
+    <div class="modal-header">
+      <h3 id="modal-plan-title">Lesson Plan</h3>
+      <button class="modal-close" onclick="closeModal('modal-plan')">&#x2715;</button>
+    </div>
+    <div class="modal-body" id="modal-plan-body"></div>
+    <div class="modal-footer" style="gap:8px;flex-wrap:wrap">
+      <button class="btn btn-blue btn-sm" onclick="printPlan(_viewPlanId)">&#x1F34E; Download</button>
+      <button class="btn btn-green btn-sm" id="btn-certificate" onclick="printCertificate(_viewPlanId)" style="display:none">&#x1F3C6; Certificate</button>
+      <button class="btn btn-danger btn-sm" onclick="confirmDeletePlan()">&#x1F5D1; Delete</button>
+      <button class="btn btn-secondary" onclick="closeModal('modal-plan')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: QUIZ RUN -->
+<div id="modal-quiz-run" class="modal-overlay" style="display:none">
+  <div class="modal" style="max-height:95vh">
+    <div class="modal-header">
+      <h3 id="quiz-run-title">Quiz</h3>
+      <button class="modal-close" onclick="abortQuiz()">&#x2715;</button>
+    </div>
+    <div class="modal-body" id="quiz-run-body"></div>
+  </div>
+</div>
+
+<!-- MODAL: PAYMENT -->
+<div id="modal-payment" class="modal-overlay" style="display:none" onclick="overlayClose(event,'modal-payment')">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>&#x1F511; Unlock Premium AI</h3>
+      <button class="modal-close" onclick="closeModal('modal-payment')">&#x2715;</button>
+    </div>
+    <div class="modal-body" id="payment-modal-body">
+      <div class="info-box">&#x26A1; OrcaLearn Premium uses Lightchain AIVM for decentralized AI inference. Pay once per month in LCAI &#x2014; no credit cards, no accounts.</div>
+      <div class="card" style="text-align:center;padding:20px">
+        <div style="font-size:36px;font-weight:900;color:var(--purple)" id="lcai-price-display">Loading...</div>
+        <div style="font-size:14px;color:var(--text-muted);margin-top:4px">LCAI per month ($4.99 USD equivalent)</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:8px" id="lcai-rate-display"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Send LCAI to this address:</label>
+        <div style="background:#f9fafb;border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-family:monospace;font-size:13px;word-break:break-all;cursor:pointer" onclick="copyKeiko()" title="Click to copy">
+          0x1F899FaD2C8BD70b6eF356ae6cC3c0abDbB15EB5 &#x1F4CB;
+        </div>
+      </div>
+      <div class="warn-box">Make sure you are on the <strong>Lightchain</strong> network (chain ID 9200) when sending. LCAI is the native token.</div>
+      <div class="form-group">
+        <label class="form-label">Paste your payment transaction hash:</label>
+        <input type="text" id="payment-txhash" class="form-input" placeholder="0x..." style="font-family:monospace;font-size:13px">
+      </div>
+      <div id="payment-status" style="font-size:13px;color:var(--text-muted)"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-payment')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitPayment()" id="btn-verify-payment">&#x2705; Verify Payment</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: TRANSCRIPT -->
+<div id="modal-transcript" class="modal-overlay" style="display:none" onclick="overlayClose(event,'modal-transcript')">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>&#x1F393; Generate Transcript</h3>
+      <button class="modal-close" onclick="closeModal('modal-transcript')">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <div class="warn-box">&#x1F512; This information stays in your browser only &#x2014; never sent to any server.</div>
+      <div class="form-group"><label class="form-label">Student Full Name</label><input type="text" id="tr-student-name" class="form-input" placeholder="e.g. Emily Johnson"></div>
+      <div class="form-group"><label class="form-label">Date of Birth (optional)</label><input type="text" id="tr-dob" class="form-input" placeholder="e.g. March 15, 2014"></div>
+      <div class="form-group"><label class="form-label">Homeschool Name</label><input type="text" id="tr-school-name" class="form-input" placeholder="e.g. Johnson Family Academy"></div>
+      <div class="form-group"><label class="form-label">Academic Year</label><input type="text" id="tr-year" class="form-input" placeholder="e.g. 2025-2026"></div>
+      <div class="form-group"><label class="form-label">Parent / Guardian Name</label><input type="text" id="tr-parent-name" class="form-input" placeholder="e.g. Sarah Johnson"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-transcript')">Cancel</button>
+      <button class="btn btn-purple-solid" onclick="generateTranscript()">&#x1F393; Generate Transcript</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+'use strict';
+
+// ── CONSTANTS ─────────────────────────────────────────────────────────────
+const AIVM_GATEWAY = 'https://chat-api.mainnet.lightchain.ai';
+const AIVM_RELAY   = 'wss://relay.mainnet.lightchain.ai/ws';
+const AIVM_JOB_REG = '0xfB15F90298e4CcD7106E76fFB5e520315cC42B0b';
+const AIVM_JOB_FEE = 20000000000000000n;
+const AIVM_CHAIN_ID = 9200;
+const AIVM_CHAIN_HEX = '0x23F0';
+const LC_RPC = 'https://rpc.mainnet.lightchain.ai';
+const KEIKO_WALLET = '0x1F899FaD2C8BD70b6eF356ae6cC3c0abDbB15EB5';
+const SUB_USD = 4.99;
+const FREE_USES = 5;
+const LS_KEY = 'orcalearn_v2_data';
+
+const AIVM_ABI = [
+  {name:'createSession',type:'function',stateMutability:'payable',
+   inputs:[{name:'paramsHash',type:'bytes32'},{name:'worker',type:'address'},
+           {name:'encWorkerKey',type:'bytes'},{name:'ephemeralPubKey',type:'bytes'},
+           {name:'initState',type:'bytes'},{name:'expiry',type:'uint256'}],
+   outputs:[{name:'sessionId',type:'uint256'}]},
+  {name:'submitJob',type:'function',stateMutability:'payable',
+   inputs:[{name:'sessionId',type:'uint256'},{name:'promptHash',type:'bytes32'}],
+   outputs:[{name:'jobId',type:'uint256'}]},
+  {anonymous:false,name:'SessionCreated',type:'event',
+   inputs:[{indexed:true,name:'sessionId',type:'uint256'},{indexed:true,name:'user',type:'address'},
+           {indexed:true,name:'paramsHash',type:'bytes32'},{indexed:false,name:'worker',type:'address'},
+           {indexed:false,name:'encWorkerKey',type:'bytes'},{indexed:false,name:'ephemeralPubKey',type:'bytes'}]},
+  {anonymous:false,name:'JobSubmitted',type:'event',
+   inputs:[{indexed:true,name:'jobId',type:'uint256'},{indexed:true,name:'sessionId',type:'uint256'},
+           {indexed:false,name:'worker',type:'address'}]},
+  {anonymous:false,name:'JobCompleted',type:'event',
+   inputs:[{indexed:true,name:'jobId',type:'uint256'},{indexed:true,name:'worker',type:'address'},
+           {indexed:false,name:'responseHash',type:'bytes32'},{indexed:false,name:'ciphertextHash',type:'bytes32'}]}
+];
+
+const SUBJECTS = {
+  math:     {name:'Mathematics',        icon:'🔢'},
+  science:  {name:'Science',            icon:'🔬'},
+  english:  {name:'English',            icon:'📖'},
+  history:  {name:'History',            icon:'🏛️'},
+  geography:{name:'Geography',          icon:'🌍'},
+  art:      {name:'Art',                icon:'🎨'},
+  music:    {name:'Music',              icon:'🎵'},
+  pe:       {name:'Physical Education', icon:'⚽'},
+  coding:   {name:'Coding',             icon:'💻'}
+};
+
+const MATH_TOPICS = [
+  {id:'mixed',       label:'Mixed Practice',  emoji:'🎯'},
+  {id:'addition',    label:'Addition',        emoji:'➕'},
+  {id:'subtraction', label:'Subtraction',     emoji:'➖'},
+  {id:'multiplication',label:'Multiplication',emoji:'✖️'},
+  {id:'division',    label:'Division',        emoji:'➗'},
+  {id:'fractions',   label:'Fractions',       emoji:'🍕'},
+  {id:'decimals',    label:'Decimals',        emoji:'🔢'},
+  {id:'wordproblems',label:'Word Problems',   emoji:'📝'},
+  {id:'prealgebra',  label:'Pre-Algebra',     emoji:'🧮'}
+];
+
+// ── STATE ─────────────────────────────────────────────────────────────────
+const S = {
+  addr:null, provider:null, signer:null,
+  students:[], activeStudentId:null,
+  plans:[], quizHistory:[], progress:{},
+  freeUsesLeft:FREE_USES, paidUntil:null, paymentTxHash:null,
+  quizTimer:null
+};
+let _aivmJWT=null, _aivmJWTExp=0;
+let _viewPlanId=null;
+let QZ=null;
+
+// ── UTILS ─────────────────────────────────────────────────────────────────
+function el(id){return document.getElementById(id);}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+function uid(){return 'id_'+Date.now()+'_'+Math.random().toString(36).slice(2,7);}
+function toast(msg,err=false,ms=3000){
+  const t=el('toast');t.innerHTML=msg;t.className='show'+(err?' error':'');
+  clearTimeout(toast._t);toast._t=setTimeout(()=>{t.className='';},ms);
+}
+function openModal(id){el(id).style.display='flex';}
+function closeModal(id){el(id).style.display='none';}
+function overlayClose(e,id){if(e.target===e.currentTarget)closeModal(id);}
+function loadingHTML(msg,sub){
+  return '<div class="loading-state"><div class="spinner"></div><h4>'+esc(msg||'Working...')+'</h4>'+(sub?'<p>'+esc(sub)+'</p>':'')+'</div>';
+}
+
+// ── STORAGE ───────────────────────────────────────────────────────────────
+function loadData(){
+  try{
+    const raw=localStorage.getItem(LS_KEY);
+    const d=raw?JSON.parse(raw):{};
+    S.freeUsesLeft=d.freeUsesLeft??FREE_USES;
+    S.paidUntil=d.paidUntil||null;
+    S.paymentTxHash=d.paymentTxHash||null;
+    S.students=d.students||[];
+    S.plans=d.lessonHistory||[];
+    S.quizHistory=d.quizHistory||[];
+    S.progress=d.progress||{};
+    S.activeStudentId=d.activeStudentId||null;
+    if(S.students.length>0&&!S.activeStudentId) S.activeStudentId=S.students[0].id;
+  }catch(e){console.error('loadData',e);}
+}
+function saveData(){
+  try{
+    const d={
+      freeUsesLeft:S.freeUsesLeft,paidUntil:S.paidUntil,paymentTxHash:S.paymentTxHash,
+      wallet:S.addr,students:S.students,lessonHistory:S.plans,
+      quizHistory:S.quizHistory,progress:S.progress,activeStudentId:S.activeStudentId
+    };
+    localStorage.setItem(LS_KEY,JSON.stringify(d));
+  }catch(e){console.error('saveData',e);}
+}
+function isPaid(){return S.paidUntil&&Date.now()<S.paidUntil;}
+function canUseAI(){return isPaid()||S.freeUsesLeft>0;}
+function consumeFree(){if(!isPaid()&&S.freeUsesLeft>0){S.freeUsesLeft--;saveData();}}
+
+// ── ENCODING HELPERS ──────────────────────────────────────────────────────
+function bytesToHex(arr){let h='0x';for(const b of arr)h+=b.toString(16).padStart(2,'0');return h;}
+function hexToBytes(hex){
+  const s=hex.replace(/^0x/i,'');
+  const out=new Uint8Array(s.length/2);
+  for(let i=0;i<out.length;i++)out[i]=parseInt(s.slice(i*2,i*2+2),16);
+  return out;
+}
+function base64ToBytes(b64){
+  const bin=atob(b64.replace(/-/g,'+').replace(/_/g,'/'));
+  const out=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++)out[i]=bin.charCodeAt(i);
+  return out;
+}
+function bytesToBase64(arr){
+  let bin='';const bytes=new Uint8Array(arr);
+  for(const b of bytes)bin+=String.fromCharCode(b);
+  return btoa(bin);
+}
+function decodePubkey(s){
+  if(!s)throw new Error('empty pubkey');
+  s=s.trim();
+  if(s.startsWith('0x')||s.startsWith('0X')){return hexToBytes(s);}
+  if(/^[0-9a-fA-F]{130}$/.test(s)){return hexToBytes(s);}
+  return base64ToBytes(s);
+}
+
+// ── CRYPTO (WebCrypto) ────────────────────────────────────────────────────
+async function ecdhWrap(sessionKey,peerPubBytes){
+  const peerPub=await crypto.subtle.importKey('raw',peerPubBytes,{name:'ECDH',namedCurve:'P-256'},false,[]);
+  const ephemKP=await crypto.subtle.generateKey({name:'ECDH',namedCurve:'P-256'},true,['deriveBits']);
+  const sharedBits=await crypto.subtle.deriveBits({name:'ECDH',public:peerPub},ephemKP.privateKey,256);
+  const aesKey=await crypto.subtle.importKey('raw',sharedBits,{name:'AES-GCM'},false,['encrypt']);
+  const nonce=crypto.getRandomValues(new Uint8Array(12));
+  const ctBuf=await crypto.subtle.encrypt({name:'AES-GCM',iv:nonce},aesKey,sessionKey);
+  const ct=new Uint8Array(ctBuf);
+  const ephemPubRaw=await crypto.subtle.exportKey('raw',ephemKP.publicKey);
+  const ephemPub=new Uint8Array(ephemPubRaw);
+  const result=new Uint8Array(65+12+ct.byteLength);
+  result.set(ephemPub,0);result.set(nonce,65);result.set(ct,77);
+  return result;
+}
+async function aesEncrypt(key,plaintext){
+  const nonce=crypto.getRandomValues(new Uint8Array(12));
+  const aesKey=await crypto.subtle.importKey('raw',key,{name:'AES-GCM'},false,['encrypt']);
+  const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv:nonce},aesKey,plaintext);
+  const result=new Uint8Array(12+ct.byteLength);
+  result.set(nonce,0);result.set(new Uint8Array(ct),12);
+  return result;
+}
+async function aesDecrypt(key,blob){
+  const nonce=blob.slice(0,12);const ct=blob.slice(12);
+  const aesKey=await crypto.subtle.importKey('raw',key,{name:'AES-GCM'},false,['decrypt']);
+  return new Uint8Array(await crypto.subtle.decrypt({name:'AES-GCM',iv:nonce},aesKey,ct));
+}
+
+// ── LCAI PRICE ────────────────────────────────────────────────────────────
+let _lcaiPrice=null,_lcaiPriceTs=0;
+async function getLCAIPrice(){
+  if(_lcaiPrice&&Date.now()-_lcaiPriceTs<300000)return _lcaiPrice;
+  for(const id of['lightchain-ai','lightchain']){
+    try{
+      const r=await fetch('https://api.coingecko.com/api/v3/simple/price?ids='+id+'&vs_currencies=usd');
+      const d=await r.json();
+      const p=d[id]?.usd;
+      if(p&&p>0){_lcaiPrice=parseFloat(p);_lcaiPriceTs=Date.now();return _lcaiPrice;}
+    }catch{}
+  }
+  try{
+    const r=await fetch('https://api.dexscreener.com/latest/dex/search?q=LCAI');
+    const d=await r.json();
+    for(const pair of(d.pairs||[])){
+      if(pair.baseToken?.symbol?.toUpperCase()==='LCAI'){
+        const p=parseFloat(pair.priceUsd||0);
+        if(p>0){_lcaiPrice=p;_lcaiPriceTs=Date.now();return p;}
+      }
+    }
+  }catch{}
+  return _lcaiPrice||0.004;
+}
+async function getRequiredLCAIWei(){
+  const price=await getLCAIPrice();
+  const lcai=SUB_USD/price;
+  return BigInt(Math.round(lcai*1e18));
+}
+
+// ── PAYMENT VERIFICATION ──────────────────────────────────────────────────
+async function verifyPaymentTx(txHash,requiredWei){
+  const rpc=async(method,params)=>{
+    const r=await fetch(LC_RPC,{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({jsonrpc:'2.0',id:1,method,params})});
+    return (await r.json()).result;
+  };
+  const tx=await rpc('eth_getTransactionByHash',[txHash]);
+  if(!tx)throw new Error('Transaction not found on Lightchain. Check the hash and network.');
+  if(!tx.to||tx.to.toLowerCase()!==KEIKO_WALLET.toLowerCase())
+    throw new Error('Payment was not sent to the correct address.');
+  const val=BigInt(tx.value||'0x0');
+  if(val<requiredWei)throw new Error('Payment amount is too low. Required: '+ethers.formatEther(requiredWei)+' LCAI');
+  const block=await rpc('eth_getBlockByNumber',[tx.blockNumber,false]);
+  const ts=parseInt(block.timestamp,16)*1000;
+  if(Date.now()-ts>31*24*3600*1000)throw new Error('Payment is more than 31 days old. Please renew.');
+  return ts;
+}
+
+// ── PAYMENT MODAL ─────────────────────────────────────────────────────────
+async function openPaymentModal(){
+  openModal('modal-payment');
+  el('lcai-price-display').textContent='Loading...';
+  el('lcai-rate-display').textContent='';
+  el('payment-status').textContent='';
+  try{
+    const price=await getLCAIPrice();
+    const lcai=(SUB_USD/price).toFixed(2);
+    el('lcai-price-display').textContent=lcai+' LCAI';
+    el('lcai-rate-display').textContent='1 LCAI = $'+price.toFixed(4)+' USD';
+  }catch{el('lcai-price-display').textContent='~1250 LCAI';}
+}
+function copyKeiko(){
+  navigator.clipboard?.writeText(KEIKO_WALLET).then(()=>toast('Address copied! &#x1F4CB;'));
+}
+async function submitPayment(){
+  const txHash=el('payment-txhash').value.trim();
+  if(!txHash||!txHash.startsWith('0x')){toast('Please enter a valid transaction hash (starts with 0x)',true);return;}
+  el('payment-status').textContent='Verifying on Lightchain...';
+  el('btn-verify-payment').disabled=true;
+  try{
+    const reqWei=await getRequiredLCAIWei();
+    const ts=await verifyPaymentTx(txHash,reqWei);
+    S.paidUntil=ts+(31*24*3600*1000);
+    S.paymentTxHash=txHash;
+    saveData();
+    closeModal('modal-payment');
+    updateNavBadge();
+    toast('&#x1F389; Payment verified! Premium AI unlocked for 31 days.');
+  }catch(e){
+    el('payment-status').textContent='';
+    toast(e.message||'Verification failed',true,6000);
+  }finally{el('btn-verify-payment').disabled=false;}
+}
+
+// ── NETWORK SWITCH ────────────────────────────────────────────────────────
+async function switchToLightchain(){
+  if(!window.ethereum)throw new Error('No wallet found');
+  try{
+    await window.ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId:AIVM_CHAIN_HEX}]});
+  }catch(e){
+    if(e.code===4902||e.code===-32603){
+      await window.ethereum.request({method:'wallet_addEthereumChain',params:[{
+        chainId:AIVM_CHAIN_HEX,chainName:'Lightchain AI',
+        rpcUrls:[LC_RPC],
+        nativeCurrency:{name:'Lightchain AI',symbol:'LCAI',decimals:18},
+        blockExplorerUrls:['https://mainnet.lightscan.app']
+      }]});
+    }else throw e;
+  }
+}
+
+// ── AIVM JWT ──────────────────────────────────────────────────────────────
+async function getAivmJWT(){
+  if(_aivmJWT&&Date.now()<_aivmJWTExp-30000)return _aivmJWT;
+  if(!S.addr||!S.signer)throw new Error('Wallet not connected');
+  const r=await fetch(AIVM_GATEWAY+'/api/auth/challenge?address='+S.addr);
+  if(!r.ok)throw new Error('AIVM auth challenge failed ('+r.status+')');
+  const {message}=await r.json();
+  const signature=await S.signer.signMessage(message);
+  const r2=await fetch(AIVM_GATEWAY+'/api/auth/verify',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({message,signature})
+  });
+  if(!r2.ok)throw new Error('AIVM auth verify failed ('+r2.status+')');
+  const d2=await r2.json();
+  _aivmJWT=d2.token;
+  _aivmJWTExp=new Date(d2.expiresAt).getTime();
+  return _aivmJWT;
+}
+
+// ── AIVM INFERENCE ────────────────────────────────────────────────────────
+async function aivmInference(prompt,onProgress){
+  onProgress('Authenticating with AIVM network...');
+  const jwt=await getAivmJWT();
+  const hdrs={'Authorization':'Bearer '+jwt,'Accept':'application/json','Content-Type':'application/json'};
+
+  onProgress('Selecting AI worker...');
+  const mr=await fetch(AIVM_GATEWAY+'/api/models');
+  if(!mr.ok)throw new Error('Workers are busy — try again in a moment.');
+  const {models=[]}=await mr.json();
+  if(!models.length)throw new Error('Workers are busy — try again in a moment.');
+  const model=models.find(m=>m.name==='llama3-8b')||models[0];
+
+  const sr=await fetch(AIVM_GATEWAY+'/api/sessions/select',{method:'POST',headers:hdrs,body:JSON.stringify({modelId:model.id})});
+  if(!sr.ok)throw new Error('Workers are busy — try again in a moment.');
+  const sel=await sr.json();
+
+  const sessionKey=crypto.getRandomValues(new Uint8Array(32));
+  const encWorker=await ecdhWrap(sessionKey,decodePubkey(sel.workerEncryptionKey));
+  const encDisputer=await ecdhWrap(sessionKey,decodePubkey(sel.disputerEncryptionKey));
+
+  const pr=await fetch(AIVM_GATEWAY+'/api/sessions/prepare',{method:'POST',headers:hdrs,
+    body:JSON.stringify({modelId:model.id,encWorkerKey:bytesToBase64(encWorker),encDisputerKey:bytesToBase64(encDisputer)})});
+  if(!pr.ok)throw new Error('Workers are busy — try again in a moment.');
+  const prep=await pr.json();
+
+  onProgress('Switching to Lightchain network...');
+  await switchToLightchain();
+  const provider=new ethers.BrowserProvider(window.ethereum);
+  const signer=await provider.getSigner();
+  const contract=new ethers.Contract(AIVM_JOB_REG,AIVM_ABI,signer);
+  const iface=new ethers.Interface(AIVM_ABI);
+
+  const paramsHash='0x'+model.id.replace(/^0x/i,'').padStart(64,'0');
+  onProgress('Sign the session transaction in MetaMask...');
+  const cseTx=await contract.createSession(paramsHash,prep.worker,bytesToHex(encWorker),bytesToHex(encDisputer),prep.signature,BigInt(prep.expiry),{value:0n});
+  onProgress('Waiting for session confirmation...');
+  const cseR=await cseTx.wait();
+
+  let sessionId;
+  for(const log of cseR.logs){
+    try{const p=iface.parseLog(log);if(p?.name==='SessionCreated'){sessionId=p.args.sessionId;break;}}catch{}
+  }
+  if(sessionId==null)throw new Error('SessionCreated event not found');
+
+  let relayToken=null;
+  const tokDeadline=Date.now()+30000;
+  while(Date.now()<tokDeadline&&!relayToken){
+    const tr=await fetch(AIVM_GATEWAY+'/api/sessions/'+sessionId+'/token',{headers:hdrs});
+    if(tr.ok){const td=await tr.json();if(td.token){relayToken=td.token;break;}}
+    await sleep(1000);
+  }
+  if(!relayToken)throw new Error('Relay token not ready');
+
+  const chunks=[];
+  const ws=new WebSocket(AIVM_RELAY+'?token='+encodeURIComponent(relayToken));
+  await new Promise((res,rej)=>{
+    const t=setTimeout(()=>rej(new Error('WebSocket timeout')),15000);
+    ws.onopen=()=>{clearTimeout(t);res();};
+    ws.onerror=e=>{clearTimeout(t);rej(new Error('WebSocket error'));};
+  });
+  ws.onmessage=async ev=>{
+    try{
+      const frame=JSON.parse(ev.data);
+      if(frame.payload){
+        const blob=base64ToBytes(frame.payload);
+        const pt=await aesDecrypt(sessionKey,blob);
+        chunks.push(new TextDecoder().decode(pt));
+      }
+    }catch{}
+  };
+
+  onProgress('Encrypting and uploading your prompt...');
+  const cipher=await aesEncrypt(sessionKey,new TextEncoder().encode(prompt));
+  const br=await fetch(AIVM_GATEWAY+'/api/blobs',{method:'POST',headers:hdrs,body:JSON.stringify({data:bytesToBase64(cipher)})});
+  if(!br.ok)throw new Error('Workers are busy — try again in a moment.');
+  const {blobHashes=[]}=await br.json();
+  if(!blobHashes.length)throw new Error('Blob upload failed');
+  const promptHash='0x'+blobHashes[0].replace(/^0x/i,'').padStart(64,'0');
+
+  onProgress('Sign the inference transaction in MetaMask (costs ~0.02 LCAI)...');
+  const sjTx=await contract.submitJob(sessionId,promptHash,{value:AIVM_JOB_FEE});
+  onProgress('AI is generating your content... (1-2 minutes)');
+  const sjR=await sjTx.wait();
+
+  let jobId;
+  for(const log of sjR.logs){
+    try{const p=iface.parseLog(log);if(p?.name==='JobSubmitted'){jobId=p.args.jobId;break;}}catch{}
+  }
+
+  const jobCompletedTopic=ethers.id('JobCompleted(uint256,address,bytes32,bytes32)');
+  const jobIdPadded=ethers.zeroPadValue(ethers.toBeHex(jobId||0n),32);
+  const deadline=Date.now()+180000;
+  let done=false;
+  while(Date.now()<deadline&&!done){
+    await sleep(5000);
+    try{
+      const logs=await provider.getLogs({address:AIVM_JOB_REG,fromBlock:sjR.blockNumber,toBlock:'latest',topics:[jobCompletedTopic,jobIdPadded]});
+      if(logs.length)done=true;
+    }catch{}
+  }
+  await sleep(3000);
+  ws.close();
+  const result=chunks.join('');
+  if(result)return result;
+  if(!done)throw new Error('Workers are busy — try again in a moment.');
+  return result;
+}
+</script>
+<script>
+// ── TEMPLATE LESSON GENERATOR (free tier) ────────────────────────────────
+function generateLessonTemplate(subject,grade,goals,numDays){
+  const name=SUBJECTS[subject]?.name||subject;
+  const g=parseInt(grade);
+  const isEarly=g<=4,isMid=g>=5&&g<=8;
+  const goalsLine=goals?('\nTeacher Notes: '+goals+'\n'):'';
+
+  const plans={
+    math:()=>{
+      const topics=isEarly?'addition, subtraction, place value, and basic shapes':
+        isMid?'fractions, decimals, ratios, and introductory algebra':
+        'algebra, geometry, statistics, and pre-calculus';
+      const obj=isEarly?
+        ['Count and compare numbers up to 1,000','Add and subtract multi-digit numbers','Identify basic 2D and 3D shapes','Solve simple word problems']:
+        isMid?
+        ['Apply operations with fractions and decimals','Solve one- and two-step equations','Use ratios and percentages in real contexts','Interpret graphs and data sets']:
+        ['Solve systems of equations','Apply geometric theorems and proofs','Analyze statistical distributions','Work with functions and their graphs'];
+      return makePlan(name,grade,numDays,obj,
+        ['Graph paper or math workbook','Ruler and protractor','Calculator (for checking)'],
+        isEarly?'sum, difference, place value, array':isMid?'ratio, variable, coefficient, percent':'function, theorem, derivative, domain',
+        topics,goalsLine);
+    },
+    science:()=>{
+      const topics=isEarly?'living things, weather, matter, and basic earth science':
+        isMid?'cells, ecosystems, chemistry basics, and forces':
+        'biology, chemistry, physics, and earth systems';
+      const obj=isEarly?
+        ['Describe properties of living vs. non-living things','Observe and record weather patterns','Identify states of matter','Describe the water cycle']:
+        isMid?
+        ['Explain cell structure and function','Analyze food webs and ecosystems','Describe physical vs. chemical changes','Apply Newton\'s laws of motion']:
+        ['Analyze genetic inheritance patterns','Balance chemical equations','Apply energy conservation principles','Describe plate tectonic processes'];
+      return makePlan(name,grade,numDays,obj,
+        ['Science notebook','Magnifying glass or microscope','Measuring tools','Reference books or internet access'],
+        isEarly?'organism, habitat, solid, liquid, gas':isMid?'cell, ecosystem, molecule, force':'DNA, entropy, catalyst, electromagnetic',
+        topics,goalsLine);
+    },
+    english:()=>{
+      const topics=isEarly?'phonics, sight words, reading fluency, and basic writing':
+        isMid?'comprehension strategies, essay writing, grammar, and vocabulary':
+        'literary analysis, persuasive writing, rhetoric, and advanced grammar';
+      const obj=isEarly?
+        ['Read grade-level texts with fluency','Identify story elements (character, setting, plot)','Write complete sentences with proper capitalization','Expand sight word vocabulary']:
+        isMid?
+        ['Identify main idea and supporting details','Write structured paragraphs and short essays','Distinguish between types of sentences','Analyze figurative language in texts']:
+        ['Analyze themes and author\'s craft in literature','Write persuasive and research-based essays','Apply advanced grammar rules','Evaluate rhetorical strategies'];
+      return makePlan(name,grade,numDays,obj,
+        ['Reading book (grade-appropriate)','Writing journal or lined paper','Dictionary/thesaurus'],
+        isEarly?'noun, verb, sentence, paragraph':isMid?'thesis, inference, metaphor, grammar':'rhetoric, syntax, theme, exposition',
+        topics,goalsLine);
+    },
+    history:()=>{
+      const topics=isEarly?'community helpers, national symbols, and local history':
+        isMid?'ancient civilizations, world exploration, and the American Revolution':
+        'world wars, the Cold War, civil rights movements, and modern global history';
+      const obj=isEarly?
+        ['Identify national symbols and their meaning','Describe roles in a community','Create a simple timeline of events','Explain why rules and laws are important']:
+        isMid?
+        ['Describe key features of ancient civilizations','Explain causes and effects of major historical events','Use primary sources to analyze the past','Compare different historical perspectives']:
+        ['Analyze causes of major 20th-century conflicts','Evaluate the impact of the Civil Rights Movement','Compare political ideologies and systems','Connect historical events to present-day issues'];
+      return makePlan(name,grade,numDays,obj,
+        ['History textbook or reference materials','Timeline paper','Access to maps and atlases'],
+        isEarly?'citizen, symbol, community, timeline':isMid?'civilization, revolution, primary source, empire':'ideology, imperialism, democracy, propaganda',
+        topics,goalsLine);
+    },
+    geography:()=>{
+      const topics=isEarly?'maps, continents, oceans, and local geography':
+        isMid?'world regions, climate zones, and human geography':
+        'geopolitics, population dynamics, and environmental geography';
+      const obj=isEarly?
+        ['Name and locate the 7 continents and 5 oceans','Use a map key and compass rose','Describe physical features near your home','Compare urban and rural environments']:
+        isMid?
+        ['Identify major world regions and their characteristics','Explain how climate affects human settlement','Compare population density across regions','Describe how trade connects world regions']:
+        ['Analyze geopolitical conflicts and their geographic roots','Evaluate environmental challenges like deforestation','Interpret population pyramids and demographic data','Apply GIS concepts to real-world problems'];
+      return makePlan(name,grade,numDays,obj,
+        ['World map or globe','Atlas','Colored pencils for mapping activities'],
+        isEarly?'continent, ocean, map key, compass rose':isMid?'region, climate, population, trade':'geopolitics, demography, sustainability, GDP',
+        topics,goalsLine);
+    },
+    art:()=>{
+      const topics=isEarly?'color theory, basic shapes, and drawing fundamentals':
+        isMid?'perspective, shading, art history, and mixed media':
+        'art movements, critique, advanced techniques, and portfolio development';
+      const obj=isEarly?
+        ['Identify primary and secondary colors','Draw recognizable shapes and objects','Explore different art materials (crayons, paint, clay)','Describe what they see in a work of art']:
+        isMid?
+        ['Apply one-point perspective in drawings','Use shading to create depth and form','Identify major art movements and famous artists','Create art using mixed media']:
+        ['Analyze artworks using formal elements','Create a cohesive body of work in a personal style','Critique artwork using art vocabulary','Research and present on an art movement'];
+      return makePlan(name,grade,numDays,obj,
+        ['Drawing paper and sketchbook','Pencils, colored pencils, markers','Paints and brushes','Reference images'],
+        isEarly?'primary colors, line, shape, texture':isMid?'perspective, shading, composition, medium':'critique, symbolism, abstraction, portfolio',
+        topics,goalsLine);
+    },
+    music:()=>{
+      const topics=isEarly?'rhythm, melody, and basic musical instruments':
+        isMid?'music theory, reading notation, and music history':
+        'harmony, music composition, and advanced music analysis';
+      const obj=isEarly?
+        ['Keep a steady beat and clap rhythmic patterns','Identify high and low pitches','Name common instruments by sight and sound','Sing simple songs in tune']:
+        isMid?
+        ['Read basic music notation on a staff','Identify time signatures and note values','Describe musical periods and key composers','Play a simple melody on a recorder or keyboard']:
+        ['Analyze harmony and chord progressions','Compose a short original piece','Compare musical styles across cultures and eras','Evaluate music using music theory vocabulary'];
+      return makePlan(name,grade,numDays,obj,
+        ['Music notebook','Recorder, keyboard, or percussion instruments','Access to music recordings'],
+        isEarly?'beat, rhythm, melody, pitch':isMid?'staff, clef, time signature, measure':'harmony, chord, composition, counterpoint',
+        topics,goalsLine);
+    },
+    pe:()=>{
+      const topics=isEarly?'locomotor skills, body awareness, and cooperative games':
+        isMid?'team sports, fitness principles, and health education':
+        'fitness training, sport skills, and wellness planning';
+      const obj=isEarly?
+        ['Perform basic locomotor skills (run, jump, skip, gallop)','Demonstrate body control and coordination','Participate cooperatively in group activities','Identify major body parts used in movement']:
+        isMid?
+        ['Apply rules and strategies in team sports','Explain components of physical fitness','Monitor heart rate during exercise','Demonstrate sportsmanship and teamwork']:
+        ['Design and execute a personal fitness plan','Analyze biomechanics of sport movements','Apply principles of nutrition to athletic performance','Lead warm-up and cool-down routines'];
+      return makePlan(name,grade,numDays,obj,
+        ['Comfortable athletic clothing','Cones, balls, jump ropes','Heart rate monitor (optional)','Fitness journal'],
+        isEarly?'locomotor, coordination, cooperation, body':isMid?'cardiovascular, endurance, flexibility, agility':'biomechanics, nutrition, interval training, wellness',
+        topics,goalsLine);
+    },
+    coding:()=>{
+      const topics=isEarly?'computer basics, sequences, and visual block coding':
+        isMid?'variables, loops, conditionals, and introductory Python':
+        'functions, data structures, algorithms, and project-based coding';
+      const obj=isEarly?
+        ['Explain what a computer program is','Create a simple sequence of instructions','Use a block-based coding tool (Scratch)','Debug simple errors in a program']:
+        isMid?
+        ['Use variables, loops, and conditionals','Write and run simple Python scripts','Break a problem into algorithmic steps','Create a simple interactive program']:
+        ['Define and call functions with parameters','Use lists and dictionaries effectively','Implement sorting or searching algorithms','Build and present a complete coding project'];
+      return makePlan(name,grade,numDays,obj,
+        ['Computer or tablet','Scratch account (scratch.mit.edu) or Python (python.org)','Code notebook for pseudocode'],
+        isEarly?'program, sequence, bug, loop':isMid?'variable, function, condition, iteration':'algorithm, data structure, recursion, API',
+        topics,goalsLine);
+    }
+  };
+  const fn=plans[subject]||plans.math;
+  return fn();
+}
+
+function makePlan(subject,grade,numDays,objectives,materials,vocab,topics,goalsLine){
+  const line='='.repeat(48);
+  const dline='-'.repeat(48);
+  const dayTitles=['Introduction & Overview','Exploration & Discovery','Practice & Application','Deep Dive & Examples','Review & Assessment',
+    'Extension Activities','Real-World Connections','Creative Projects','Peer Discussion','Final Review & Quiz Prep'];
+  let days='';
+  for(let i=0;i<numDays;i++){
+    const title=dayTitles[i%dayTitles.length];
+    const isFirst=i===0,isLast=i===numDays-1;
+    days+='\n'+line+'\nDAY '+(i+1)+' — '+title.toUpperCase()+'\n'+line+'\n';
+    if(isFirst){
+      days+='Warm-Up (10 min):\n  • Review prior knowledge\n  • Vocabulary preview\n\nMain Activity (30 min):\n  • Introduce key concepts for this unit\n  • Teacher demonstration / read-aloud\n  • Discussion: What do we already know about '+topics+'?\n\nPractice (20 min):\n  • Guided worksheet or hands-on activity\n  • Partner work on a starter problem\n\nWrap-Up (5 min):\n  • Exit ticket: 1 thing learned today\n';
+    }else if(isLast){
+      days+='Review (15 min):\n  • Recap key concepts from all '+(i+1)+' days\n  • Answer remaining questions\n\nAssessment (25 min):\n  • Use the Quiz tab to generate a quiz on this topic\n  • Written reflection: What was most interesting?\n\nCelebration (5 min):\n  • Share one thing learned this unit\n  • Mark all days complete in the lesson tracker!\n';
+    }else{
+      days+='Warm-Up (10 min):\n  • Review Day '+(i)+' concepts\n  • Quick oral quiz\n\nMain Activity (30 min):\n  • Build on previous lesson\n  • Introduce: '+topics.split(',')[i%3]||topics+'\n  • Worked examples with student participation\n\nPractice (20 min):\n  • Independent or partner activity\n  • Apply concepts to a new problem\n\nExtension (optional):\n  • Research one real-world use of today\'s topic\n';
+    }
+  }
+  return subject+' Lesson Plan — Grade '+grade+'\n'+numDays+'-Day Unit | OrcaLearn\n\n'+line+
+    '\nLEARNING OBJECTIVES\n'+line+
+    '\nBy the end of this unit, students will:\n'+objectives.map(o=>'  • '+o).join('\n')+
+    '\n\n'+line+'\nMATERIALS\n'+line+'\n'+materials.map(m=>'  • '+m).join('\n')+
+    '\n\n'+line+'\nKEY VOCABULARY\n'+line+'\n  '+vocab+goalsLine+days+
+    '\n'+line+'\nASSESSMENT IDEAS\n'+line+
+    '\n  • Daily exit tickets\n  • Unit quiz (see Quiz tab)\n  • Written reflection or creative project\n  • Oral presentation of one concept learned\n\n'+
+    dline+'\nGenerated by OrcaLearn — Free Template\nUpgrade to Premium for AI-personalized plans powered by Lightchain AIVM\n'+dline;
+}
+
+// ── FREE-TIER QUIZ BANK ───────────────────────────────────────────────────
+const QUIZ_BANK={
+  science:[
+    {q:'Which planet is closest to the Sun?',c:['Venus','Mercury','Mars','Earth'],a:1},
+    {q:'What gas do plants release during photosynthesis?',c:['CO₂','Nitrogen','Oxygen','Hydrogen'],a:2},
+    {q:'How many bones are in the adult human body?',c:['196','206','226','186'],a:1},
+    {q:'What is the powerhouse of the cell?',c:['Nucleus','Ribosome','Mitochondria','Vacuole'],a:2},
+    {q:'What force pulls objects toward Earth?',c:['Magnetism','Friction','Gravity','Tension'],a:2},
+    {q:'What is H₂O?',c:['Salt','Water','Hydrogen gas','Oxygen gas'],a:1},
+    {q:'How many legs does an insect have?',c:['4','6','8','10'],a:1},
+    {q:'What layer of Earth do we live on?',c:['Mantle','Core','Crust','Magma'],a:2}
+  ],
+  english:[
+    {q:'Which is a noun in: "The dog runs fast"?',c:['runs','fast','the','dog'],a:3},
+    {q:'What punctuation ends a question?',c:['Period','Exclamation mark','Question mark','Comma'],a:2},
+    {q:'Who wrote Romeo and Juliet?',c:['Dickens','Shakespeare','Twain','Austen'],a:1},
+    {q:'What is a synonym for "happy"?',c:['Sad','Angry','Joyful','Tired'],a:2},
+    {q:'Which is a complete sentence?',c:['Running fast.','The cat slept.','Big red house.','After school'],a:1},
+    {q:'What does a verb describe?',c:['A person','A place','A thing','An action'],a:3},
+    {q:'What is the plural of "child"?',c:['Childs','Childes','Children','Childrens'],a:2},
+    {q:'Which word is an adjective: "The tall tree fell"?',c:['The','fell','tree','tall'],a:3}
+  ],
+  history:[
+    {q:'In what year did Columbus reach the Americas?',c:['1492','1776','1066','1215'],a:0},
+    {q:'Who was the first President of the United States?',c:['Lincoln','Jefferson','Washington','Adams'],a:2},
+    {q:'In which year did World War II end?',c:['1939','1941','1945','1950'],a:2},
+    {q:'Ancient Egyptian rulers were called:',c:['Emperors','Pharaohs','Kings','Sultans'],a:1},
+    {q:'Which country built the Great Wall?',c:['Japan','India','China','Korea'],a:2},
+    {q:'The Declaration of Independence was signed in:',c:['1776','1787','1812','1865'],a:0},
+    {q:'What ancient wonder stood in Alexandria?',c:['Colosseum','Lighthouse','Parthenon','Sphinx'],a:1},
+    {q:'Who was the first person to walk on the Moon?',c:['Gagarin','Aldrin','Armstrong','Collins'],a:2}
+  ],
+  geography:[
+    {q:'What is the largest continent?',c:['Africa','North America','Europe','Asia'],a:3},
+    {q:'What is the longest river in the world?',c:['Amazon','Mississippi','Yangtze','Nile'],a:3},
+    {q:'What is the capital of France?',c:['Berlin','Madrid','Paris','Rome'],a:2},
+    {q:'What is the largest ocean?',c:['Atlantic','Indian','Arctic','Pacific'],a:3},
+    {q:'What is the highest mountain in the world?',c:['K2','Kilimanjaro','Everest','Denali'],a:2},
+    {q:'Which continent contains the Sahara Desert?',c:['Asia','Australia','South America','Africa'],a:3},
+    {q:'How many continents are there?',c:['5','6','7','8'],a:2},
+    {q:'What is the capital of Japan?',c:['Seoul','Tokyo','Beijing','Bangkok'],a:1}
+  ],
+  art:[
+    {q:'What are the three primary colors?',c:['Red, Green, Blue','Red, Yellow, Blue','Orange, Purple, Green','Black, White, Gray'],a:1},
+    {q:'Who painted the Mona Lisa?',c:['Michelangelo','Picasso','Da Vinci','Rembrandt'],a:2},
+    {q:'What is a three-dimensional work of art called?',c:['Painting','Sketch','Sculpture','Print'],a:2},
+    {q:'Mixing red and blue makes:',c:['Green','Orange','Brown','Purple'],a:3},
+    {q:'What art style uses geometric shapes and multiple viewpoints?',c:['Impressionism','Cubism','Realism','Surrealism'],a:1},
+    {q:'What tool do artists use to mix paint?',c:['Palette','Canvas','Easel','Frame'],a:0},
+    {q:'What does "perspective" create in a drawing?',c:['Color','Texture','Depth','Pattern'],a:2},
+    {q:'Who cut off his own ear and is famous for "Starry Night"?',c:['Monet','Dali','Van Gogh','Cezanne'],a:2}
+  ],
+  music:[
+    {q:'How many lines are on a standard music staff?',c:['4','5','6','7'],a:1},
+    {q:'Which tempo marking means very fast?',c:['Adagio','Andante','Moderato','Presto'],a:3},
+    {q:'Who composed Symphony No. 5?',c:['Mozart','Bach','Beethoven','Handel'],a:2},
+    {q:'What is the lowest male singing voice called?',c:['Tenor','Baritone','Alto','Bass'],a:3},
+    {q:'A group of musicians playing together is called an:',c:['Choir','Band','Orchestra','Ensemble'],a:2},
+    {q:'What does "forte" mean in music?',c:['Slow','Loud','Soft','Fast'],a:1},
+    {q:'How many notes are in an octave?',c:['6','7','8','9'],a:2},
+    {q:'Which instrument has black and white keys?',c:['Violin','Trumpet','Piano','Guitar'],a:2}
+  ],
+  pe:[
+    {q:'How many minutes of daily activity do health guidelines recommend for kids?',c:['30','45','60','90'],a:2},
+    {q:'Which exercise primarily builds cardiovascular endurance?',c:['Weight lifting','Stretching','Running','Sit-ups'],a:2},
+    {q:'What does "BMI" stand for?',c:['Body Mass Index','Basic Muscle Indicator','Body Motion Intensity','Balance Measure Index'],a:0},
+    {q:'Which sport uses a shuttlecock?',c:['Tennis','Badminton','Squash','Pickleball'],a:1},
+    {q:'How many players are on a standard basketball team on the court?',c:['4','5','6','7'],a:1},
+    {q:'What type of exercise increases flexibility?',c:['Running','Sprinting','Stretching','Jumping'],a:2},
+    {q:'Which nutrient provides the most energy per gram?',c:['Protein','Carbohydrates','Fat','Fiber'],a:2},
+    {q:'What is the target heart rate zone for aerobic exercise?',c:['20-40%','50-70%','80-100%','10-30%'],a:1}
+  ],
+  coding:[
+    {q:'CPU stands for:',c:['Computer Processing Unit','Central Processing Unit','Core Program Utility','Central Program Update'],a:1},
+    {q:'HTML stands for:',c:['HyperText Markup Language','High Text Making Language','Hyper Transfer Main Language','Home Text Markup List'],a:0},
+    {q:'Binary uses how many digits?',c:['1','2','8','10'],a:1},
+    {q:'A loop that never ends is called:',c:['A function','An infinite loop','A variable','A bug'],a:1},
+    {q:'What symbol is used for comments in Python?',c:['//','{  }','#','--'],a:2},
+    {q:'What does "debug" mean in coding?',c:['Write code','Delete code','Fix errors in code','Copy code'],a:2},
+    {q:'Which is a programming language?',c:['HTML','CSS','Python','Markdown'],a:2},
+    {q:'What stores a value in programming?',c:['A loop','A variable','A function','A class'],a:1}
+  ]
+};
+
+function getFreeTierQuiz(subject,numQ){
+  const bank=QUIZ_BANK[subject]||QUIZ_BANK.science;
+  const shuffled=[...bank].sort(()=>Math.random()-0.5);
+  return shuffled.slice(0,Math.min(numQ,shuffled.length)).map(q=>({
+    q:q.q,
+    choices:q.c,
+    ans:q.a,
+    isIndex:true
+  }));
+}
+
+// ── AIVM QUIZ / LESSON GENERATORS ────────────────────────────────────────
+async function generateLessonAIVM(subject,grade,goals,numDays,onProgress){
+  const name=SUBJECTS[subject]?.name||subject;
+  const prompt='Create a structured '+numDays+'-day lesson plan for '+name+', Grade '+grade+'.'+(goals?'\nTeacher goals: '+goals:'')+'\n\nFormat:\n- Start with LEARNING OBJECTIVES (3-5 bullet points)\n- MATERIALS NEEDED\n- KEY VOCABULARY\n- Day 1 through Day '+numDays+' each with: focus topic, warm-up activity, main lesson, practice activity\n- End with ASSESSMENT IDEAS\n\nWrite in a friendly, practical homeschool style. Be specific and grade-appropriate.';
+  return aivmInference(prompt,onProgress);
+}
+
+async function generateQuizAIVM(subject,grade,numQ,topic,onProgress){
+  const name=SUBJECTS[subject]?.name||subject;
+  const prompt='Generate '+numQ+' multiple-choice questions about '+name+' for Grade '+grade+(topic?' focusing on '+topic:'')+'.\n\nRETURN ONLY a JSON array, no extra text, no markdown:\n[{"q":"Question text?","choices":["A","B","C","D"],"answer":0},{"q":"...","choices":[...],"answer":2}]\n\nAnswer is the 0-based index of the correct choice. Make questions grade-appropriate and educational.';
+  const raw=await aivmInference(prompt,onProgress);
+  const match=raw.match(/\[[\s\S]*\]/);
+  if(!match)throw new Error('Could not parse AI quiz response');
+  const parsed=JSON.parse(match[0]);
+  return parsed.map(q=>({q:q.q,choices:q.choices,ans:q.answer,isIndex:true}));
+}
+
+// ── MATH QUIZ ENGINE (programmatic, always free) ──────────────────────────
+function rnd(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function gcd(a,b){return b===0?a:gcd(b,a%b);}
+function qAdd(g){const m=g<=2?20:g<=4?100:g<=6?500:5000;const a=rnd(1,m),b=rnd(1,m);return{q:a+' + '+b+' = ?',ans:a+b};}
+function qSub(g){const m=g<=2?20:g<=4?100:g<=6?500:5000;let a=rnd(1,m),b=rnd(1,m);if(g<=4&&b>a){const t=a;a=b;b=t;}return{q:a+' − '+b+' = ?',ans:a-b};}
+function qMul(g){const t=g<=3?5:g<=5?10:g<=7?12:20;const a=rnd(2,t),b=rnd(2,t);return{q:a+' \xd7 '+b+' = ?',ans:a*b};}
+function qDiv(g){const t=g<=4?10:g<=6?12:20;const b=rnd(2,t),a=b*rnd(1,t);return{q:a+' \xf7 '+b+' = ?',ans:a/b};}
+function qFrac(g){
+  if(g<=4){const d=rnd(2,8),n1=rnd(1,d-1),n2=rnd(1,d-1);
+    if(n1+n2<d)return{q:n1+'/'+d+' + '+n2+'/'+d+' = ?/'+d,ans:n1+n2};
+    const mn=Math.max(n1,n2),mx=Math.min(n1,n2);return{q:mn+'/'+d+' − '+mx+'/'+d+' = ?/'+d,ans:mn-mx};}
+  const d1=rnd(2,6),d2=rnd(2,6),n1=rnd(1,d1),n2=rnd(1,d2);
+  const num=n1*d2+n2*d1,den=d1*d2,g2=gcd(num,den);
+  return{q:n1+'/'+d1+' + '+n2+'/'+d2+' = ?',ans:num/g2+'/'+den/g2,txt:true};
+}
+function qDec(g){
+  if(g<=6){const a=(rnd(1,99)/10).toFixed(1),b=(rnd(1,99)/10).toFixed(1);
+    return{q:a+' + '+b+' = ?',ans:parseFloat((parseFloat(a)+parseFloat(b)).toFixed(2))};}
+  const a=(rnd(10,99)/10).toFixed(1),b=rnd(2,9);
+  return{q:a+' \xd7 '+b+' = ?',ans:parseFloat((parseFloat(a)*b).toFixed(2))};
+}
+function qWord(g){
+  const p=g<=3?[
+    ()=>{const a=rnd(5,20),b=rnd(1,a-1);return{q:'Sarah has '+a+' apples and gives '+b+' away. How many left?',ans:a-b};},
+    ()=>{const a=rnd(3,15),b=rnd(2,10);return{q:a+' red balls and '+b+' blue balls. How many total?',ans:a+b};},
+  ]:g<=6?[
+    ()=>{const r=rnd(3,12),d=rnd(3,8);return{q:'A car travels '+r+' miles/hour. Distance in '+d+' hours?',ans:r*d};},
+    ()=>{const p=rnd(20,50),d=rnd(5,p-5);return{q:'A shirt costs $'+p+'. On sale for $'+d+' off. Sale price?',ans:p-d};},
+  ]:[
+    ()=>{const r=rnd(5,20),h=rnd(3,10);return{q:'A worker earns $'+r+'/hour. Earnings for '+h+' hours?',ans:r*h};},
+    ()=>{const pr=rnd(100,500),pct=rnd(10,40);return{q:'A $'+pr+' item has '+pct+'% discount. Discount amount?',ans:Math.round(pr*pct/100)};},
+  ];
+  return p[rnd(0,p.length-1)]();
+}
+function qAlg(g){
+  if(g<=6){const x=rnd(1,20),b=rnd(1,20);return{q:'x + '+b+' = '+(x+b)+'. Solve for x.',ans:x};}
+  if(g<=8){const x=rnd(1,15),a=rnd(2,8),b=rnd(1,20);return{q:a+'x + '+b+' = '+(a*x+b)+'. Solve for x.',ans:x};}
+  const r1=rnd(1,8),r2=rnd(1,8);return{q:'x\xb2 − '+(r1+r2)+'x + '+(r1*r2)+' = 0. Smaller root?',ans:Math.min(r1,r2)};
+}
+function genMathQ(topicId,grade){
+  const map={addition:qAdd,subtraction:qSub,multiplication:qMul,division:qDiv,
+    fractions:qFrac,decimals:qDec,wordproblems:qWord,prealgebra:qAlg,
+    mixed:g=>{const pool=['addition','subtraction','multiplication','division','decimals'];return genMathQ(pool[rnd(0,pool.length-1)],g);}};
+  return(map[topicId]||qAdd)(grade);
+}
+function makeMathChoices(ans,txt){
+  if(txt)return null;
+  const a=typeof ans==='number'?ans:parseFloat(ans);
+  const set=new Set([a]);let tries=0;
+  while(set.size<4&&tries<40){tries++;const off=rnd(1,Math.max(3,Math.abs(Math.round(a*0.3))||5));const w=Math.random()<0.5?a+off:a-off;if(!isNaN(w))set.add(Number(w.toFixed(2)));}
+  return[...set].sort((x,y)=>x-y);
+}
+</script>
+<script>
+// ── WALLET ────────────────────────────────────────────────────────────────
+async function connectWallet(){
+  if(!window.ethereum){
+    toast('Please install MetaMask, Trust Wallet, or any Web3 wallet to continue.',true,7000);
+    return;
+  }
+  try{
+    const btn=el('hero-connect-btn');if(btn)btn.textContent='Connecting...';
+    const prov=new ethers.BrowserProvider(window.ethereum);
+    await prov.send('eth_requestAccounts',[]);
+    const sig=await prov.getSigner();
+    S.addr=await sig.getAddress();S.provider=prov;S.signer=sig;
+    const btn2=el('hero-connect-btn');if(btn2)btn2.innerHTML='&#x1F433; Connect Wallet &#x2014; It\'s Free';
+    afterConnect();
+  }catch(e){
+    toast('Wallet connection cancelled.',true);
+    const btn=el('hero-connect-btn');if(btn)btn.innerHTML='&#x1F433; Connect Wallet &#x2014; It\'s Free';
+  }
+}
+function startFree(){
+  S.addr=null;S.provider=null;S.signer=null;
+  enterApp();
+}
+function goLanding(){
+  if(S.addr){showTab('home');return;}
+  el('app').style.display='none';el('landing').style.display='';
+}
+function disconnectWallet(){
+  S.addr=null;S.provider=null;S.signer=null;_aivmJWT=null;_aivmJWTExp=0;
+  el('app').style.display='none';el('landing').style.display='flex';
+}
+function afterConnect(){
+  enterApp();
+  el('nav-wallet-addr').textContent=S.addr.slice(0,6)+'...'+S.addr.slice(-4);
+  el('btn-disconnect').style.display='';
+  saveData();
+}
+function enterApp(){
+  el('landing').style.display='none';el('app').style.display='flex';
+  updateNavBadge();
+  // Use showTab to ensure tab visibility is set correctly
+  showTab('home');
+  renderLessons();renderQuiz();renderStudents();
+}
+function updateNavBadge(){
+  const b=el('nav-payment-badge');if(!b)return;
+  if(isPaid()){
+    const days=Math.ceil((S.paidUntil-Date.now())/(86400000));
+    b.innerHTML='<span class="paid-badge">&#x2B50; Premium ('+days+'d)</span>';
+  }else if(S.freeUsesLeft>0){
+    b.innerHTML='<span class="free-badge">'+S.freeUsesLeft+' free left</span>';
+  }else{
+    b.innerHTML='<span class="free-badge" style="cursor:pointer" onclick="openPaymentModal()">&#x1F511; Upgrade</span>';
+  }
+}
+
+// ── HOME ──────────────────────────────────────────────────────────────────
+function renderHome(){
+  const c=el('home-content');if(!c)return;
+  let h='';
+  if(!isPaid()&&S.freeUsesLeft>0){
+    h+='<div class="free-banner mb-4"><div class="free-banner-icon">&#x1F381;</div><div class="free-banner-text"><div class="free-banner-title">'+S.freeUsesLeft+' free use'+(S.freeUsesLeft!==1?'s':'')+' remaining</div><div class="free-banner-sub">First '+FREE_USES+' AI lessons &amp; quizzes are always free</div></div></div>';
+  }else if(!isPaid()&&S.freeUsesLeft<=0){
+    h+='<div class="pay-banner mb-4" onclick="openPaymentModal()"><div class="free-banner-icon">&#x26A1;</div><div class="free-banner-text"><div class="free-banner-title">Unlock Premium AI &#x2014; $4.99/month</div><div class="free-banner-sub">Pay in LCAI on Lightchain. Tap to unlock.</div></div><div>&#x1F449;</div></div>';
+  }
+  if(S.students.length===0){
+    h+='<div class="card text-center" style="padding:24px"><div style="font-size:40px;margin-bottom:10px">&#x1F44B;</div><div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px">Add your first student</div><div class="text-muted" style="margin-bottom:16px">Create a student profile to get started.</div><button class="btn btn-primary" onclick="showTab(\'students\');openStudentModal()">+ Add Student</button></div>';
+  }else{
+    h+='<div class="section-header"><div class="section-title">Students</div></div>';
+    h+='<div class="students-row">';
+    for(const s of S.students){
+      h+='<div class="student-chip'+(s.id===S.activeStudentId?' active':'')+'" onclick="selectStudent(\''+s.id+'\')">';
+      h+='<span class="student-avatar">'+s.avatar+'</span><span class="student-chip-name">'+esc(s.name)+'</span><span class="student-chip-grade">Grade '+s.grade+'</span></div>';
+    }
+    h+='</div>';
+    const st=S.students.find(s=>s.id===S.activeStudentId);
+    if(st){
+      const myPlans=S.plans.filter(p=>p.studentId===st.id);
+      const doneDays=Object.values(S.progress[st.id]||{}).reduce((a,p)=>a+(p.completedDays?.length||0),0);
+      const myQ=S.quizHistory.filter(q=>q.studentId===st.id);
+      const lastQ=myQ[0];
+      h+='<div class="stats-grid mt-4">';
+      h+='<div class="stat-card"><div class="stat-card-num">'+myPlans.length+'</div><div class="stat-card-label">Lesson Plans</div></div>';
+      h+='<div class="stat-card"><div class="stat-card-num">'+doneDays+'</div><div class="stat-card-label">Days Completed</div></div>';
+      h+='<div class="stat-card"><div class="stat-card-num">'+myQ.length+'</div><div class="stat-card-label">Quizzes Taken</div></div>';
+      h+='<div class="stat-card"><div class="stat-card-num">'+(lastQ?lastQ.pct+'%':'&#x2014;')+'</div><div class="stat-card-label">Last Score</div></div>';
+      h+='</div>';
+      h+='<div class="report-btns"><button class="btn btn-green" onclick="printProgressReport()">&#x1F4CA; Progress Report</button><button class="btn btn-purple-solid" onclick="openTranscriptModal()">&#x1F393; Transcript</button><button class="btn btn-blue" onclick="exportPortfolio()">&#x1F4E6; Portfolio</button></div>';
+      h+='<div class="section-header mt-4"><div class="section-title">Quick Actions</div></div><div class="quick-actions">';
+      h+='<div class="action-card" onclick="openGenerateModal()"><div class="action-icon">&#x1F916;</div><div class="action-title">New Lesson</div><div class="action-sub">AI lesson plan</div></div>';
+      h+='<div class="action-card" onclick="showTab(\'quiz\')"><div class="action-icon">&#x1F9EE;</div><div class="action-title">Take Quiz</div><div class="action-sub">Any subject</div></div>';
+      h+='<div class="action-card" onclick="showTab(\'lessons\')"><div class="action-icon">&#x1F4DA;</div><div class="action-title">My Lessons</div><div class="action-sub">'+myPlans.length+' saved</div></div>';
+      h+='<div class="action-card" onclick="showTab(\'students\')"><div class="action-icon">&#x1F464;</div><div class="action-title">Students</div><div class="action-sub">'+S.students.length+' profile'+(S.students.length!==1?'s':'')+'</div></div>';
+      h+='</div>';
+    }
+  }
+  h+='<div class="aivm-badge mt-4" style="align-self:center">&#x26A1; Powered by Lightchain AIVM</div>';
+  c.innerHTML=h;
+}
+
+// ── LESSONS ───────────────────────────────────────────────────────────────
+function renderLessons(){
+  const c=el('lessons-list');if(!c)return;
+  if(S.plans.length===0){
+    c.innerHTML='<div class="empty-state"><div class="empty-state-icon">&#x1F4DA;</div><h3>No lessons yet</h3><p>Generate your first AI-powered lesson plan &#x2014; '+(S.freeUsesLeft>0?'free to start':'premium).')+'</p><button class="btn btn-primary" onclick="openGenerateModal()">&#x1F916; Generate First Lesson</button></div>';
+    return;
+  }
+  let h='';
+  for(const p of S.plans){
+    const subj=SUBJECTS[p.subject]||{name:p.subject,icon:'📄'};
+    const prog=(S.progress[p.studentId||'']||{})[p.id]||{completedDays:[]};
+    const done=prog.completedDays?.length||0;
+    const total=p.numDays||5;
+    const pct=Math.round((done/total)*100);
+    const st=S.students.find(s=>s.id===p.studentId);
+    const date=new Date(p.date).toLocaleDateString();
+    h+='<div class="plan-card" onclick="openPlan(\''+p.id+'\')">';
+    h+='<div class="plan-card-header"><div class="plan-subject-icon">'+subj.icon+'</div><div class="plan-card-info">';
+    h+='<div class="plan-card-title">'+esc(subj.name)+' &#x2014; Grade '+p.grade+'</div>';
+    h+='<div class="plan-card-meta">'+(st?esc(st.name):'No student')+' &nbsp;&#183;&nbsp; '+total+' days &nbsp;&#183;&nbsp; '+date+'</div>';
+    h+='</div></div>';
+    h+='<div class="plan-progress-bar"><div class="plan-progress-fill" style="width:'+pct+'%"></div></div>';
+    h+='<div class="plan-progress-label">'+done+' of '+total+' days completed</div></div>';
+  }
+  c.innerHTML=h;
+}
+
+function openGenerateModal(){
+  if(S.students.length===0){
+    el('gen-student').innerHTML='<option value="">No students — add one first</option>';
+  }else{
+    el('gen-student').innerHTML=S.students.map(s=>'<option value="'+s.id+'"'+(s.id===S.activeStudentId?' selected':'')+'>'+s.avatar+' '+esc(s.name)+' (Grade '+s.grade+')</option>').join('');
+    updateGenGrade();
+  }
+  el('gen-goals').value='';
+  el('generate-modal-body').innerHTML=`
+    <div class="form-group"><label class="form-label">Student</label><select id="gen-student" class="form-select" onchange="updateGenGrade()">${S.students.map(s=>'<option value="'+s.id+'"'+(s.id===S.activeStudentId?' selected':'')+'>'+s.avatar+' '+esc(s.name)+' (Grade '+s.grade+')</option>').join('')}</select></div>
+    <div class="form-group"><label class="form-label">Subject</label><select id="gen-subject" class="form-select"><option value="math">&#x1F522; Mathematics</option><option value="science">&#x1F52C; Science</option><option value="english">&#x1F4D6; English</option><option value="history">&#x1F3DB;&#xFE0F; History</option><option value="geography">&#x1F30D; Geography</option><option value="art">&#x1F3A8; Art</option><option value="music">&#x1F3B5; Music</option><option value="pe">&#x26BD; Physical Education</option><option value="coding">&#x1F4BB; Coding</option></select></div>
+    <div class="form-group"><label class="form-label">Grade</label><select id="gen-grade" class="form-select">${[1,2,3,4,5,6,7,8,9,10,11,12].map(n=>'<option value="'+n+'"'+(n===3?' selected':'')+'>Grade '+n+'</option>').join('')}</select></div>
+    <div class="form-group"><label class="form-label">Plan Length</label><select id="gen-days" class="form-select"><option value="5">5 days (1 week)</option><option value="10">10 days (2 weeks)</option></select></div>
+    <div class="form-group"><label class="form-label">Goals / Notes (optional)</label><textarea id="gen-goals" class="form-textarea" placeholder="e.g. Focus on fractions, struggling with reading comprehension..."></textarea></div>`;
+  el('generate-modal-footer').innerHTML='<button class="btn btn-secondary" onclick="closeModal(\'modal-generate\')">Cancel</button><button class="btn btn-primary" onclick="startGenerate()">&#x1F680; Generate Plan</button>';
+  el('generate-modal-footer').style.display='';
+  openModal('modal-generate');
+}
+function updateGenGrade(){
+  const sid=el('gen-student')?.value;const st=S.students.find(s=>s.id===sid);
+  if(st&&el('gen-grade'))el('gen-grade').value=String(st.grade);
+}
+
+async function startGenerate(){
+  if(!canUseAI()){closeModal('modal-generate');openPaymentModal();return;}
+  const studentId=el('gen-student')?.value||'';
+  const subject=el('gen-subject').value;
+  const grade=parseInt(el('gen-grade').value);
+  const numDays=parseInt(el('gen-days').value);
+  const goals=el('gen-goals').value.trim();
+
+  el('generate-modal-body').innerHTML=loadingHTML('Generating your lesson plan...','This may take 1-2 minutes with AIVM');
+  el('generate-modal-footer').style.display='none';
+
+  try{
+    let content;
+    if(isPaid()&&S.addr&&S.signer){
+      content=await generateLessonAIVM(subject,grade,goals,numDays,msg=>{
+        el('generate-modal-body').innerHTML=loadingHTML(msg,'Decentralized AI via Lightchain AIVM');
+      });
+    }else{
+      await sleep(1200);
+      content=generateLessonTemplate(subject,grade,goals,numDays);
+      consumeFree();
+    }
+    const plan={id:uid(),date:Date.now(),subject,grade,numDays,goals,content,studentId,completedDays:[]};
+    S.plans.unshift(plan);
+    if(!S.progress[studentId])S.progress[studentId]={};
+    S.progress[studentId][plan.id]={completedDays:[]};
+    saveData();
+    closeModal('modal-generate');
+    renderLessons();renderHome();
+    toast('Lesson plan ready! &#x1F389;');
+    openPlan(plan.id);
+  }catch(e){
+    const msg=e.message||'Generation failed';
+    el('generate-modal-body').innerHTML='<div class="empty-state"><div class="empty-state-icon">&#x274C;</div><h3>Oops!</h3><p>'+esc(msg)+'</p></div>';
+    el('generate-modal-footer').innerHTML='<button class="btn btn-primary" style="flex:1;padding:13px" onclick="closeModal(\'modal-generate\')">Close</button>';
+    el('generate-modal-footer').style.display='';
+  }
+}
+
+function openPlan(id){
+  const p=S.plans.find(x=>x.id===id);if(!p)return;
+  _viewPlanId=id;
+  const subj=SUBJECTS[p.subject]||{name:p.subject,icon:'📄'};
+  el('modal-plan-title').textContent=subj.name+' — Grade '+p.grade;
+  const st=S.students.find(s=>s.id===p.studentId);
+  const prog=(S.progress[p.studentId||'']||{})[p.id]||{completedDays:[]};
+  const done=prog.completedDays||[];
+  const total=p.numDays||5;
+  let cl='<div class="plan-days-checklist">';
+  for(let d=1;d<=total;d++){
+    const isDone=done.includes(d);
+    cl+='<div class="day-check'+(isDone?' completed':'')+'" id="dc-'+d+'"><input type="checkbox" id="cb-'+d+'" '+(isDone?'checked':'')+' onchange="toggleDay('+d+',this.checked,\''+id+'\',\''+p.studentId+'\')"><label for="cb-'+d+'">Day '+d+'</label></div>';
+  }
+  cl+='</div>';
+  el('modal-plan-body').innerHTML='<div class="text-muted mb-4">'+(st?esc(st.name)+' &nbsp;&#183;&nbsp; ':'')+total+' days &nbsp;&#183;&nbsp; '+new Date(p.date).toLocaleDateString()+'</div>'+cl+'<div class="divider"></div><div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:12px">Lesson Content</div><pre class="plan-viewer-text">'+esc(p.content||'')+'</pre>';
+  const certBtn=el('btn-certificate');
+  if(certBtn)certBtn.style.display=(done.length>=total)?'':'none';
+  openModal('modal-plan');
+}
+
+function toggleDay(day,done,planId,studentId){
+  const row=el('dc-'+day);if(row)row.className='day-check'+(done?' completed':'');
+  if(!S.progress[studentId])S.progress[studentId]={};
+  if(!S.progress[studentId][planId])S.progress[studentId][planId]={completedDays:[]};
+  const days=S.progress[studentId][planId].completedDays;
+  if(done&&!days.includes(day))days.push(day);
+  else if(!done){const i=days.indexOf(day);if(i!==-1)days.splice(i,1);}
+  saveData();renderLessons();renderHome();
+}
+function confirmDeletePlan(){
+  if(!_viewPlanId)return;
+  if(!confirm('Delete this lesson plan? This cannot be undone.'))return;
+  S.plans=S.plans.filter(p=>p.id!==_viewPlanId);
+  saveData();closeModal('modal-plan');renderLessons();renderHome();toast('Plan deleted.');
+}
+
+// ── STUDENTS ──────────────────────────────────────────────────────────────
+function renderStudents(){
+  const c=el('students-list');if(!c)return;
+  if(S.students.length===0){
+    c.innerHTML='<div class="empty-state"><div class="empty-state-icon">&#x1F46A;</div><h3>No students yet</h3><p>Add your first student to get started.</p><button class="btn btn-primary" onclick="openStudentModal()">+ Add Student</button></div>';
+    return;
+  }
+  c.innerHTML=S.students.map(s=>'<div class="student-card"><div class="student-card-avatar">'+s.avatar+'</div><div class="student-card-info"><div class="student-card-name">'+esc(s.name)+'</div><div class="student-card-grade">Grade '+s.grade+'</div></div><div class="student-card-actions"><button class="btn btn-secondary btn-sm" onclick="openStudentModal(\''+s.id+'\')">Edit</button></div></div>').join('');
+}
+function selectStudent(id){S.activeStudentId=id;saveData();renderHome();renderLessons();renderQuiz();}
+function openStudentModal(id){
+  el('modal-student-title').textContent=id?'Edit Student':'Add Student';
+  el('student-edit-id').value=id||'';
+  if(id){const s=S.students.find(x=>x.id===id);if(s){el('student-name').value=s.name;el('student-grade').value=String(s.grade);setAvatar(s.avatar);}}
+  else{el('student-name').value='';el('student-grade').value='3';setAvatar('\u{1F981}');}
+  openModal('modal-student');
+}
+function selectAvatar(elx){document.querySelectorAll('.avatar-opt').forEach(o=>o.classList.remove('selected'));elx.classList.add('selected');}
+function setAvatar(emoji){document.querySelectorAll('.avatar-opt').forEach(o=>o.classList.toggle('selected',o.dataset.emoji===emoji||o.textContent.trim()===emoji));}
+function getAvatar(){const s=document.querySelector('.avatar-opt.selected');return s?s.textContent.trim():'\u{1F981}';}
+function saveStudent(){
+  const name=el('student-name').value.trim();
+  if(!name){toast('Please enter a name.',true);return;}
+  const grade=parseInt(el('student-grade').value);
+  const avatar=getAvatar();
+  const editId=el('student-edit-id').value;
+  if(editId){
+    const idx=S.students.findIndex(s=>s.id===editId);
+    if(idx!==-1)S.students[idx]={id:editId,name,grade,avatar};
+  }else{
+    const newS={id:uid(),name,grade,avatar};
+    S.students.push(newS);
+    if(!S.activeStudentId)S.activeStudentId=newS.id;
+  }
+  saveData();closeModal('modal-student');renderStudents();renderHome();
+  toast(esc(name)+' saved! &#x1F389;');
+}
+
+// ── QUIZ ──────────────────────────────────────────────────────────────────
+function renderQuiz(){
+  const c=el('quiz-content');if(!c)return;
+  const stOpts=S.students.map(s=>'<option value="'+s.id+'"'+(s.id===S.activeStudentId?' selected':'')+'>'+s.avatar+' '+esc(s.name)+' (Gr.'+s.grade+')</option>').join('');
+  const topicOpts=MATH_TOPICS.map(t=>'<option value="'+t.id+'">'+t.emoji+' '+t.label+'</option>').join('');
+  let h='<h2 class="section-title" style="margin-bottom:16px">&#x1F9EE; Quiz</h2>';
+  h+='<div class="quiz-setup card" style="padding:20px;gap:14px">';
+  if(S.students.length>0)h+='<div class="form-group"><label class="form-label">Student</label><select class="form-select" id="quiz-st" onchange="quizStChange(this.value)">'+stOpts+'</select></div>';
+  h+='<div class="form-group"><label class="form-label">Subject</label><select class="form-select" id="quiz-subject" onchange="toggleMathTopic()"><option value="math">&#x1F522; Mathematics</option><option value="science">&#x1F52C; Science</option><option value="english">&#x1F4D6; English</option><option value="history">&#x1F3DB;&#xFE0F; History</option><option value="geography">&#x1F30D; Geography</option><option value="art">&#x1F3A8; Art</option><option value="music">&#x1F3B5; Music</option><option value="pe">&#x26BD; Physical Education</option><option value="coding">&#x1F4BB; Coding</option></select></div>';
+  h+='<div id="math-topic-row" class="form-group"><label class="form-label">Math Topic</label><select class="form-select" id="quiz-topic">'+topicOpts+'</select></div>';
+  h+='<div class="form-group"><label class="form-label">Questions</label><select class="form-select" id="quiz-cnt"><option value="5">5 questions</option><option value="10" selected>10 questions</option></select></div>';
+  h+='<div class="toggle-row"><span class="toggle-label">&#x23F1; Timer (60 sec per question)</span><label class="toggle"><input type="checkbox" id="quiz-tmr"><span class="toggle-slider"></span></label></div>';
+  h+='<button class="btn btn-primary" style="width:100%;padding:14px;font-size:16px" onclick="startQuiz()">&#x1F680; Start Quiz</button>';
+  if(!isPaid()&&S.freeUsesLeft===0)h+='<p class="text-muted text-center">AI quizzes for non-math subjects require Premium. <span style="color:var(--purple);cursor:pointer;font-weight:600" onclick="openPaymentModal()">Upgrade &#x1F511;</span></p>';
+  h+='</div>';
+  const myQ=S.quizHistory.filter(q=>!S.activeStudentId||q.studentId===S.activeStudentId);
+  if(myQ.length>0){
+    h+='<div class="section-header mt-4"><div class="section-title">Recent Scores</div><button class="btn btn-secondary btn-sm" onclick="printQuizHistory()">&#x1F4E5; Export</button></div>';
+    for(const r of myQ.slice(0,6)){
+      const subj=SUBJECTS[r.subject]||{name:r.subject,icon:'🧮'};
+      const topicLabel=MATH_TOPICS.find(t=>t.id===r.topicId)?.label||r.topicId||'';
+      h+='<div class="quiz-history-item"><div class="history-icon">'+subj.icon+'</div><div class="history-info"><div class="history-title">'+subj.name+(topicLabel?' — '+topicLabel:'')+'</div><div class="history-sub">Grade '+r.grade+' &nbsp;&#183;&nbsp; '+r.score+'/'+r.total+' &nbsp;&#183;&nbsp; '+new Date(r.date).toLocaleDateString()+'</div></div><div class="history-score">'+r.pct+'%</div></div>';
+    }
+  }
+  c.innerHTML=h;
+}
+function toggleMathTopic(){
+  const sub=el('quiz-subject')?.value;
+  const row=el('math-topic-row');if(row)row.style.display=sub==='math'?'':'none';
+}
+function quizStChange(id){S.activeStudentId=id;saveData();renderQuiz();renderHome();}
+
+async function startQuiz(){
+  const sid=S.students.length>0?(el('quiz-st')?.value||null):null;
+  const st=S.students.find(s=>s.id===sid)||null;
+  const grade=st?st.grade:6;
+  const subject=el('quiz-subject').value;
+  const topicId=el('quiz-topic')?.value||'mixed';
+  const cnt=parseInt(el('quiz-cnt').value);
+  const tmr=el('quiz-tmr')?.checked||false;
+  const isMath=subject==='math';
+
+  if(isMath){
+    const topicInfo=MATH_TOPICS.find(t=>t.id===topicId);
+    el('quiz-run-title').textContent=(topicInfo?topicInfo.emoji+' '+topicInfo.label:'Math Quiz');
+  } else {
+    el('quiz-run-title').textContent=(SUBJECTS[subject]?.name||subject)+' Quiz';
+  }
+
+  if(isMath){
+    // Programmatic — always free
+    const qs=[];
+    for(let i=0;i<cnt;i++){const q=genMathQ(topicId,grade);q.choices=makeMathChoices(q.ans,q.txt);qs.push(q);}
+    QZ={sid,st,subject,topicId,cnt,tmr,qs,cur:0,ok:0,start:Date.now(),isAI:false};
+    openModal('modal-quiz-run');renderQQ();
+  }else{
+    if(!canUseAI()){closeModal('modal-quiz-run');openPaymentModal();return;}
+    // Show loading in quiz modal
+    el('quiz-run-body').innerHTML=loadingHTML('Generating quiz questions...','AI via Lightchain AIVM');
+    openModal('modal-quiz-run');
+    try{
+      let qs;
+      if(isPaid()&&S.addr&&S.signer){
+        qs=await generateQuizAIVM(subject,grade,cnt,null,msg=>{
+          el('quiz-run-body').innerHTML=loadingHTML(msg,'');
+        });
+      }else{
+        await sleep(800);
+        qs=getFreeTierQuiz(subject,cnt);
+        consumeFree();
+      }
+      QZ={sid,st,subject,topicId:null,cnt:qs.length,tmr,qs,cur:0,ok:0,start:Date.now(),isAI:true};
+      renderQQ();
+    }catch(e){
+      el('quiz-run-body').innerHTML='<div class="empty-state"><div class="empty-state-icon">&#x274C;</div><h3>Could not generate quiz</h3><p>'+esc(e.message||'Try again in a moment')+'</p><button class="btn btn-secondary" onclick="closeModal(\'modal-quiz-run\')">Close</button></div>';
+    }
+  }
+}
+
+function renderQQ(){
+  if(!QZ||QZ.cur>=QZ.qs.length){finishQuiz();return;}
+  const q=QZ.qs[QZ.cur];
+  const timerH=QZ.tmr?'<div class="quiz-timer" id="qtimer">60</div>':'';
+  let choicesH='';
+  if(q.choices){
+    if(q.isIndex){
+      choicesH='<div class="quiz-choices">'+q.choices.map((c,i)=>'<button class="choice-btn" onclick="ansQIdx(this,'+i+','+q.ans+')">'+esc(String(c))+'</button>').join('')+'</div>';
+    }else{
+      choicesH='<div class="quiz-choices">'+q.choices.map(c=>'<button class="choice-btn" onclick="ansQ(this,'+c+','+q.ans+')">'+c+'</button>').join('')+'</div>';
+    }
+  }else{
+    choicesH='<div style="display:flex;gap:10px;margin-top:4px"><input type="text" id="qtxt" class="form-input" placeholder="Your answer..." style="font-size:18px;text-align:center"><button class="btn btn-primary" style="padding:10px 20px;white-space:nowrap" onclick="ansTxt()">Check</button></div>';
+  }
+  el('quiz-run-body').innerHTML='<div class="quiz-meta"><div class="quiz-progress">Q '+(QZ.cur+1)+' of '+QZ.cnt+' &nbsp;&#183;&nbsp; &#x2705; '+QZ.ok+'</div>'+timerH+'</div><div class="quiz-question">'+esc(q.q)+'</div>'+choicesH+'<div id="qfb"></div>';
+  if(QZ.tmr)startQTimer();
+}
+function startQTimer(){
+  clearInterval(S.quizTimer);let sec=60;
+  S.quizTimer=setInterval(()=>{
+    sec--;const d=el('qtimer');if(!d){clearInterval(S.quizTimer);return;}
+    d.textContent=sec;if(sec<=10)d.className='quiz-timer warn';
+    if(sec<=0){clearInterval(S.quizTimer);disableChoices();showFB(false,QZ.qs[QZ.cur].ans);setTimeout(nextQ,1800);}
+  },1000);
+}
+function disableChoices(){document.querySelectorAll('.choice-btn').forEach(b=>b.disabled=true);}
+function ansQ(btn,sel,correct){
+  clearInterval(S.quizTimer);disableChoices();
+  const ok=sel===correct;btn.className='choice-btn '+(ok?'correct':'wrong');
+  if(!ok)document.querySelectorAll('.choice-btn').forEach(b=>{if(parseFloat(b.textContent)===correct)b.className='choice-btn reveal';});
+  if(ok)QZ.ok++;showFB(ok,correct);setTimeout(nextQ,1500);
+}
+function ansQIdx(btn,idx,correctIdx){
+  clearInterval(S.quizTimer);disableChoices();
+  const ok=idx===correctIdx;btn.className='choice-btn '+(ok?'correct':'wrong');
+  if(!ok){const btns=document.querySelectorAll('.choice-btn');if(btns[correctIdx])btns[correctIdx].className='choice-btn reveal';}
+  if(ok)QZ.ok++;showFB(ok,QZ.qs[QZ.cur].choices[correctIdx]);setTimeout(nextQ,1500);
+}
+function ansTxt(){
+  const inp=el('qtxt');if(!inp)return;
+  const ua=inp.value.trim(),ca=String(QZ.qs[QZ.cur].ans);
+  const ok=ua===ca;if(ok)QZ.ok++;
+  inp.disabled=true;inp.style.borderColor=ok?'#059669':'#dc2626';inp.style.background=ok?'#d1fae5':'#fee2e2';
+  showFB(ok,ca);setTimeout(nextQ,1800);
+}
+function showFB(ok,correct){
+  const d=el('qfb');if(!d)return;
+  d.innerHTML='<div class="quiz-feedback '+(ok?'correct':'wrong')+'">'+(ok?'&#x2705; Correct!':'&#x274C; Answer: '+esc(String(correct)))+'</div>';
+}
+function nextQ(){QZ.cur++;if(QZ.cur>=QZ.cnt)finishQuiz();else renderQQ();}
+function finishQuiz(){
+  clearInterval(S.quizTimer);
+  const pct=Math.round((QZ.ok/QZ.cnt)*100);
+  const elapsed=Math.round((Date.now()-QZ.start)/1000);
+  const grade=pct>=90?'A':pct>=80?'B':pct>=70?'C':pct>=60?'D':'F';
+  el('quiz-run-body').innerHTML='<div class="quiz-score-card"><div class="score-big">'+pct+'%</div><div class="score-grade">'+grade+'</div><div class="score-label">'+QZ.ok+' of '+QZ.cnt+' correct</div><div class="text-muted mt-2">'+(QZ.st?esc(QZ.st.name)+' &nbsp;&#183;&nbsp; ':'')+esc(SUBJECTS[QZ.subject]?.name||QZ.subject)+'</div></div><div style="display:flex;gap:10px;margin-top:20px"><button class="btn btn-secondary" style="flex:1;padding:13px" onclick="closeModal(\'modal-quiz-run\');renderQuiz()">Done</button><button class="btn btn-primary" style="flex:1;padding:13px" onclick="reQuiz()">Try Again</button></div>';
+  const result={date:Date.now(),subject:QZ.subject,topicId:QZ.topicId,grade:QZ.st?.grade||0,score:QZ.ok,total:QZ.cnt,pct,letterGrade:grade,elapsed,studentId:QZ.sid};
+  S.quizHistory.unshift(result);saveData();renderQuiz();renderHome();
+}
+function reQuiz(){closeModal('modal-quiz-run');setTimeout(startQuiz,100);}
+function abortQuiz(){clearInterval(S.quizTimer);closeModal('modal-quiz-run');}
+
+// ── TABS ──────────────────────────────────────────────────────────────────
+function showTab(name){
+  ['home','lessons','quiz','students'].forEach(t=>{const s=el('tab-'+t);if(s)s.style.display=t===name?'':'none';});
+  document.querySelectorAll('.bottom-nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));
+  if(name==='home')renderHome();
+  if(name==='lessons')renderLessons();
+  if(name==='quiz')renderQuiz();
+  if(name==='students')renderStudents();
+  window.scrollTo(0,0);
+}
+
+// ── TRANSCRIPT ────────────────────────────────────────────────────────────
+function openTranscriptModal(){
+  const st=S.students.find(s=>s.id===S.activeStudentId);
+  if(!st){toast('Select a student first.',true);return;}
+  el('tr-student-name').value=st.name;el('tr-dob').value='';el('tr-school-name').value='';el('tr-year').value='';el('tr-parent-name').value='';
+  openModal('modal-transcript');
+}
+function generateTranscript(){
+  const st=S.students.find(s=>s.id===S.activeStudentId);if(!st)return;
+  const fullName=el('tr-student-name').value.trim()||st.name;
+  const dob=el('tr-dob').value.trim();
+  const schoolName=el('tr-school-name').value.trim()||'Homeschool';
+  const year=el('tr-year').value.trim()||new Date().getFullYear()+'-'+(new Date().getFullYear()+1);
+  const parentName=el('tr-parent-name').value.trim();
+  closeModal('modal-transcript');
+  const myPlans=S.plans.filter(p=>p.studentId===st.id);
+  const myQ=S.quizHistory.filter(q=>q.studentId===st.id);
+  const courseMap={};
+  for(const p of myPlans){
+    if(!courseMap[p.subject])courseMap[p.subject]={subject:p.subject,grade:p.grade,totalDays:0,doneDays:0,quizScores:[]};
+    const prog=(S.progress[st.id]||{})[p.id]||{};
+    courseMap[p.subject].totalDays+=(p.numDays||5);
+    courseMap[p.subject].doneDays+=(prog.completedDays?.length||0);
+  }
+  const mathSubs=['math'];
+  for(const r of myQ){
+    const sub=mathSubs.includes(r.subject)?'math':r.subject;
+    if(courseMap[sub])courseMap[sub].quizScores.push(r.pct);
+  }
+  const courses=Object.values(courseMap);
+  let totalCredits=0,gpaN=0,gpaC=0;
+  const gp={'A':4.0,'B':3.0,'C':2.0,'D':1.0,'F':0.0};
+  let rows=courses.length===0?'<tr><td colspan="5" style="text-align:center;color:#9ca3af">No completed subjects yet</td></tr>':
+    courses.map(c=>{
+      const credits=Math.round((c.doneDays/36)*2)/2;totalCredits+=credits;
+      let lg='Pass';
+      if(c.quizScores.length>0){const avg=Math.round(c.quizScores.reduce((a,b)=>a+b,0)/c.quizScores.length);lg=avg>=90?'A':avg>=80?'B':avg>=70?'C':avg>=60?'D':'F';if(gp[lg]!==undefined){gpaN+=gp[lg];gpaC++;}}
+      const gc=lg!=='Pass'?'grade-'+lg:'badge-pass';
+      return '<tr><td>'+esc(SUBJECTS[c.subject]?.name||c.subject)+'</td><td>Grade '+c.grade+'</td><td>'+c.doneDays+' / '+c.totalDays+'</td><td>'+credits.toFixed(1)+'</td><td><span class="badge-grade '+gc+'">'+lg+'</span></td></tr>';
+    }).join('');
+  const gpa=gpaC>0?(gpaN/gpaC).toFixed(2):'N/A';
+  const body='<div class="orca-header"><div class="orca-logo">&#x1F393;</div><div><div class="orca-title">'+esc(schoolName)+'</div><div class="orca-sub">Official Homeschool Transcript</div></div></div><h2>Student Information</h2><table><tr><th>Student Name</th><th>Grade Level</th>'+(dob?'<th>Date of Birth</th>':'')+'<th>Academic Year</th></tr><tr><td><strong>'+esc(fullName)+'</strong></td><td>Grade '+st.grade+'</td>'+(dob?'<td>'+esc(dob)+'</td>':'')+'<td>'+esc(year)+'</td></tr></table>'+(parentName?'<p style="font-size:13px;color:#6b7280;margin-top:8px">Administrator: <strong>'+esc(parentName)+'</strong></p>':'')+'<h2>Course Record</h2><table><tr><th>Subject</th><th>Grade</th><th>Days</th><th>Credits</th><th>Grade</th></tr>'+rows+'</table><h2>Summary</h2><table><tr><th>Credits</th><th>GPA</th><th>Subjects</th></tr><tr><td>'+totalCredits.toFixed(1)+'</td><td>'+gpa+'</td><td>'+courses.length+'</td></tr></table><div class="sig-line"><div class="sig-item"><div class="line"></div><div class="label">'+(parentName?'Parent: '+esc(parentName):'Parent / Administrator')+'</div></div><div class="sig-item"><div class="line"></div><div class="label">Date</div></div></div><div class="footer">OrcaLearn v2 &nbsp;&#183;&nbsp; '+new Date().toLocaleDateString()+'</div>';
+  printBase('Transcript — '+fullName,body);
+}
+
+// ── PRINT / EXPORT ────────────────────────────────────────────────────────
+function printBase(title,bodyHtml){
+  const w=window.open('','_blank');
+  w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+title+'</title><style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:-apple-system,sans-serif;color:#1e1b4b;background:#fff;}#pb{background:#7c3aed;color:white;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;}#pb h2{font-size:15px;font-weight:700;}#pb button{background:white;color:#7c3aed;border:none;border-radius:8px;padding:8px 18px;font-size:14px;font-weight:700;cursor:pointer;}.content{max-width:800px;margin:0 auto;padding:32px 24px;}@media print{#pb{display:none!important;}.content{padding:0;max-width:100%;}}h1{font-size:22px;font-weight:800;margin-bottom:4px;}h2{font-size:16px;font-weight:700;margin:20px 0 8px;color:#7c3aed;border-bottom:2px solid #ede9fe;padding-bottom:4px;}p,li{font-size:14px;line-height:1.7;}table{width:100%;border-collapse:collapse;font-size:14px;margin:8px 0;}th{background:#f5f3ff;color:#5b21b6;font-weight:700;padding:8px 12px;text-align:left;border:1px solid #e5e7eb;}td{padding:8px 12px;border:1px solid #e5e7eb;}tr:nth-child(even) td{background:#fafafa;}.meta{font-size:13px;color:#6b7280;margin-bottom:20px;}.badge-grade{padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600;}.grade-A{background:#d1fae5;color:#065f46;}.grade-B{background:#dbeafe;color:#1e40af;}.grade-C{background:#fef9c3;color:#713f12;}.grade-D,.grade-F{background:#fee2e2;color:#991b1b;}.badge-pass{background:#d1fae5;color:#065f46;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600;}.footer{margin-top:40px;padding-top:16px;border-top:2px solid #e5e7eb;font-size:12px;color:#9ca3af;text-align:center;}.sig-line{display:flex;gap:40px;margin-top:32px;}.sig-item{flex:1;}.sig-item .line{border-bottom:1px solid #374151;height:32px;margin-bottom:4px;}.sig-item .label{font-size:12px;color:#6b7280;}.progress-bar{height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden;margin:4px 0 8px;}.progress-fill{height:100%;background:linear-gradient(90deg,#7c3aed,#2563eb);border-radius:4px;}pre{white-space:pre-wrap;font-family:inherit;font-size:13px;line-height:1.7;background:#f9fafb;border-radius:8px;padding:16px;border:1px solid #e5e7eb;}.orca-header{display:flex;align-items:center;gap:12px;margin-bottom:20px;padding-bottom:16px;border-bottom:3px solid #7c3aed;}.orca-logo{font-size:40px;}.orca-title{font-size:24px;font-weight:900;color:#1e1b4b;}.orca-sub{font-size:13px;color:#7c3aed;font-weight:600;}</style></head><body><div id="pb"><h2>&#x1F4C4; '+title+'</h2><button onclick="window.print()">&#x1F5A8; Print / Save as PDF</button></div><div class="content">'+bodyHtml+'</div></body></html>');
+  w.document.close();
+}
+
+function printPlan(planId){
+  const p=S.plans.find(x=>x.id===planId);if(!p)return;
+  const st=S.students.find(s=>s.id===p.studentId);
+  const subj=SUBJECTS[p.subject]||{name:p.subject,icon:''};
+  const prog=(S.progress[p.studentId||'']||{})[p.id]||{completedDays:[]};
+  const done=prog.completedDays||[];const total=p.numDays||5;
+  const pct=Math.round((done.length/total)*100);
+  const daysH=Array.from({length:total},(_,i)=>i+1).map(d=>'<span style="display:inline-block;margin:2px 6px;font-size:13px;'+(done.includes(d)?'color:#059669;font-weight:700':'color:#9ca3af')+'">'+(done.includes(d)?'&#x2705;':'&#x25A1;')+' Day '+d+'</span>').join('');
+  const body='<div class="orca-header"><div class="orca-logo">&#x1F433;</div><div><div class="orca-title">OrcaLearn</div><div class="orca-sub">Lesson Plan</div></div></div><h1>'+esc(subj.name)+' &#x2014; Grade '+p.grade+'</h1><p class="meta">'+(st?esc(st.name)+' &nbsp;&#183;&nbsp; ':'')+total+' days &nbsp;&#183;&nbsp; '+new Date(p.date).toLocaleDateString()+'</p><h2>Progress</h2><div class="progress-bar"><div class="progress-fill" style="width:'+pct+'%"></div></div><p style="font-size:13px;color:#6b7280;margin-bottom:8px">'+done.length+' of '+total+' days ('+pct+'%)</p><div>'+daysH+'</div>'+(p.goals?'<h2>Goals</h2><p>'+esc(p.goals)+'</p>':'')+'<h2>Lesson Plan</h2><pre>'+esc(p.content||'')+'</pre><div class="footer">OrcaLearn v2 &nbsp;&#183;&nbsp; '+new Date().toLocaleDateString()+'</div>';
+  printBase(esc(subj.name)+' &#x2014; Grade '+p.grade,body);
+}
+
+function printCertificate(planId){
+  const p=S.plans.find(x=>x.id===planId);if(!p)return;
+  const st=S.students.find(s=>s.id===p.studentId);
+  const subj=SUBJECTS[p.subject]||{name:p.subject,icon:'📚'};
+  const dateStr=new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+  const w=window.open('','_blank');
+  w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Certificate</title><style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:Georgia,serif;background:#faf7ff;display:flex;flex-direction:column;min-height:100vh;}#pb{background:#7c3aed;color:white;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;}#pb h2{font-size:15px;font-weight:700;font-family:-apple-system,sans-serif;}#pb button{background:white;color:#7c3aed;border:none;border-radius:8px;padding:8px 18px;font-size:14px;font-weight:700;cursor:pointer;font-family:-apple-system,sans-serif;}.cert{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 20px;}.cert-inner{background:white;border:8px solid #7c3aed;border-radius:24px;padding:48px 56px;text-align:center;max-width:700px;width:100%;box-shadow:0 8px 40px rgba(124,58,237,0.15);position:relative;}.cert-inner::before{content:\'\';position:absolute;inset:12px;border:2px solid #ede9fe;border-radius:16px;pointer-events:none;}.cert-logo{font-size:56px;margin-bottom:8px;}.cert-org{font-size:14px;font-weight:700;letter-spacing:3px;color:#7c3aed;text-transform:uppercase;margin-bottom:24px;font-family:-apple-system,sans-serif;}.cert-title{font-size:36px;font-weight:400;color:#1e1b4b;margin-bottom:8px;font-style:italic;}.cert-of{font-size:16px;letter-spacing:2px;text-transform:uppercase;color:#9ca3af;margin-bottom:32px;font-family:-apple-system,sans-serif;}.cert-name{font-size:42px;font-weight:700;color:#7c3aed;margin-bottom:24px;border-bottom:2px solid #ede9fe;padding-bottom:16px;}.cert-body{font-size:18px;color:#374151;line-height:1.7;margin-bottom:32px;}.cert-subject{font-size:24px;font-weight:700;color:#1e1b4b;}.cert-footer{display:flex;justify-content:space-between;align-items:flex-end;margin-top:40px;padding-top:20px;border-top:1px solid #e5e7eb;}.cert-date{font-size:14px;color:#6b7280;font-family:-apple-system,sans-serif;}.cert-seal{font-size:48px;}.cert-issued{font-size:12px;color:#9ca3af;font-family:-apple-system,sans-serif;}@media print{#pb{display:none!important;}}</style></head><body><div id="pb"><h2>&#x1F3C6; Certificate of Completion</h2><button onclick="window.print()">&#x1F5A8; Print / Save PDF</button></div><div class="cert"><div class="cert-inner"><div class="cert-logo">&#x1F433;</div><div class="cert-org">OrcaLearn</div><div class="cert-title">Certificate</div><div class="cert-of">of Completion</div><div class="cert-name">'+(st?esc(st.name):'Student')+'</div><div class="cert-body">has successfully completed all '+p.numDays+' days of the<br><span class="cert-subject">'+subj.icon+' '+esc(subj.name)+'</span><br>lesson plan for Grade '+p.grade+'</div><div class="cert-footer"><div><div class="cert-date">'+dateStr+'</div><div class="cert-issued">Date Completed</div></div><div class="cert-seal">&#x1F3C5;</div><div style="text-align:right"><div class="cert-date">OrcaLearn v2</div><div class="cert-issued">Powered by Lightchain</div></div></div></div></div></body></html>');
+  w.document.close();
+}
+
+function printProgressReport(){
+  const st=S.students.find(s=>s.id===S.activeStudentId);if(!st){toast('Select a student first.',true);return;}
+  const myPlans=S.plans.filter(p=>p.studentId===st.id);
+  const myQ=S.quizHistory.filter(q=>q.studentId===st.id);
+  const totalDone=Object.values(S.progress[st.id]||{}).reduce((a,p)=>a+(p.completedDays?.length||0),0);
+  const avg=myQ.length>0?Math.round(myQ.reduce((a,r)=>a+r.pct,0)/myQ.length):null;
+  const plansRows=myPlans.length===0?'<tr><td colspan="4" style="text-align:center;color:#9ca3af">No plans yet</td></tr>':
+    myPlans.map(p=>{const prog=(S.progress[st.id]||{})[p.id]||{};const done=prog.completedDays?.length||0;const tot=p.numDays||5;const pct=Math.round((done/tot)*100);return '<tr><td>'+esc(SUBJECTS[p.subject]?.name||p.subject)+'</td><td>Grade '+p.grade+'</td><td>'+done+'/'+tot+' days</td><td><div class="progress-bar" style="width:80px;display:inline-block"><div class="progress-fill" style="width:'+pct+'%"></div></div> '+pct+'%</td></tr>';}).join('');
+  const qRows=myQ.length===0?'<tr><td colspan="4" style="text-align:center;color:#9ca3af">No quizzes yet</td></tr>':
+    myQ.slice(0,10).map(r=>{const gc=r.letterGrade?'grade-'+r.letterGrade:'';return '<tr><td>'+esc(SUBJECTS[r.subject]?.name||r.subject)+'</td><td>Grade '+r.grade+'</td><td>'+r.score+'/'+r.total+'</td><td><span class="badge-grade '+gc+'">'+(r.letterGrade||r.pct+'%')+'</span></td></tr>';}).join('');
+  const body='<div class="orca-header"><div class="orca-logo">&#x1F433;</div><div><div class="orca-title">OrcaLearn</div><div class="orca-sub">Progress Report</div></div></div><h1>'+st.avatar+' '+esc(st.name)+'</h1><p class="meta">Grade '+st.grade+' &nbsp;&#183;&nbsp; '+new Date().toLocaleDateString()+'</p><h2>Summary</h2><table><tr><th>Lesson Plans</th><th>Days Completed</th><th>Quizzes</th><th>Avg Score</th></tr><tr><td>'+myPlans.length+'</td><td>'+totalDone+'</td><td>'+myQ.length+'</td><td>'+(avg!==null?avg+'%':'&#x2014;')+'</td></tr></table><h2>Lesson Plans</h2><table><tr><th>Subject</th><th>Grade</th><th>Progress</th><th>Completion</th></tr>'+plansRows+'</table><h2>Recent Quizzes</h2><table><tr><th>Subject</th><th>Grade</th><th>Score</th><th>Grade</th></tr>'+qRows+'</table><div class="footer">OrcaLearn v2 &nbsp;&#183;&nbsp; '+new Date().toLocaleDateString()+'</div>';
+  printBase('Progress Report &#x2014; '+esc(st.name),body);
+}
+
+function printQuizHistory(){
+  const st=S.students.find(s=>s.id===S.activeStudentId);
+  const myQ=S.quizHistory.filter(q=>!S.activeStudentId||q.studentId===S.activeStudentId);
+  if(myQ.length===0){toast('No quiz history yet.',true);return;}
+  const avg=Math.round(myQ.reduce((a,r)=>a+r.pct,0)/myQ.length);
+  const best=Math.max(...myQ.map(r=>r.pct));
+  const rows=myQ.map((r,i)=>{const gc=r.letterGrade?'grade-'+r.letterGrade:'';return '<tr><td>'+(i+1)+'</td><td>'+esc(SUBJECTS[r.subject]?.name||r.subject)+'</td><td>Grade '+r.grade+'</td><td>'+r.score+'/'+r.total+'</td><td>'+r.pct+'%</td><td><span class="badge-grade '+gc+'">'+(r.letterGrade||'—')+'</span></td><td>'+new Date(r.date).toLocaleDateString()+'</td></tr>';}).join('');
+  const body='<div class="orca-header"><div class="orca-logo">&#x1F433;</div><div><div class="orca-title">OrcaLearn</div><div class="orca-sub">Quiz History</div></div></div><h1>'+(st?st.avatar+' '+esc(st.name)+' &#x2014; ':'')+'Quiz History</h1><p class="meta">'+myQ.length+' quizzes &nbsp;&#183;&nbsp; Avg: '+avg+'% &nbsp;&#183;&nbsp; Best: '+best+'%</p><table><tr><th>#</th><th>Subject</th><th>Grade</th><th>Score</th><th>%</th><th>Letter</th><th>Date</th></tr>'+rows+'</table><div class="footer">OrcaLearn v2 &nbsp;&#183;&nbsp; '+new Date().toLocaleDateString()+'</div>';
+  printBase('Quiz History',body);
+}
+
+async function exportPortfolio(){
+  const st=S.students.find(s=>s.id===S.activeStudentId);if(!st){toast('Select a student first.',true);return;}
+  if(typeof JSZip==='undefined'){toast('Loading ZIP library...',false,2000);return;}
+  toast('Building portfolio...',false,10000);
+  const myPlans=S.plans.filter(p=>p.studentId===st.id);
+  const myQ=S.quizHistory.filter(q=>q.studentId===st.id);
+  const zip=new JSZip();
+  const folder=zip.folder('OrcaLearn_Portfolio_'+st.name.replace(/\s+/g,'_'));
+  const makeHtml=(title,body)=>'<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+title+'</title><style>body{font-family:sans-serif;color:#1e1b4b;padding:32px 24px;max-width:800px;margin:0 auto;}h1{font-size:22px;font-weight:800;margin-bottom:4px;}h2{font-size:16px;font-weight:700;margin:20px 0 8px;color:#7c3aed;border-bottom:2px solid #ede9fe;padding-bottom:4px;}p,li{font-size:14px;line-height:1.7;}table{width:100%;border-collapse:collapse;font-size:14px;margin:8px 0;}th{background:#f5f3ff;color:#5b21b6;font-weight:700;padding:8px 12px;text-align:left;border:1px solid #e5e7eb;}td{padding:8px 12px;border:1px solid #e5e7eb;}pre{white-space:pre-wrap;font-size:13px;line-height:1.7;background:#f9fafb;padding:16px;border:1px solid #e5e7eb;}.footer{margin-top:40px;border-top:2px solid #e5e7eb;padding-top:16px;font-size:12px;color:#9ca3af;text-align:center;}</style></head><body>'+body+'</body></html>';
+  const totalDone=Object.values(S.progress[st.id]||{}).reduce((a,p)=>a+(p.completedDays?.length||0),0);
+  const avg=myQ.length>0?Math.round(myQ.reduce((a,r)=>a+r.pct,0)/myQ.length):null;
+  const planRows=myPlans.map(p=>{const pr=(S.progress[st.id]||{})[p.id]||{};const d=pr.completedDays?.length||0;const t=p.numDays||5;return '<tr><td>'+esc(SUBJECTS[p.subject]?.name||p.subject)+'</td><td>Grade '+p.grade+'</td><td>'+d+'/'+t+'</td><td>'+Math.round((d/t)*100)+'%</td></tr>';}).join('');
+  folder.file('progress_report.html',makeHtml('Progress — '+st.name,'<h1>'+st.avatar+' '+esc(st.name)+'</h1><p style="color:#6b7280;margin-bottom:20px">Grade '+st.grade+' &nbsp;&#183;&nbsp; '+new Date().toLocaleDateString()+'</p><h2>Summary</h2><table><tr><th>Plans</th><th>Days</th><th>Quizzes</th><th>Avg Score</th></tr><tr><td>'+myPlans.length+'</td><td>'+totalDone+'</td><td>'+myQ.length+'</td><td>'+(avg!==null?avg+'%':'—')+'</td></tr></table><h2>Lesson Plans</h2><table><tr><th>Subject</th><th>Grade</th><th>Progress</th><th>%</th></tr>'+planRows+'</table><div class="footer">OrcaLearn v2 &nbsp;&#183;&nbsp; '+new Date().toLocaleDateString()+'</div>'));
+  const plansFolder=folder.folder('lesson_plans');
+  for(const p of myPlans){
+    const pr=(S.progress[st.id]||{})[p.id]||{completedDays:[]};
+    const subj=SUBJECTS[p.subject]||{name:p.subject};
+    plansFolder.file(p.subject+'_grade'+p.grade+'_'+new Date(p.date).toISOString().slice(0,10)+'.html',makeHtml(subj.name+' Grade '+p.grade,'<h1>'+esc(subj.name)+' — Grade '+p.grade+'</h1><p style="color:#6b7280;margin-bottom:20px">'+(p.numDays||5)+' days &nbsp;&#183;&nbsp; '+new Date(p.date).toLocaleDateString()+'</p><pre>'+esc(p.content||'')+'</pre><div class="footer">OrcaLearn v2 &nbsp;&#183;&nbsp; '+new Date().toLocaleDateString()+'</div>'));
+  }
+  folder.file('README.txt','OrcaLearn Student Portfolio\nStudent: '+st.name+' (Grade '+st.grade+')\nExported: '+new Date().toLocaleDateString()+'\n\nGenerated by OrcaLearn v2 — Powered by Lightchain AIVM');
+  try{
+    const blob=await zip.generateAsync({type:'blob'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;a.download='OrcaLearn_Portfolio_'+st.name.replace(/\s+/g,'_')+'.zip';
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url),5000);
+    toast('Portfolio downloaded! &#x1F389;',false,4000);
+  }catch(e){toast('Export failed: '+e.message,true);}
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+(async function init(){
+  loadData();
+  if(window.ethereum){
+    try{
+      const p=new ethers.BrowserProvider(window.ethereum);
+      const accs=await p.listAccounts();
+      if(accs.length>0){S.provider=p;S.signer=await p.getSigner();S.addr=await S.signer.getAddress();afterConnect();}
+    }catch{}
+    window.ethereum.on('accountsChanged',async accs=>{
+      if(accs.length===0)disconnectWallet();
+      else{S.addr=accs[0];if(S.provider){S.signer=await S.provider.getSigner();}renderHome();renderLessons();renderQuiz();renderStudents();updateNavBadge();}
+    });
+  }
+})();
+</script>
+</body>
+</html>
