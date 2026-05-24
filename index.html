@@ -270,6 +270,7 @@ html,body{min-height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI
       <span class="nav-brand-name" style="font-size:15px">OrcaLearn</span>
     </div>
     <div class="nav-wallet">
+      <button class="btn btn-outline btn-sm" onclick="openModal('modal-help')" title="Help" style="font-size:16px;padding:6px 10px;">❓</button>
       <span id="nav-payment-badge"></span>
       <span id="nav-wallet-addr" class="wallet-addr"></span>
       <button class="btn btn-outline btn-sm" id="btn-disconnect" onclick="disconnectWallet()" style="display:none">Disconnect</button>
@@ -474,6 +475,99 @@ html,body{min-height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('modal-transcript')">Cancel</button>
       <button class="btn btn-purple-solid" onclick="generateTranscript()">&#x1F393; Generate Transcript</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: HELP -->
+<div id="modal-help" class="modal-overlay" style="display:none" onclick="overlayClose(event,'modal-help')">
+  <div class="modal" style="max-width:600px;max-height:92vh">
+    <div class="modal-header">
+      <h3>❓ How to Use OrcaLearn</h3>
+      <button class="modal-close" onclick="closeModal('modal-help')">&#x2715;</button>
+    </div>
+    <div class="modal-body" style="gap:0">
+
+      <!-- Welcome -->
+      <div style="background:#f5f3ff;border:1px solid #c4b5fd;border-radius:12px;padding:18px 20px;margin-bottom:20px">
+        <div style="font-size:17px;font-weight:800;color:#1e1b4b;margin-bottom:8px">🐋 Welcome to OrcaLearn</div>
+        <div style="font-size:15px;color:#374151;line-height:1.7">OrcaLearn is an AI-powered homeschool helper. It generates full lesson plans and quizzes for any subject and grade level. <strong>All your data stays in your browser</strong> — nothing is stored on anyone else's computer. AI runs through the Lightchain network, not through us.</div>
+      </div>
+
+      <!-- Getting Started -->
+      <div style="margin-bottom:20px">
+        <div style="font-size:16px;font-weight:800;color:#7c3aed;margin-bottom:12px">🚀 Getting Started</div>
+        <div style="font-size:15px;color:#374151;line-height:1.75">
+          You get <strong>5 free lessons and quizzes</strong> before needing to subscribe — no wallet required.<br><br>
+          To start, click <strong>Continue Without Wallet</strong> on the home screen, or connect a MetaMask / Trust Wallet to unlock unlimited access for <strong>$4.99/month</strong> in LCAI.
+        </div>
+      </div>
+      <div style="height:1px;background:#e5e7eb;margin-bottom:20px"></div>
+
+      <!-- Students -->
+      <div style="margin-bottom:20px">
+        <div style="font-size:16px;font-weight:800;color:#7c3aed;margin-bottom:12px">👨‍👩‍👧 Setting Up Students</div>
+        <div style="font-size:15px;color:#374151;line-height:1.75">
+          Go to the <strong>Students</strong> tab and tap <strong>+ Add Student</strong>. Enter the child's name, pick a grade level, and choose an avatar. You can add as many students as you need.<br><br>
+          On the <strong>Home</strong> tab, tap a student's name at the top to switch between children. All lessons and quiz scores are tracked separately per student.
+        </div>
+      </div>
+      <div style="height:1px;background:#e5e7eb;margin-bottom:20px"></div>
+
+      <!-- Lessons -->
+      <div style="margin-bottom:20px">
+        <div style="font-size:16px;font-weight:800;color:#7c3aed;margin-bottom:12px">📚 Generating a Lesson Plan</div>
+        <div style="font-size:15px;color:#374151;line-height:1.75">
+          Go to the <strong>Lessons</strong> tab and tap <strong>+ New Lesson</strong>. Choose a subject, grade, and how many days (1–10). You can add optional notes like "focus on fractions" or "keep it fun."<br><br>
+          The AI generates a full multi-day plan in about 30 seconds. Tap any lesson card to open it and see the full plan broken into daily activities.<br><br>
+          <strong>Check off each day</strong> as you complete it — OrcaLearn tracks your progress automatically.<br><br>
+          <strong>Download / Print:</strong> Open a lesson and tap the blue <strong>Download</strong> button. A print-ready version opens in a new tab. Press <strong>Ctrl+P</strong> to print it, or change the printer to <em>Save as PDF</em> to keep a digital copy.
+        </div>
+      </div>
+      <div style="height:1px;background:#e5e7eb;margin-bottom:20px"></div>
+
+      <!-- Quizzes -->
+      <div style="margin-bottom:20px">
+        <div style="font-size:16px;font-weight:800;color:#7c3aed;margin-bottom:12px">🎯 Taking a Quiz</div>
+        <div style="font-size:15px;color:#374151;line-height:1.75">
+          Go to the <strong>Quiz</strong> tab. Pick a subject, grade level, number of questions, and set a time limit if you want one. For Math, you can also pick a specific topic like Addition, Fractions, or Word Problems.<br><br>
+          Tap <strong>Start Quiz</strong>. Each question shows 4 choices — tap your answer. You'll see instantly if you got it right. At the end you'll see a score, grade (A–F), and full results saved to your history.
+        </div>
+      </div>
+      <div style="height:1px;background:#e5e7eb;margin-bottom:20px"></div>
+
+      <!-- Progress & Reports -->
+      <div style="margin-bottom:20px">
+        <div style="font-size:16px;font-weight:800;color:#7c3aed;margin-bottom:12px">📊 Progress & Reports</div>
+        <div style="font-size:15px;color:#374151;line-height:1.75">
+          The <strong>Home</strong> tab shows a summary of lessons completed and quizzes taken for the active student.<br><br>
+          In the <strong>Students</strong> tab, tap a student and you'll see options to:<br>
+          • <strong>Progress Report</strong> — a printable summary of all lessons and quiz scores<br>
+          • <strong>Transcript</strong> — a formal academic transcript with GPA (great for college prep or record-keeping)<br>
+          • <strong>Certificate</strong> — appears on a completed lesson; a printable certificate of completion
+        </div>
+      </div>
+      <div style="height:1px;background:#e5e7eb;margin-bottom:20px"></div>
+
+      <!-- Payment -->
+      <div style="margin-bottom:20px">
+        <div style="font-size:16px;font-weight:800;color:#7c3aed;margin-bottom:12px">💳 Subscribing ($4.99/month)</div>
+        <div style="font-size:15px;color:#374151;line-height:1.75">
+          After your 5 free uses, you'll see a payment prompt. Connect your MetaMask or Trust Wallet, then tap <strong>Pay Now</strong>. The app calculates the current LCAI equivalent of $4.99 automatically.<br><br>
+          Send the LCAI from your wallet to complete the payment. Once confirmed on the blockchain, your access is unlocked for 30 days — no accounts, no passwords, no middleman.
+        </div>
+      </div>
+      <div style="height:1px;background:#e5e7eb;margin-bottom:20px"></div>
+
+      <!-- Privacy -->
+      <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:12px;padding:16px 18px">
+        <div style="font-size:15px;font-weight:800;color:#065f46;margin-bottom:6px">🔒 Your Privacy</div>
+        <div style="font-size:14px;color:#374151;line-height:1.7">All student names, grades, lesson plans, and quiz scores are stored <strong>only in your browser</strong> using localStorage. Nothing is ever uploaded to a server. Clearing your browser data will erase it, so use the <strong>Download</strong> button regularly to keep printed or PDF copies of important lesson plans.</div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="closeModal('modal-help')">Got it!</button>
     </div>
   </div>
 </div>
