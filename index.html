@@ -228,6 +228,27 @@ html,body{min-height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI
 @media(min-width:900px){
   .quick-actions{grid-template-columns:1fr 1fr 1fr 1fr;}
 }
+
+/* VOGRABULARY */
+.vocab-phonetic-card{background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border:2px solid #7dd3fc;border-radius:20px;padding:24px;text-align:center;}
+.vocab-phonetic{font-size:30px;font-weight:800;color:#0369a1;letter-spacing:2px;margin-bottom:6px;line-height:1.2;}
+.vocab-word-big{font-size:26px;font-weight:700;color:#1e1b4b;margin-bottom:6px;}
+.vocab-definition{font-size:14px;color:#374151;line-height:1.6;background:rgba(255,255,255,0.75);border-radius:10px;padding:10px 14px;margin-top:10px;text-align:left;}
+.vocab-example{font-size:13px;color:#0369a1;font-style:italic;margin-top:8px;text-align:left;}
+.vocab-tries-row{display:flex;gap:8px;justify-content:center;margin:10px 0;}
+.vocab-try-dot{width:13px;height:13px;border-radius:50%;background:#e5e7eb;}
+.vocab-try-dot.used{background:#fca5a5;}
+.vocab-sent-block{background:#f9fafb;border:1.5px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px;}
+.vocab-sent-block.done{border-color:#86efac;background:#f0fdf4;}
+.vocab-sent-label{font-size:13px;font-weight:700;color:var(--purple);margin-bottom:8px;}
+.vocab-sent-accepted{font-size:13px;color:#065f46;font-style:italic;margin-top:6px;}
+.vocab-history-row{display:flex;align-items:center;gap:10px;padding:9px 12px;background:white;border-radius:10px;border:1px solid var(--border);margin-bottom:7px;}
+.vocab-history-word{font-size:15px;font-weight:700;color:var(--text);flex:1;}
+.vocab-history-date{font-size:11px;color:var(--text-muted);}
+.vocab-band-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.vocab-band-btn{padding:16px 12px;border:2px solid var(--border);border-radius:14px;background:white;font-size:15px;font-weight:700;color:var(--text);cursor:pointer;transition:all 0.15s;text-align:center;font-family:inherit;}
+.vocab-band-btn.selected{border-color:var(--purple);background:var(--purple-light);color:var(--purple);}
+.vocab-band-btn:hover:not(.selected){border-color:#c4b5fd;}
 </style>
 </head>
 <body>
@@ -293,12 +314,14 @@ html,body{min-height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI
       </div>
       <div id="students-list"></div>
     </div>
+    <div id="tab-vocab" class="tab-section" style="display:none"><div id="vocab-content"></div></div>
   </div>
   <nav class="bottom-nav">
     <button class="bottom-nav-btn active" onclick="showTab('home')" data-tab="home"><span class="nav-icon">&#x1F3E0;</span><span class="nav-label">Home</span></button>
     <button class="bottom-nav-btn" onclick="showTab('lessons')" data-tab="lessons"><span class="nav-icon">&#x1F4DA;</span><span class="nav-label">Lessons</span></button>
     <button class="bottom-nav-btn" onclick="showTab('quiz')" data-tab="quiz"><span class="nav-icon">&#x1F9EE;</span><span class="nav-label">Quiz</span></button>
     <button class="bottom-nav-btn" onclick="showTab('students')" data-tab="students"><span class="nav-icon">&#x1F464;</span><span class="nav-label">Students</span></button>
+    <button class="bottom-nav-btn" onclick="showTab('vocab')" data-tab="vocab"><span class="nav-icon">&#x1F4D6;</span><span class="nav-label">Vocab</span></button>
   </nav>
 </div>
 
@@ -642,6 +665,7 @@ const S = {
   students:[], activeStudentId:null,
   plans:[], quizHistory:[], progress:{},
   freeUsesLeft:FREE_USES, paidUntil:null, paymentTxHash:null,
+  vocabHistory:{},
   quizTimer:null
 };
 let _aivmJWT=null, _aivmJWTExp=0;
@@ -677,6 +701,7 @@ function loadData(){
     S.quizHistory=d.quizHistory||[];
     S.progress=d.progress||{};
     S.activeStudentId=d.activeStudentId||null;
+    S.vocabHistory=d.vocabHistory||{};
     if(S.students.length>0&&!S.activeStudentId) S.activeStudentId=S.students[0].id;
   }catch(e){console.error('loadData',e);}
 }
@@ -685,7 +710,8 @@ function saveData(){
     const d={
       freeUsesLeft:S.freeUsesLeft,paidUntil:S.paidUntil,paymentTxHash:S.paymentTxHash,
       wallet:S.addr,students:S.students,lessonHistory:S.plans,
-      quizHistory:S.quizHistory,progress:S.progress,activeStudentId:S.activeStudentId
+      quizHistory:S.quizHistory,progress:S.progress,activeStudentId:S.activeStudentId,
+      vocabHistory:S.vocabHistory
     };
     localStorage.setItem(LS_KEY,JSON.stringify(d));
   }catch(e){console.error('saveData',e);}
@@ -1405,6 +1431,7 @@ function renderHome(){
       h+='<div class="section-header mt-4"><div class="section-title">Quick Actions</div></div><div class="quick-actions">';
       h+='<div class="action-card" onclick="openGenerateModal()"><div class="action-icon">&#x1F916;</div><div class="action-title">New Lesson</div><div class="action-sub">AI lesson plan</div></div>';
       h+='<div class="action-card" onclick="showTab(\'quiz\')"><div class="action-icon">&#x1F9EE;</div><div class="action-title">Take Quiz</div><div class="action-sub">Any subject</div></div>';
+      h+='<div class="action-card" onclick="showTab(\'vocab\')"><div class="action-icon">&#x1F4D6;</div><div class="action-title">VOGRABULARY</div><div class="action-sub">Spelling &amp; sentences</div></div>';
       h+='<div class="action-card" onclick="showTab(\'lessons\')"><div class="action-icon">&#x1F4DA;</div><div class="action-title">My Lessons</div><div class="action-sub">'+myPlans.length+' saved</div></div>';
       h+='<div class="action-card" onclick="showTab(\'students\')"><div class="action-icon">&#x1F464;</div><div class="action-title">Students</div><div class="action-sub">'+S.students.length+' profile'+(S.students.length!==1?'s':'')+'</div></div>';
       h+='</div>';
@@ -1721,12 +1748,13 @@ function abortQuiz(){clearInterval(S.quizTimer);closeModal('modal-quiz-run');}
 
 // ── TABS ──────────────────────────────────────────────────────────────────
 function showTab(name){
-  ['home','lessons','quiz','students'].forEach(t=>{const s=el('tab-'+t);if(s)s.style.display=t===name?'':'none';});
+  ['home','lessons','quiz','students','vocab'].forEach(t=>{const s=el('tab-'+t);if(s)s.style.display=t===name?'':'none';});
   document.querySelectorAll('.bottom-nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));
   if(name==='home')renderHome();
   if(name==='lessons')renderLessons();
   if(name==='quiz')renderQuiz();
   if(name==='students')renderStudents();
+  if(name==='vocab')renderVocab();
   window.scrollTo(0,0);
 }
 
@@ -1857,6 +1885,456 @@ async function exportPortfolio(){
     setTimeout(()=>URL.revokeObjectURL(url),5000);
     toast('Portfolio downloaded! &#x1F389;',false,4000);
   }catch(e){toast('Export failed: '+e.message,true);}
+}
+
+// ── VOGRABULARY ───────────────────────────────────────────────────────────
+
+const VOCAB_GRADE_BANDS=[
+  {id:'K-2',  label:'K–2',  subtitle:'Kindergarten–Grade 2'},
+  {id:'3-5',  label:'3–5',  subtitle:'Grades 3–5'},
+  {id:'6-8',  label:'6–8',  subtitle:'Grades 6–8'},
+  {id:'9-12', label:'9–12', subtitle:'Grades 9–12'},
+];
+
+const VOCAB_LISTS={
+  'K-2':[
+    {word:'apple',    phonetic:'AP-ul',       definition:'A round fruit that is usually red, green, or yellow.',             example:'I ate a red apple for lunch.'},
+    {word:'happy',    phonetic:'HAP-ee',      definition:'Feeling joy or great pleasure.',                                   example:'She was happy to see her friend.'},
+    {word:'jump',     phonetic:'JUMP',        definition:'To push yourself off the ground and into the air.',                example:'The frog can jump very far.'},
+    {word:'friend',   phonetic:'FREND',       definition:'A person you like and enjoy spending time with.',                  example:'My best friend and I play together every day.'},
+    {word:'color',    phonetic:'KUL-er',      definition:'How light makes something look, such as red, blue, or green.',     example:'My favorite color is purple.'},
+    {word:'school',   phonetic:'SKOOL',       definition:'A place where students go to learn.',                              example:'I walk to school every morning.'},
+    {word:'animal',   phonetic:'AN-uh-mul',   definition:'A living creature that can move and breathe on its own.',          example:'A dog is a friendly animal.'},
+    {word:'water',    phonetic:'WAW-ter',     definition:'The clear liquid that fills oceans, rivers, and lakes.',           example:'I drink a glass of water every day.'},
+    {word:'garden',   phonetic:'GAR-den',     definition:'A place outside where plants, flowers, or vegetables are grown.',  example:'We grow tomatoes in our garden.'},
+    {word:'brave',    phonetic:'BRAVE',       definition:'Ready to do something even when it feels scary.',                  example:'The brave child helped the lost puppy.'},
+    {word:'quiet',    phonetic:'KWY-et',      definition:'Making very little or no sound.',                                  example:'Please be quiet in the library.'},
+    {word:'gentle',   phonetic:'JEN-tul',     definition:'Soft and careful; not rough or harsh.',                            example:'Be gentle when you hold the baby bird.'},
+    {word:'funny',    phonetic:'FUN-ee',      definition:'Making you want to laugh or smile.',                               example:'He told a really funny joke.'},
+    {word:'careful',  phonetic:'KAIR-ful',    definition:'Giving close attention to avoid mistakes or danger.',              example:'Be careful when you cross the street.'},
+    {word:'sunny',    phonetic:'SUN-ee',      definition:'Bright with sunlight; full of sunshine.',                          example:'It was a sunny day at the park.'},
+    {word:'hungry',   phonetic:'HUNG-gree',   definition:'Feeling the need to eat food.',                                   example:'I was very hungry after playing outside.'},
+    {word:'wonder',   phonetic:'WUN-der',     definition:'To feel curious and want to know more about something.',           example:'I wonder what is inside that big box.'},
+    {word:'kind',     phonetic:'KYND',        definition:'Friendly, caring, and helpful toward others.',                    example:'It was kind of you to share your snack.'},
+    {word:'strong',   phonetic:'STRONG',      definition:'Having a lot of power or energy.',                                example:'She is strong enough to carry the heavy box.'},
+    {word:'healthy',  phonetic:'HEL-thee',    definition:'In good health; good for your mind and body.',                    example:'Eating fruit and vegetables is a healthy habit.'},
+  ],
+  '3-5':[
+    {word:'admire',     phonetic:'ad-MYR',        definition:'To look at or think about someone with great respect and pleasure.',example:'I admire her hard work and dedication.'},
+    {word:'enormous',   phonetic:'ih-NOR-mus',    definition:'Extremely large; much bigger than usual.',                        example:'An enormous whale swam past our boat.'},
+    {word:'flexible',   phonetic:'FLEK-suh-bul',  definition:'Able to bend easily; able to change and adapt to new situations.',example:'A gymnast must be very flexible.'},
+    {word:'genuine',    phonetic:'JEN-yoo-in',    definition:'Real and true; not fake or pretend.',                             example:'She gave a genuine smile of thanks.'},
+    {word:'hesitate',   phonetic:'HEZ-ih-tayt',   definition:'To pause before doing something because you feel unsure.',        example:'Do not hesitate to ask your teacher for help.'},
+    {word:'improve',    phonetic:'im-PROOV',      definition:'To get better at something over time through effort.',            example:'Practice every day to improve your writing skills.'},
+    {word:'jealous',    phonetic:'JEL-us',        definition:'Wanting something that someone else has.',                        example:'He felt jealous when his sister got a new bike.'},
+    {word:'knowledge',  phonetic:'NOL-ij',        definition:'Facts, skills, and information that you have learned.',           example:'Reading books builds your knowledge every day.'},
+    {word:'patient',    phonetic:'PAY-shunt',     definition:'Able to wait calmly without getting upset or complaining.',       example:'Be patient; the cookies are still baking in the oven.'},
+    {word:'remarkable', phonetic:'reh-MAR-kuh-bul',definition:'Unusual and very impressive; worthy of attention.',            example:'She did a remarkable job on her science project.'},
+    {word:'stubborn',   phonetic:'STUB-urn',      definition:'Refusing to change your mind even when others disagree.',         example:'The stubborn mule refused to move down the trail.'},
+    {word:'terrific',   phonetic:'teh-RIF-ik',    definition:'Very good or excellent; wonderful.',                             example:'You did a terrific job on that spelling test.'},
+    {word:'urgent',     phonetic:'UR-junt',       definition:'Needing to be done or dealt with right away.',                   example:'The doctor received an urgent phone call.'},
+    {word:'victory',    phonetic:'VIK-tuh-ree',   definition:'Winning a battle, game, competition, or challenge.',             example:'The whole team celebrated their victory together.'},
+    {word:'cautious',   phonetic:'KAW-shus',      definition:'Being very careful to avoid danger or mistakes.',                example:'Be cautious when walking on icy sidewalks.'},
+    {word:'dedicate',   phonetic:'DED-ih-kayt',   definition:'To give a lot of time and effort to something important.',       example:'She dedicates one hour each day to reading.'},
+    {word:'curious',    phonetic:'KYOOR-ee-us',   definition:'Wanting to learn or find out more about something.',             example:'The curious child asked many interesting questions.'},
+    {word:'obstacle',   phonetic:'OB-stuh-kul',  definition:'Something that blocks your path or makes progress harder.',      example:'The fallen tree was an obstacle on the hiking trail.'},
+    {word:'persuade',   phonetic:'per-SWAYD',     definition:'To convince someone to do or believe something.',                example:'She persuaded her dad to let her get a puppy.'},
+    {word:'vivid',      phonetic:'VIV-id',        definition:'Very bright, strong, clear, or easy to picture in your mind.',   example:'He had a vivid memory of his first day at school.'},
+  ],
+  '6-8':[
+    {word:'abolish',     phonetic:'uh-BOL-ish',       definition:'To officially put an end to a law, practice, or system.',      example:'The activists worked to abolish the unfair rule.'},
+    {word:'abundant',    phonetic:'uh-BUN-dunt',      definition:'Present in large quantities; more than enough.',               example:'There was abundant food at the harvest celebration.'},
+    {word:'eloquent',    phonetic:'EL-uh-kwent',      definition:'Well-spoken; expressing ideas clearly and persuasively.',      example:'The student gave an eloquent speech at graduation.'},
+    {word:'ferocious',   phonetic:'feh-ROH-shus',     definition:'Extremely fierce, violent, or intense.',                       example:'A ferocious storm knocked out power across the city.'},
+    {word:'hypothesis',  phonetic:'hy-POT-ih-sis',    definition:'An educated guess that can be tested through investigation.',  example:'Our hypothesis was supported by the experiment results.'},
+    {word:'illuminate',  phonetic:'ih-LOO-mih-nayt',  definition:'To light something up; to make an idea easier to understand.', example:'The lanterns illuminate the entire courtyard at night.'},
+    {word:'jeopardize',  phonetic:'JEP-er-dyz',       definition:'To put something at risk of being lost, harmed, or ruined.',   example:'Skipping practice will jeopardize your spot on the team.'},
+    {word:'meticulous',  phonetic:'meh-TIK-yoo-lus',  definition:'Showing extremely careful attention to every detail.',         example:'She was meticulous about recording her lab observations.'},
+    {word:'negotiate',   phonetic:'nih-GOH-shee-ayt', definition:'To have a discussion in order to reach an agreement.',         example:'The two sides met to negotiate a peaceful solution.'},
+    {word:'persevere',   phonetic:'pur-suh-VEER',     definition:'To keep going and not give up even when things are difficult.', example:'You must persevere through hard times to reach your goal.'},
+    {word:'resilient',   phonetic:'rih-ZIL-ee-unt',   definition:'Able to recover quickly and strongly from difficulties.',      example:'A resilient community rebuilds after a natural disaster.'},
+    {word:'scrutinize',  phonetic:'SKROO-tih-nyz',    definition:'To examine something very closely and carefully.',             example:'The inspector scrutinized every detail of the report.'},
+    {word:'turbulent',   phonetic:'TUR-byoo-lunt',    definition:'Full of confusion, disorder, or sudden changes.',              example:'It was a turbulent period in the nation\'s history.'},
+    {word:'versatile',   phonetic:'VUR-suh-tul',      definition:'Able to do many different things well; adaptable.',            example:'She is a versatile athlete who excels at many sports.'},
+    {word:'ambivalent',  phonetic:'am-BIV-uh-lunt',   definition:'Having mixed or conflicting feelings about something.',        example:'He felt ambivalent about moving away from his hometown.'},
+    {word:'contemplate', phonetic:'KON-tem-playt',    definition:'To think carefully and deeply about something for a while.',   example:'She sat quietly to contemplate her important decision.'},
+    {word:'diligent',    phonetic:'DIL-ih-junt',      definition:'Showing steady, careful, and hard-working effort.',            example:'A diligent student always reviews their notes each evening.'},
+    {word:'empathy',     phonetic:'EM-puh-thee',      definition:'The ability to understand and share the feelings of another person.',example:'Empathy helps us be kinder and more patient with others.'},
+    {word:'inevitable',  phonetic:'in-EV-ih-tuh-bul', definition:'Certain to happen; impossible to avoid or prevent.',          example:'Change is an inevitable part of growing up.'},
+    {word:'profound',    phonetic:'pruh-FOUND',       definition:'Very great, intense, or deep in meaning or understanding.',    example:'The book had a profound effect on how she saw the world.'},
+  ],
+  '9-12':[
+    {word:'ambiguous',    phonetic:'am-BIG-yoo-us',    definition:'Open to more than one interpretation; not clear or definite.',    example:'The contract language was deliberately ambiguous.'},
+    {word:'benevolent',   phonetic:'beh-NEV-uh-lunt',  definition:'Well-meaning, kind, and generous; wishing good for others.',      example:'The benevolent donor gave millions to fund education.'},
+    {word:'ephemeral',    phonetic:'ih-FEM-er-ul',     definition:'Lasting for only a very short time; quickly fading away.',        example:'Social media trends are often ephemeral and forgotten quickly.'},
+    {word:'futile',       phonetic:'FYOO-tul',         definition:'Having no result or effect; completely pointless.',               example:'It was futile to argue once the final decision had been made.'},
+    {word:'gregarious',   phonetic:'grih-GAIR-ee-us',  definition:'Very fond of company; sociable and outgoing by nature.',         example:'Her gregarious personality made her instantly likable.'},
+    {word:'hyperbole',    phonetic:'hy-PUR-buh-lee',   definition:'Obvious exaggeration used for emphasis or dramatic effect.',      example:'Saying the backpack weighs a ton is hyperbole.'},
+    {word:'juxtapose',    phonetic:'JUK-stuh-pohz',    definition:'To place two things side by side to highlight their contrast.',   example:'The author chose to juxtapose wealth and poverty in the novel.'},
+    {word:'labyrinth',    phonetic:'LAB-uh-rinth',     definition:'A complicated network of paths; any complex and confusing situation.',example:'Navigating the application process felt like a labyrinth.'},
+    {word:'nefarious',    phonetic:'nih-FAIR-ee-us',   definition:'Wicked, criminal, or evil in nature or intent.',                  example:'The villain\'s nefarious scheme was finally uncovered.'},
+    {word:'ostracize',    phonetic:'OS-truh-syz',      definition:'To exclude someone deliberately from a group or society.',        example:'He was ostracized for speaking out against the popular view.'},
+    {word:'paradox',      phonetic:'PAIR-uh-doks',     definition:'A statement that seems contradictory yet may express a truth.',   example:'The paradox of choice suggests that too many options cause stress.'},
+    {word:'querulous',    phonetic:'KWER-yoo-lus',     definition:'Habitually complaining or whining; petulantly discontented.',     example:'Her querulous tone made the discussion difficult to continue.'},
+    {word:'tenacious',    phonetic:'teh-NAY-shus',     definition:'Holding firmly to a goal or position; not giving up easily.',     example:'A tenacious athlete keeps training through every setback.'},
+    {word:'ubiquitous',   phonetic:'yoo-BIK-wih-tus',  definition:'Seeming to appear everywhere at the same time.',                 example:'Smartphones have become ubiquitous in modern daily life.'},
+    {word:'soliloquy',    phonetic:'suh-LIL-uh-kwee',  definition:'A dramatic speech in which a character speaks private thoughts aloud.',example:'Hamlet\'s soliloquy reveals his deepest inner conflicts.'},
+    {word:'capricious',   phonetic:'kuh-PRISH-us',     definition:'Given to sudden unpredictable changes in mood or behavior.',      example:'The capricious weather ruined all our outdoor plans.'},
+    {word:'demagogue',    phonetic:'DEM-uh-gog',       definition:'A leader who gains power by appealing to people\'s emotions rather than reason.',example:'The demagogue stirred the crowd with exaggerated claims.'},
+    {word:'inimitable',   phonetic:'ih-NIM-ih-tuh-bul',definition:'So distinctive or unique that it cannot be imitated or copied.',  example:'Her inimitable style set her apart from all other designers.'},
+    {word:'perspicacious',phonetic:'pur-spih-KAY-shus',definition:'Having a ready insight into things; shrewd and perceptive.',     example:'A perspicacious leader identifies problems before they grow.'},
+    {word:'sycophant',    phonetic:'SIK-uh-funt',      definition:'A person who uses excessive flattery to gain favor from someone powerful.',example:'The sycophant praised every decision the boss made.'},
+  ],
+};
+
+// Current selected band before a session starts
+let _vocabBand=null;
+// Current active vocab session (null = not in a session)
+let VB=null;
+
+function vocabBandForStudent(studentId){
+  const st=S.students.find(s=>s.id===studentId);
+  if(!st)return 'K-2';
+  const g=parseInt(st.grade);
+  if(g<=2)return 'K-2';
+  if(g<=5)return '3-5';
+  if(g<=8)return '6-8';
+  return '9-12';
+}
+function vocabHistoryFor(sid){return S.vocabHistory[sid]||[];}
+function vocabLogWord(sid,word){
+  if(!S.vocabHistory[sid])S.vocabHistory[sid]=[];
+  S.vocabHistory[sid].unshift({word:word.toLowerCase(),date:Date.now()});
+  if(S.vocabHistory[sid].length>200)S.vocabHistory[sid].length=200;
+  saveData();
+}
+function vocabHasSeen(sid,word){return vocabHistoryFor(sid).some(e=>e.word===word.toLowerCase());}
+
+function vocabGetBuiltinBatch(band,sid){
+  const list=VOCAB_LISTS[band]||VOCAB_LISTS['K-2'];
+  const unseen=list.filter(w=>!vocabHasSeen(sid,w.word));
+  const pool=unseen.length>=3?unseen:list;
+  return pool.slice().sort(()=>Math.random()-0.5).slice(0,Math.min(10,pool.length));
+}
+
+function vocabParseAIBatch(text){
+  try{
+    const m=text.match(/\[[\s\S]*\]/);
+    if(!m)return null;
+    const arr=JSON.parse(m[0]);
+    if(!Array.isArray(arr))return null;
+    return arr.filter(w=>w&&typeof w.word==='string'&&w.word.trim());
+  }catch(e){return null;}
+}
+
+async function vocabFetchAIBatch(band,sid,specificWord,onProgress){
+  const seen=vocabHistoryFor(sid).slice(0,50).map(e=>e.word).join(', ');
+  const bandInfo=VOCAB_GRADE_BANDS.find(b=>b.id===band);
+  const gradeDesc=bandInfo?bandInfo.subtitle:band;
+  const specific=specificWord?('Include the word "'+specificWord+'" as the first entry. '):'';
+  const avoid=seen?('Do NOT use these recently used words: '+seen+'. '):'';
+  const prompt='Generate a vocabulary list for '+gradeDesc+' students. '+specific+avoid+
+    'Return ONLY a JSON array of exactly 10 words. Each item must have: '+
+    '"word" (the vocabulary word), "phonetic" (simple syllable guide, e.g. "re-MARK-uh-bul"), '+
+    '"definition" (clear age-appropriate definition, 1-2 sentences), '+
+    '"example" (a natural example sentence). '+
+    'Example: [{"word":"example","phonetic":"ig-ZAM-pul","definition":"Something used to illustrate a point.","example":"This sentence is an example."}] '+
+    'Return ONLY the JSON array with no extra text.';
+  const result=await aivmInference(prompt,onProgress);
+  return vocabParseAIBatch(result);
+}
+
+function renderVocab(){
+  const c=el('vocab-content');if(!c)return;
+  if(!VB){renderVocabSetup(c);}
+  else if(VB.phase==='loading'){c.innerHTML=loadingHTML('Finding your next word...','Asking the Lightchain AIVM network');}
+  else if(VB.phase==='spell'){renderVocabSpell(c);}
+  else if(VB.phase==='sentence'){renderVocabSentence(c);}
+  else if(VB.phase==='word-done'){renderVocabWordDone(c);}
+}
+
+function renderVocabSetup(c){
+  const sid=S.activeStudentId;
+  const activeBand=_vocabBand||vocabBandForStudent(sid);
+  const students=S.students;
+  let stOpts='';
+  for(const s of students){
+    stOpts+='<option value="'+esc(s.id)+'"'+(s.id===sid?' selected':'')+'>'+esc(s.avatar+' '+s.name)+' (Grade '+s.grade+')</option>';
+  }
+  if(!students.length)stOpts='<option value="">No students yet — add one first</option>';
+  let bandBtns='';
+  for(const b of VOCAB_GRADE_BANDS){
+    const sel=b.id===activeBand?' selected':'';
+    bandBtns+='<button class="vocab-band-btn'+sel+'" onclick="vocabSelectBand(\''+b.id+'\')">'+
+      '<div style="font-size:18px;margin-bottom:4px">&#x1F4D6;</div>'+
+      '<div>'+b.label+'</div>'+
+      '<div style="font-size:11px;color:var(--text-muted);font-weight:400;margin-top:2px">'+b.subtitle+'</div>'+
+      '</button>';
+  }
+  const hist=vocabHistoryFor(sid);
+  const histCount=hist.length;
+  const freeInfo=isPaid()?
+    '<span class="paid-badge">&#x2705; Premium</span>':
+    ('<span style="font-size:13px;color:var(--text-muted)">'+S.freeUsesLeft+' free session'+(S.freeUsesLeft!==1?'s':'')+' left</span>');
+  let html=
+    '<div class="section-header"><h2 class="section-title">&#x1F4D6; VOGRABULARY</h2>'+freeInfo+'</div>'+
+    '<div class="card">'+
+      '<p style="font-size:14px;color:var(--text-muted);margin-bottom:16px">The Orca grabs a word! Learn how it sounds, spell it, then use it in 3 sentences. Keep a written notebook of your VOGRABULARY words!</p>'+
+      (students.length>1?'<div class="form-group" style="margin-bottom:16px"><label class="form-label">Student</label><select class="form-select" id="vocab-student-sel" onchange="vocabChangeStudent()">'+stOpts+'</select></div>':'')+
+      '<div class="form-label" style="margin-bottom:10px">Grade Band</div>'+
+      '<div class="vocab-band-grid">'+bandBtns+'</div>'+
+      '<div class="form-group" style="margin-bottom:16px"><label class="form-label">Request a specific word (optional)</label>'+
+        '<input type="text" id="vocab-specific" class="form-input" placeholder="e.g. metamorphosis"></div>'+
+      '<button class="btn btn-primary btn-large" onclick="vocabGo()">&#x1F433; Go! Grab a Word</button>'+
+    '</div>';
+  if(histCount>0){
+    html+=
+      '<div class="card" style="margin-top:14px">'+
+        '<div class="section-header">'+
+          '<h3 style="font-size:16px;font-weight:700;color:var(--text)">&#x1F4D3; Word Log ('+histCount+' words)</h3>'+
+          '<button class="btn btn-outline btn-sm" onclick="vocabClearHistory()">Clear</button>'+
+        '</div>'+
+        '<p style="font-size:13px;color:var(--text-muted);margin-bottom:12px">These words won\'t repeat in normal practice. Request one by name to review it again.</p>'+
+        hist.slice(0,15).map(e=>'<div class="vocab-history-row"><span class="vocab-history-word">'+esc(e.word)+'</span><span class="vocab-history-date">'+new Date(e.date).toLocaleDateString()+'</span></div>').join('')+
+        (histCount>15?'<p style="font-size:12px;color:var(--text-muted);text-align:center;margin-top:8px">+ '+(histCount-15)+' more words in log</p>':'')+
+      '</div>';
+  }
+  c.innerHTML=html;
+}
+
+function vocabSelectBand(bandId){
+  _vocabBand=bandId;
+  renderVocab();
+}
+function vocabChangeStudent(){
+  const sel=el('vocab-student-sel');
+  if(sel)S.activeStudentId=sel.value;
+  _vocabBand=null;
+  renderVocab();
+}
+
+async function vocabGo(){
+  if(!canUseAI()){openPaymentModal();return;}
+  const band=_vocabBand||vocabBandForStudent(S.activeStudentId);
+  const sid=S.activeStudentId;
+  const specificWord=el('vocab-specific')?el('vocab-specific').value.trim():'';
+  VB={band,studentId:sid,phase:'loading',batch:[],batchIdx:0,word:null,spellTries:0,sentIdx:0,sentTries:[0,0,0],sentences:[]};
+  renderVocab();
+  consumeFree();
+  try{
+    let batch=null;
+    if(isPaid()&&S.signer){
+      try{
+        batch=await vocabFetchAIBatch(band,sid,specificWord,function(msg){
+          const c=el('vocab-content');
+          if(c)c.innerHTML=loadingHTML('Getting your word...',msg);
+        });
+      }catch(e){console.warn('AIVM vocab failed, using built-in:',e.message);}
+    }
+    if(!batch||!batch.length){
+      if(specificWord){
+        const allWords=Object.values(VOCAB_LISTS).flat();
+        const found=allWords.find(w=>w.word.toLowerCase()===specificWord.toLowerCase());
+        if(found){
+          batch=[found].concat(vocabGetBuiltinBatch(band,sid).filter(w=>w.word!==found.word)).slice(0,10);
+        }else{
+          const reqEntry={word:specificWord,phonetic:specificWord.toUpperCase(),
+            definition:'Look this word up in a dictionary and write the definition in your notebook!',
+            example:'Write your own example sentence for "'+specificWord+'" in your notebook.'};
+          batch=[reqEntry].concat(vocabGetBuiltinBatch(band,sid)).slice(0,10);
+        }
+      }else{
+        batch=vocabGetBuiltinBatch(band,sid);
+      }
+    }
+    if(!batch||!batch.length){toast('No words available. Try a different grade band.',true);VB=null;renderVocab();return;}
+    VB.batch=batch;VB.batchIdx=0;
+    vocabStartWord();
+  }catch(e){
+    toast(e.message||'Could not get words. Please try again.',true,5000);
+    VB=null;renderVocab();
+  }
+}
+
+function vocabStartWord(){
+  if(!VB||VB.batchIdx>=VB.batch.length){
+    VB=null;
+    toast('&#x1F389; Great work! You\'ve finished this batch. Start a new session for more words!',false,5000);
+    renderVocab();return;
+  }
+  VB.word=VB.batch[VB.batchIdx];
+  VB.phase='spell';VB.spellTries=0;VB.sentIdx=0;VB.sentTries=[0,0,0];VB.sentences=[];
+  renderVocab();
+}
+
+function renderVocabSpell(c){
+  const w=VB.word;if(!w)return;
+  const dots=[0,1,2].map(i=>'<div class="vocab-try-dot'+(i<VB.spellTries?' used':'')+'"></div>').join('');
+  let hintText='';
+  if(VB.spellTries===1)hintText='Hint: starts with “'+w.word[0].toUpperCase()+'”';
+  if(VB.spellTries===2)hintText='Hint: “'+w.word[0].toUpperCase()+'____'+w.word[w.word.length-1]+'”  ('+w.word.length+' letters)';
+  c.innerHTML=
+    '<div class="section-header"><h2 class="section-title">&#x270F;&#xFE0F; Spell It!</h2>'+
+      '<span style="font-size:13px;color:var(--text-muted)">Word '+(VB.batchIdx+1)+' of '+VB.batch.length+'</span>'+
+    '</div>'+
+    '<div class="vocab-phonetic-card">'+
+      '<div style="font-size:13px;color:#0369a1;font-weight:600;margin-bottom:8px">&#x1F50A; Say it out loud!</div>'+
+      '<div class="vocab-phonetic">'+esc(w.phonetic)+'</div>'+
+      '<div class="vocab-definition">'+esc(w.definition)+'</div>'+
+      (w.example?'<div class="vocab-example">&#x201C;'+esc(w.example)+'&#x201D;</div>':'')+
+    '</div>'+
+    '<div class="card" style="margin-top:14px">'+
+      '<div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:12px">Now type the word:</div>'+
+      '<div class="vocab-tries-row">'+dots+'</div>'+
+      (hintText?'<div style="text-align:center;font-size:13px;color:#d97706;font-weight:600;margin-bottom:10px">'+esc(hintText)+'</div>':'')+
+      '<div style="display:flex;gap:10px">'+
+        '<input type="text" id="vocab-spell-input" class="form-input" placeholder="Type the word here..." autocomplete="off" autocorrect="off" spellcheck="false" onkeydown="if(event.key===\'Enter\')checkVocabSpelling()">'+
+        '<button class="btn btn-primary" onclick="checkVocabSpelling()" style="flex-shrink:0;padding:13px 20px">Check</button>'+
+      '</div>'+
+      '<div id="vocab-spell-feedback" style="margin-top:10px"></div>'+
+    '</div>'+
+    '<button class="btn btn-outline btn-sm" onclick="vocabSkipWord()" style="margin-top:12px;width:100%">Skip this word</button>';
+  setTimeout(function(){var inp=el('vocab-spell-input');if(inp)inp.focus();},100);
+}
+
+function checkVocabSpelling(){
+  var inp=el('vocab-spell-input');
+  if(!inp||!VB||!VB.word)return;
+  var typed=inp.value.trim().toLowerCase();
+  var correct=VB.word.word.toLowerCase();
+  var fb=el('vocab-spell-feedback');
+  if(typed===correct){
+    if(fb)fb.innerHTML='<div style="background:#d1fae5;border-radius:10px;padding:10px 14px;font-size:14px;font-weight:700;color:#065f46">&#x2705; Perfect spelling!</div>';
+    inp.disabled=true;
+    setTimeout(function(){VB.phase='sentence';renderVocab();},1200);
+    return;
+  }
+  VB.spellTries++;
+  if(VB.spellTries>=3){
+    if(fb)fb.innerHTML='<div style="background:#fee2e2;border-radius:10px;padding:10px 14px;font-size:14px;font-weight:700;color:#991b1b">&#x274C; The word is: <span style="text-decoration:underline">'+esc(VB.word.word)+'</span> — write it in your notebook!</div>';
+    inp.disabled=true;
+    setTimeout(function(){VB.phase='sentence';renderVocab();},2200);
+    return;
+  }
+  if(fb)fb.innerHTML='<div style="background:#fef9c3;border-radius:10px;padding:10px 14px;font-size:14px;color:#713f12">Not quite — '+(3-VB.spellTries)+' tr'+(3-VB.spellTries===1?'y':'ies')+' left.</div>';
+  inp.value='';inp.focus();
+  renderVocab();
+}
+
+const SENT_PROMPTS=[
+  'Write a sentence using this word:',
+  'Now write a second sentence using it differently:',
+  'One more sentence — try a new situation or context:'
+];
+
+function renderVocabSentence(c){
+  const w=VB.word;if(!w)return;
+  const idx=VB.sentIdx;
+  let prevSents='';
+  for(var i=0;i<idx;i++){
+    prevSents+='<div class="vocab-sent-block done">'+
+      '<div class="vocab-sent-label">Sentence '+(i+1)+' &#x2705;</div>'+
+      '<div class="vocab-sent-accepted">&#x201C;'+esc(VB.sentences[i]||'')+'&#x201D;</div>'+
+    '</div>';
+  }
+  const dots=[0,1,2].map(i=>'<div class="vocab-try-dot'+(i<VB.sentTries[idx]?' used':'')+'"></div>').join('');
+  c.innerHTML=
+    '<div class="section-header">'+
+      '<h2 class="section-title">&#x270D;&#xFE0F; Use It!</h2>'+
+      '<span style="font-size:13px;color:var(--text-muted)">Word '+(VB.batchIdx+1)+' of '+VB.batch.length+'</span>'+
+    '</div>'+
+    '<div class="vocab-phonetic-card" style="margin-bottom:14px">'+
+      '<div class="vocab-word-big">'+esc(w.word)+'</div>'+
+      '<div class="vocab-phonetic" style="font-size:22px">'+esc(w.phonetic)+'</div>'+
+      '<div class="vocab-definition">'+esc(w.definition)+'</div>'+
+    '</div>'+
+    prevSents+
+    (idx>=3?'':
+      '<div class="vocab-sent-block">'+
+        '<div class="vocab-sent-label">'+esc(SENT_PROMPTS[idx])+'</div>'+
+        '<div style="font-size:18px;font-weight:800;color:var(--purple);margin-bottom:10px">'+esc(w.word)+'</div>'+
+        '<div class="vocab-tries-row">'+dots+'</div>'+
+        '<div style="display:flex;gap:10px;margin-bottom:8px">'+
+          '<input type="text" id="vocab-sent-input" class="form-input" placeholder="Write your sentence here..." onkeydown="if(event.key===\'Enter\')checkVocabSentence()">'+
+          '<button class="btn btn-primary" onclick="checkVocabSentence()" style="flex-shrink:0;padding:13px 16px">&#x2714;</button>'+
+        '</div>'+
+        '<div id="vocab-sent-feedback"></div>'+
+      '</div>'
+    );
+  if(idx<3)setTimeout(function(){var inp=el('vocab-sent-input');if(inp)inp.focus();},100);
+}
+
+function checkVocabSentence(){
+  var inp=el('vocab-sent-input');
+  if(!inp||!VB||!VB.word)return;
+  var typed=inp.value.trim();
+  var word=VB.word.word.toLowerCase();
+  var fb=el('vocab-sent-feedback');
+  var idx=VB.sentIdx;
+  var hasWord=typed.toLowerCase().includes(word);
+  var wordCount=typed.split(/\s+/).filter(Boolean).length;
+  if(hasWord&&wordCount>=4){
+    VB.sentences[idx]=typed;VB.sentIdx++;
+    if(fb)fb.innerHTML='<div style="background:#d1fae5;border-radius:10px;padding:8px 12px;font-size:14px;font-weight:700;color:#065f46">&#x2705; Great sentence!</div>';
+    inp.disabled=true;
+    setTimeout(function(){if(VB.sentIdx>=3){vocabWordComplete();}else{renderVocab();}},1000);
+    return;
+  }
+  VB.sentTries[idx]++;
+  if(!hasWord){
+    if(fb)fb.innerHTML='<div style="background:#fef9c3;border-radius:10px;padding:8px 12px;font-size:13px;color:#713f12">Make sure you use the word <strong>'+esc(VB.word.word)+'</strong> in your sentence!</div>';
+    inp.select();renderVocab();return;
+  }
+  if(wordCount<4){
+    if(fb)fb.innerHTML='<div style="background:#fef9c3;border-radius:10px;padding:8px 12px;font-size:13px;color:#713f12">Add more detail to your sentence — make it longer!</div>';
+    inp.select();renderVocab();return;
+  }
+  if(VB.sentTries[idx]>=3){
+    VB.sentences[idx]=VB.word.example||('I used the word '+VB.word.word+' in a sentence.');
+    VB.sentIdx++;
+    if(fb)fb.innerHTML='<div style="background:#fee2e2;border-radius:10px;padding:8px 12px;font-size:13px;color:#991b1b">Here is an example: <em>'+esc(VB.word.example)+'</em></div>';
+    inp.disabled=true;
+    setTimeout(function(){if(VB.sentIdx>=3){vocabWordComplete();}else{renderVocab();}},2000);
+    return;
+  }
+  renderVocab();
+}
+
+function vocabWordComplete(){
+  vocabLogWord(VB.studentId,VB.word.word);
+  VB.phase='word-done';
+  renderVocab();
+}
+
+function renderVocabWordDone(c){
+  const w=VB.word;
+  const total=vocabHistoryFor(VB.studentId).length;
+  c.innerHTML=
+    '<div style="text-align:center;padding:32px 16px">'+
+      '<div style="font-size:64px;margin-bottom:10px">&#x1F38A;</div>'+
+      '<div style="font-size:30px;font-weight:900;color:var(--purple);margin-bottom:4px">'+esc(w.word)+'</div>'+
+      '<div style="font-size:20px;color:#0369a1;margin-bottom:20px">'+esc(w.phonetic)+'</div>'+
+      '<div style="background:#f0fdf4;border:1px solid #86efac;border-radius:14px;padding:16px;text-align:left;margin-bottom:20px">'+
+        '<div style="font-size:13px;font-weight:700;color:#065f46;margin-bottom:8px">&#x1F4D3; Write this in your VOGRABULARY notebook:</div>'+
+        '<div style="font-size:16px;font-weight:700;color:var(--text)">'+esc(w.word)+' — '+esc(w.phonetic)+'</div>'+
+        '<div style="font-size:13px;color:#374151;margin-top:4px">'+esc(w.definition)+'</div>'+
+      '</div>'+
+      '<div style="font-size:14px;color:var(--text-muted);margin-bottom:24px">&#x1F4AF; '+total+' word'+(total!==1?'s':'')+' in your log</div>'+
+      '<div style="display:flex;gap:10px;flex-direction:column">'+
+        '<button class="btn btn-primary btn-large" onclick="vocabNextWord()">&#x1F433; Next Word!</button>'+
+        '<button class="btn btn-secondary" onclick="vocabEndSession()" style="padding:13px">Back to Setup</button>'+
+      '</div>'+
+    '</div>';
+}
+
+function vocabNextWord(){VB.batchIdx++;vocabStartWord();}
+function vocabSkipWord(){VB.batchIdx++;vocabStartWord();}
+function vocabEndSession(){VB=null;renderVocab();}
+function vocabClearHistory(){
+  var sid=S.activeStudentId;if(!sid)return;
+  var cnt=vocabHistoryFor(sid).length;
+  if(!confirm('Clear all '+cnt+' words from the log for this student? Those words can then appear again in practice.'))return;
+  S.vocabHistory[sid]=[];saveData();renderVocab();
 }
 
 // ── INIT ──────────────────────────────────────────────────────────────────
