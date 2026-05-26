@@ -1373,9 +1373,13 @@ function goLanding(){
 }
 function disconnectWallet(){
   S.addr=null;S.provider=null;S.signer=null;_aivmJWT=null;_aivmJWTExp=0;
+  // Remember the user explicitly disconnected so init() won't auto-reconnect on refresh
+  try{const d=JSON.parse(localStorage.getItem(LS_KEY)||'{}');d.manualDisconnect=true;localStorage.setItem(LS_KEY,JSON.stringify(d));}catch{}
   el('app').style.display='none';el('landing').style.display='flex';
 }
 function afterConnect(){
+  // Clear manual-disconnect flag so refresh works normally
+  try{const d=JSON.parse(localStorage.getItem(LS_KEY)||'{}');delete d.manualDisconnect;localStorage.setItem(LS_KEY,JSON.stringify(d));}catch{}
   enterApp();
   el('nav-wallet-addr').textContent=S.addr.slice(0,6)+'...'+S.addr.slice(-4);
   el('btn-disconnect').style.display='';
@@ -2346,9 +2350,12 @@ function vocabClearHistory(){
   loadData();
   if(window.ethereum){
     try{
-      const p=new ethers.BrowserProvider(window.ethereum);
-      const accs=await p.listAccounts();
-      if(accs.length>0){S.provider=p;S.signer=await p.getSigner();S.addr=await S.signer.getAddress();afterConnect();}
+      const stored=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
+      if(!stored.manualDisconnect){
+        const p=new ethers.BrowserProvider(window.ethereum);
+        const accs=await p.listAccounts();
+        if(accs.length>0){S.provider=p;S.signer=await p.getSigner();S.addr=await S.signer.getAddress();afterConnect();}
+      }
     }catch{}
     window.ethereum.on('accountsChanged',async accs=>{
       if(accs.length===0)disconnectWallet();
