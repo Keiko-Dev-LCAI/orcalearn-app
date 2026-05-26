@@ -1397,9 +1397,9 @@ function updateNavBadge(){
   if(isPaid()){
     const days=Math.ceil((S.paidUntil-Date.now())/(86400000));
     b.innerHTML='<span class="paid-badge">&#x2B50; Premium ('+days+'d)</span>';
-  }else if(S.freeUsesLeft>0){
+  }else if(S.freeUsesLeft>0&&!S.addr){
     b.innerHTML='<span class="free-badge">'+S.freeUsesLeft+' free left</span>';
-  }else{
+  }else if(S.freeUsesLeft<=0){
     b.innerHTML='<span class="free-badge" style="cursor:pointer" onclick="openPaymentModal()">&#x1F511; Upgrade</span>';
   }
 }
@@ -1408,7 +1408,7 @@ function updateNavBadge(){
 function renderHome(){
   const c=el('home-content');if(!c)return;
   let h='';
-  if(!isPaid()&&S.freeUsesLeft>0){
+  if(!isPaid()&&!S.addr&&S.freeUsesLeft>0){
     h+='<div class="free-banner mb-4"><div class="free-banner-icon">&#x1F381;</div><div class="free-banner-text"><div class="free-banner-title">'+S.freeUsesLeft+' free use'+(S.freeUsesLeft!==1?'s':'')+' remaining</div><div class="free-banner-sub">First '+FREE_USES+' AI lessons &amp; quizzes are always free</div></div></div>';
   }else if(!isPaid()&&S.freeUsesLeft<=0){
     h+='<div class="pay-banner mb-4" onclick="openPaymentModal()"><div class="free-banner-icon">&#x26A1;</div><div class="free-banner-text"><div class="free-banner-title">Unlock Premium AI &#x2014; $4.99/month</div><div class="free-banner-sub">Pay in LCAI on Lightchain. Tap to unlock.</div></div><div>&#x1F449;</div></div>';
