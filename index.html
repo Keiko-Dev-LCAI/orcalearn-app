@@ -716,7 +716,11 @@ function saveData(){
     localStorage.setItem(LS_KEY,JSON.stringify(d));
   }catch(e){console.error('saveData',e);}
 }
-function isPaid(){return S.paidUntil&&Date.now()<S.paidUntil;}
+function isPaid(){
+  // Owner wallet always has full access
+  if(S.addr&&S.addr.toLowerCase()===KEIKO_WALLET.toLowerCase())return true;
+  return S.paidUntil&&Date.now()<S.paidUntil;
+}
 function canUseAI(){return isPaid()||S.freeUsesLeft>0;}
 function consumeFree(){if(!isPaid()&&S.freeUsesLeft>0){S.freeUsesLeft--;saveData();}}
 
@@ -2074,8 +2078,8 @@ function renderVocabSetup(c){
   const hist=vocabHistoryFor(sid);
   const histCount=hist.length;
   const freeInfo=isPaid()?
-    '<span class="paid-badge">&#x2B50; AI Words</span>':
-    '<span style="font-size:13px;color:#059669;font-weight:600">&#x2705; Always Free</span>';
+    '<span class="paid-badge">&#x2705; Premium</span>':
+    ('<span style="font-size:13px;color:var(--text-muted)">'+S.freeUsesLeft+' free session'+(S.freeUsesLeft!==1?'s':'')+' left</span>');
   let html=
     '<div class="section-header"><h2 class="section-title">&#x1F4D6; VOGRABULARY</h2>'+freeInfo+'</div>'+
     '<div class="card">'+
@@ -2114,13 +2118,13 @@ function vocabChangeStudent(){
 }
 
 async function vocabGo(){
-  // VOGRABULARY is always free — built-in lists cost nothing.
-  // AIVM word generation is available for paid subscribers only.
+  if(!canUseAI()){openPaymentModal();return;}
   const band=_vocabBand||vocabBandForStudent(S.activeStudentId);
   const sid=S.activeStudentId;
   const specificWord=el('vocab-specific')?el('vocab-specific').value.trim():'';
   VB={band,studentId:sid,phase:'loading',batch:[],batchIdx:0,word:null,spellTries:0,sentIdx:0,sentTries:[0,0,0],sentences:[]};
   renderVocab();
+  consumeFree();
   try{
     let batch=null;
     if(isPaid()&&S.signer){
