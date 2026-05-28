@@ -920,111 +920,18 @@ async function getAivmJWT(){
 
 // ── AIVM INFERENCE ────────────────────────────────────────────────────────
 async function aivmInference(prompt,onProgress){
-  onProgress('Authenticating with AIVM network...');
-  const jwt=await getAivmJWT();
-  const hdrs={'Authorization':'Bearer '+jwt,'Accept':'application/json','Content-Type':'application/json'};
-
-  onProgress('Selecting AI worker...');
-  const mr=await fetch(AIVM_GATEWAY+'/api/models');
-  if(!mr.ok)throw new Error('Workers are busy — try again in a moment.');
-  const {models=[]}=await mr.json();
-  if(!models.length)throw new Error('Workers are busy — try again in a moment.');
-  const model=models.find(m=>m.name==='llama3-8b')||models[0];
-
-  const sr=await fetch(AIVM_GATEWAY+'/api/sessions/select',{method:'POST',headers:hdrs,body:JSON.stringify({modelId:model.id})});
-  if(!sr.ok)throw new Error('Workers are busy — try again in a moment.');
-  const sel=await sr.json();
-
-  const sessionKey=crypto.getRandomValues(new Uint8Array(32));
-  const encWorker=await ecdhWrap(sessionKey,decodePubkey(sel.workerEncryptionKey));
-  const encDisputer=await ecdhWrap(sessionKey,decodePubkey(sel.disputerEncryptionKey));
-
-  const pr=await fetch(AIVM_GATEWAY+'/api/sessions/prepare',{method:'POST',headers:hdrs,
-    body:JSON.stringify({modelId:model.id,encWorkerKey:bytesToBase64(encWorker),encDisputerKey:bytesToBase64(encDisputer)})});
-  if(!pr.ok)throw new Error('Workers are busy — try again in a moment.');
-  const prep=await pr.json();
-
-  onProgress('Switching to Lightchain network...');
-  await switchToLightchain();
-  const provider=new ethers.BrowserProvider(window.ethereum);
-  const signer=await provider.getSigner();
-  const contract=new ethers.Contract(AIVM_JOB_REG,AIVM_ABI,signer);
-  const iface=new ethers.Interface(AIVM_ABI);
-
-  const paramsHash='0x'+model.id.replace(/^0x/i,'').padStart(64,'0');
-  onProgress('Sign the session transaction in MetaMask...');
-  const cseTx=await contract.createSession(paramsHash,prep.worker,bytesToHex(encWorker),bytesToHex(encDisputer),prep.signature,BigInt(prep.expiry),{value:0n});
-  onProgress('Waiting for session confirmation...');
-  const cseR=await cseTx.wait();
-
-  let sessionId;
-  for(const log of cseR.logs){
-    try{const p=iface.parseLog(log);if(p?.name==='SessionCreated'){sessionId=p.args.sessionId;break;}}catch{}
-  }
-  if(sessionId==null)throw new Error('SessionCreated event not found');
-
-  let relayToken=null;
-  const tokDeadline=Date.now()+30000;
-  while(Date.now()<tokDeadline&&!relayToken){
-    const tr=await fetch(AIVM_GATEWAY+'/api/sessions/'+sessionId+'/token',{headers:hdrs});
-    if(tr.ok){const td=await tr.json();if(td.token){relayToken=td.token;break;}}
-    await sleep(1000);
-  }
-  if(!relayToken)throw new Error('Relay token not ready');
-
-  const chunks=[];
-  const ws=new WebSocket(AIVM_RELAY+'?token='+encodeURIComponent(relayToken));
-  await new Promise((res,rej)=>{
-    const t=setTimeout(()=>rej(new Error('WebSocket timeout')),15000);
-    ws.onopen=()=>{clearTimeout(t);res();};
-    ws.onerror=e=>{clearTimeout(t);rej(new Error('WebSocket error'));};
+  onProgress('Connecting to Lightchain AI... (this takes 1-2 minutes)');
+  const res=await fetch('https://web-production-0ccfe.up.railway.app/api/chat',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({prompt})
   });
-  ws.onmessage=async ev=>{
-    try{
-      const frame=JSON.parse(ev.data);
-      if(frame.payload){
-        const blob=base64ToBytes(frame.payload);
-        const pt=await aesDecrypt(sessionKey,blob);
-        chunks.push(new TextDecoder().decode(pt));
-      }
-    }catch{}
-  };
-
-  onProgress('Encrypting and uploading your prompt...');
-  const cipher=await aesEncrypt(sessionKey,new TextEncoder().encode(prompt));
-  const br=await fetch(AIVM_GATEWAY+'/api/blobs',{method:'POST',headers:hdrs,body:JSON.stringify({data:bytesToBase64(cipher)})});
-  if(!br.ok)throw new Error('Workers are busy — try again in a moment.');
-  const {blobHashes=[]}=await br.json();
-  if(!blobHashes.length)throw new Error('Blob upload failed');
-  const promptHash='0x'+blobHashes[0].replace(/^0x/i,'').padStart(64,'0');
-
-  onProgress('Sign the inference transaction in MetaMask (costs ~0.02 LCAI)...');
-  const sjTx=await contract.submitJob(sessionId,promptHash,{value:AIVM_JOB_FEE});
-  onProgress('AI is generating your content... (1-2 minutes)');
-  const sjR=await sjTx.wait();
-
-  let jobId;
-  for(const log of sjR.logs){
-    try{const p=iface.parseLog(log);if(p?.name==='JobSubmitted'){jobId=p.args.jobId;break;}}catch{}
+  if(!res.ok){
+    const txt=await res.text().catch(()=>'');
+    throw new Error('AI error '+res.status+(txt?': '+txt:''));
   }
-
-  const jobCompletedTopic=ethers.id('JobCompleted(uint256,address,bytes32,bytes32)');
-  const jobIdPadded=ethers.zeroPadValue(ethers.toBeHex(jobId||0n),32);
-  const deadline=Date.now()+180000;
-  let done=false;
-  while(Date.now()<deadline&&!done){
-    await sleep(5000);
-    try{
-      const logs=await provider.getLogs({address:AIVM_JOB_REG,fromBlock:sjR.blockNumber,toBlock:'latest',topics:[jobCompletedTopic,jobIdPadded]});
-      if(logs.length)done=true;
-    }catch{}
-  }
-  await sleep(3000);
-  ws.close();
-  const result=chunks.join('');
-  if(result)return result;
-  if(!done)throw new Error('Workers are busy — try again in a moment.');
-  return result;
+  const data=await res.json();
+  return data.reply||'';
 }
 </script>
 <script>
