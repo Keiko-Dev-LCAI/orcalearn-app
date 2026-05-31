@@ -12,7 +12,7 @@
   --blue:#2563eb;--blue-light:#dbeafe;
   --text:#1e1b4b;--text-muted:#6b7280;--border:#e5e7eb;--bg:#f5f3ff;
 }
-html,body{min-height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:16px;}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:16px;}
 
 /* LANDING */
 #landing{min-height:100vh;background:linear-gradient(160deg,#fce4ec 0%,#f3e5f5 40%,#ede9fe 65%,#dbeafe 100%);display:flex;flex-direction:column;}
@@ -50,13 +50,13 @@ html,body{min-height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI
 .aivm-badge{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#1e1b4b,#312e81);color:white;border-radius:999px;padding:6px 14px;font-size:12px;font-weight:600;letter-spacing:0.02em;}
 
 /* APP SHELL */
-#app{min-height:100vh;background:var(--bg);display:flex;flex-direction:column;padding-bottom:64px;}
+#app{height:100vh;background:var(--bg);display:flex;flex-direction:column;overflow:hidden;}
 .app-nav{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:white;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10;gap:8px;}
 .nav-wallet{display:flex;align-items:center;gap:6px;flex-shrink:0;}
 .wallet-addr{font-size:11px;color:var(--text-muted);font-family:monospace;}
 .paid-badge{background:#d1fae5;color:#065f46;border-radius:999px;padding:3px 8px;font-size:11px;font-weight:700;}
 .free-badge{background:#fef9c3;color:#713f12;border-radius:999px;padding:3px 8px;font-size:11px;font-weight:700;}
-.tab-content{flex:1;}
+.tab-content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
 .tab-section{padding:20px 18px;max-width:760px;margin:0 auto;width:100%;}
 
 /* BOTTOM NAV */
@@ -333,6 +333,23 @@ html,body{min-height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI
       <div id="students-list"></div>
     </div>
     <div id="tab-vocab" class="tab-section" style="display:none"><div id="vocab-content"></div></div>
+    <!-- ── ORCA POD STRIP ── -->
+    <div style="padding:0 20px 80px;">
+      <div style="max-width:760px;margin:0 auto;">
+        <div style="background:#0f1526;border:1px solid #1e2d4a;border-radius:12px;padding:12px 16px;">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#7a8499;margin-bottom:10px;">🐬 More Apps from the Orca Pod</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;">
+            <a href="https://orcamail.ai" target="_blank" style="background:#0f1526;border:1px solid #1e2d4a;border-radius:8px;padding:5px 11px;font-size:12px;color:#e8eaf0;text-decoration:none;white-space:nowrap;transition:all .2s;" onmouseover="this.style.borderColor='#00d4ff';this.style.color='#00d4ff'" onmouseout="this.style.borderColor='#1e2d4a';this.style.color='#e8eaf0'">OrcaMail 📧</a>
+            <a href="https://orcafiles.ai" target="_blank" style="background:#0f1526;border:1px solid #1e2d4a;border-radius:8px;padding:5px 11px;font-size:12px;color:#e8eaf0;text-decoration:none;white-space:nowrap;transition:all .2s;" onmouseover="this.style.borderColor='#00d4ff';this.style.color='#00d4ff'" onmouseout="this.style.borderColor='#1e2d4a';this.style.color='#e8eaf0'">OrcaFiles 📁</a>
+            <a href="https://keiko-dev-lcai.github.io/orcaguard/" target="_blank" style="background:#0f1526;border:1px solid #1e2d4a;border-radius:8px;padding:5px 11px;font-size:12px;color:#e8eaf0;text-decoration:none;white-space:nowrap;transition:all .2s;" onmouseover="this.style.borderColor='#00d4ff';this.style.color='#00d4ff'" onmouseout="this.style.borderColor='#1e2d4a';this.style.color='#e8eaf0'">OrcaGuard 🛡️</a>
+            <a href="https://orcamint.xyz" target="_blank" style="background:#0f1526;border:1px solid #1e2d4a;border-radius:8px;padding:5px 11px;font-size:12px;color:#e8eaf0;text-decoration:none;white-space:nowrap;transition:all .2s;" onmouseover="this.style.borderColor='#00d4ff';this.style.color='#00d4ff'" onmouseout="this.style.borderColor='#1e2d4a';this.style.color='#e8eaf0'">OrcaMint 🎨</a>
+            <a href="https://smartcontractexplainer.xyz" target="_blank" style="background:#0f1526;border:1px solid #1e2d4a;border-radius:8px;padding:5px 11px;font-size:12px;color:#e8eaf0;text-decoration:none;white-space:nowrap;transition:all .2s;" onmouseover="this.style.borderColor='#00d4ff';this.style.color='#00d4ff'" onmouseout="this.style.borderColor='#1e2d4a';this.style.color='#e8eaf0'">Contract Explainer 🔍</a>
+            <a href="https://keiko-dev-lcai.github.io/orcanode" target="_blank" style="background:#0f1526;border:1px solid #1e2d4a;border-radius:8px;padding:5px 11px;font-size:12px;color:#e8eaf0;text-decoration:none;white-space:nowrap;transition:all .2s;" onmouseover="this.style.borderColor='#00d4ff';this.style.color='#00d4ff'" onmouseout="this.style.borderColor='#1e2d4a';this.style.color='#e8eaf0'">Node Builder ⚡</a>
+            <a href="https://keiko-dev-lcai.github.io/orcaappbuilder/" target="_blank" style="background:#0f1526;border:1px solid #1e2d4a;border-radius:8px;padding:5px 11px;font-size:12px;color:#e8eaf0;text-decoration:none;white-space:nowrap;transition:all .2s;" onmouseover="this.style.borderColor='#00d4ff';this.style.color='#00d4ff'" onmouseout="this.style.borderColor='#1e2d4a';this.style.color='#e8eaf0'">OrcaAppBuilder 🛠️</a>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
   <nav class="bottom-nav">
     <button class="bottom-nav-btn active" onclick="showTab('home')" data-tab="home"><span class="nav-icon">&#x1F3E0;</span><span class="nav-label">Home</span></button>
@@ -2368,20 +2385,5 @@ function vocabClearHistory(){
   </div>
 </div>
 
-<!-- ── ORCA POD STRIP ── -->
-<div style="margin:0 auto 0;padding:12px 20px 20px;max-width:900px;">
-  <div style="background:#0f1526;border:1px solid #1e2d4a;border-radius:12px;padding:12px 16px;">
-    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#7a8499;margin-bottom:10px;">🐬 More Apps from the Orca Pod</div>
-    <div style="display:flex;flex-wrap:wrap;gap:8px;">
-    <a href="https://orcamail.ai" target="_blank" style="background:#0f1526;border:1px solid #1e2d4a;border-radius:8px;padding:5px 11px;font-size:12px;color:#e8eaf0;text-decoration:none;white-space:nowrap;transition:all .2s;" onmouseover="this.style.borderColor='#00d4ff';this.style.color='#00d4ff'" onmouseout="this.style.borderColor='#1e2d4a';this.style.color='#e8eaf0'">OrcaMail 📧</a>
-    <a href="https://orcafiles.ai" target="_blank" style="background:#0f1526;border:1px solid #1e2d4a;border-radius:8px;padding:5px 11px;font-size:12px;color:#e8eaf0;text-decoration:none;white-space:nowrap;transition:all .2s;" onmouseover="this.style.borderColor='#00d4ff';this.style.color='#00d4ff'" onmouseout="this.style.borderColor='#1e2d4a';this.style.color='#e8eaf0'">OrcaFiles 📁</a>
-    <a href="https://keiko-dev-lcai.github.io/orcaguard/" target="_blank" style="background:#0f1526;border:1px solid #1e2d4a;border-radius:8px;padding:5px 11px;font-size:12px;color:#e8eaf0;text-decoration:none;white-space:nowrap;transition:all .2s;" onmouseover="this.style.borderColor='#00d4ff';this.style.color='#00d4ff'" onmouseout="this.style.borderColor='#1e2d4a';this.style.color='#e8eaf0'">OrcaGuard 🛡️</a>
-    <a href="https://orcamint.xyz" target="_blank" style="background:#0f1526;border:1px solid #1e2d4a;border-radius:8px;padding:5px 11px;font-size:12px;color:#e8eaf0;text-decoration:none;white-space:nowrap;transition:all .2s;" onmouseover="this.style.borderColor='#00d4ff';this.style.color='#00d4ff'" onmouseout="this.style.borderColor='#1e2d4a';this.style.color='#e8eaf0'">OrcaMint 🎨</a>
-    <a href="https://smartcontractexplainer.xyz" target="_blank" style="background:#0f1526;border:1px solid #1e2d4a;border-radius:8px;padding:5px 11px;font-size:12px;color:#e8eaf0;text-decoration:none;white-space:nowrap;transition:all .2s;" onmouseover="this.style.borderColor='#00d4ff';this.style.color='#00d4ff'" onmouseout="this.style.borderColor='#1e2d4a';this.style.color='#e8eaf0'">Contract Explainer 🔍</a>
-    <a href="https://keiko-dev-lcai.github.io/orcanode" target="_blank" style="background:#0f1526;border:1px solid #1e2d4a;border-radius:8px;padding:5px 11px;font-size:12px;color:#e8eaf0;text-decoration:none;white-space:nowrap;transition:all .2s;" onmouseover="this.style.borderColor='#00d4ff';this.style.color='#00d4ff'" onmouseout="this.style.borderColor='#1e2d4a';this.style.color='#e8eaf0'">Node Builder ⚡</a>
-    <a href="https://keiko-dev-lcai.github.io/orcaappbuilder/" target="_blank" style="background:#0f1526;border:1px solid #1e2d4a;border-radius:8px;padding:5px 11px;font-size:12px;color:#e8eaf0;text-decoration:none;white-space:nowrap;transition:all .2s;" onmouseover="this.style.borderColor='#00d4ff';this.style.color='#00d4ff'" onmouseout="this.style.borderColor='#1e2d4a';this.style.color='#e8eaf0'">OrcaAppBuilder 🛠️</a>
-    </div>
-  </div>
-</div>
 </body>
 </html>
