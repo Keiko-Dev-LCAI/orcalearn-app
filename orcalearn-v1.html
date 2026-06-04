@@ -1,0 +1,1547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>OrcaLearn — AI Homeschool Planner</title>
+  <link rel="icon" type="image/png" href="/orcalearn-logo.png">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --purple: #7c3aed;
+      --purple-dark: #6d28d9;
+      --purple-light: #ede9fe;
+      --blue: #2563eb;
+      --blue-light: #dbeafe;
+      --text: #1e1b4b;
+      --text-muted: #6b7280;
+      --border: #e5e7eb;
+      --bg: #f5f3ff;
+    }
+    html, body { min-height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+
+    /* LANDING */
+    #landing {
+      min-height: 100vh;
+      background: linear-gradient(160deg, #fce4ec 0%, #f3e5f5 40%, #ede9fe 65%, #dbeafe 100%);
+      display: flex; flex-direction: column;
+    }
+    .landing-nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(255,255,255,0.5);
+      position: sticky; top: 0; z-index: 10;
+    }
+    .nav-brand { display: flex; align-items: center; gap: 8px; }
+    .nav-logo { width: 32px; height: 32px; border-radius: 8px; object-fit: cover; }
+    .nav-brand-name { font-weight: 700; font-size: 16px; color: var(--text); }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: #9ca3af; display: inline-block; }
+    .status-dot.online { background: #10b981; }
+    .status-dot.warn { background: #f59e0b; }
+    .landing-hero {
+      flex: 1; display: flex; flex-direction: column; align-items: center;
+      text-align: center; padding: 32px 20px 80px; gap: 20px;
+    }
+    .hero-logo { width: 110px; height: 110px; border-radius: 24px; box-shadow: 0 8px 32px rgba(124,58,237,0.2); object-fit: cover; }
+    .landing-title { font-size: 36px; font-weight: 800; line-height: 1.15; color: var(--text); }
+    .title-gradient {
+      background: linear-gradient(135deg, #7c3aed, #2563eb);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .landing-subtitle { font-size: 16px; color: #374151; max-width: 420px; line-height: 1.6; }
+    .landing-pills { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; max-width: 400px; }
+    .pill {
+      background: rgba(255,255,255,0.85); border: 1px solid rgba(255,255,255,0.7);
+      border-radius: 999px; padding: 7px 14px; font-size: 13px; font-weight: 500; color: #374151;
+    }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      border: none; border-radius: 12px; font-weight: 600; cursor: pointer;
+      transition: all 0.15s; text-decoration: none; font-family: inherit;
+    }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary { background: linear-gradient(135deg, #7c3aed, #6d28d9); color: white; box-shadow: 0 4px 14px rgba(124,58,237,0.35); }
+    .btn-primary:hover { background: linear-gradient(135deg, #6d28d9, #5b21b6); }
+    .btn-secondary { background: #f3f4f6; color: #374151; }
+    .btn-secondary:hover { background: #e5e7eb; }
+    .btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--text-muted); font-size: 13px; }
+    .btn-danger { background: #fee2e2; color: #dc2626; }
+    .btn-sm { padding: 7px 14px; font-size: 13px; border-radius: 10px; }
+    .btn-large { padding: 16px 32px; font-size: 18px; border-radius: 16px; width: 100%; max-width: 320px; }
+    .landing-note { font-size: 13px; color: #6b7280; }
+    .landing-stats { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+    .stat-item { font-size: 13px; color: #6b7280; }
+    .stat-num { font-weight: 700; color: var(--purple); }
+    .stat-divider { color: #d1d5db; }
+
+    /* APP SHELL */
+    #app { min-height: 100vh; background: var(--bg); display: flex; flex-direction: column; padding-bottom: 64px; }
+    .app-nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 16px; background: white; border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 10;
+    }
+    .nav-wallet { display: flex; align-items: center; gap: 8px; }
+    .wallet-addr { font-size: 12px; color: var(--text-muted); font-family: monospace; }
+    .tab-content { flex: 1; }
+    .tab-section { padding: 16px; max-width: 700px; margin: 0 auto; width: 100%; }
+
+    /* BOTTOM NAV */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: white; border-top: 1px solid var(--border);
+      display: flex; z-index: 10; box-shadow: 0 -4px 12px rgba(0,0,0,0.06);
+    }
+    .bottom-nav-btn {
+      flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;
+      padding: 8px 4px; border: none; background: none; cursor: pointer;
+      transition: all 0.15s; color: #9ca3af;
+    }
+    .bottom-nav-btn.active { color: var(--purple); }
+    .bottom-nav-btn:active { background: #f3f0ff; }
+    .nav-icon { font-size: 20px; line-height: 1; }
+    .nav-label { font-size: 11px; font-weight: 600; }
+
+    /* CARDS */
+    .card { background: white; border-radius: 16px; padding: 16px; border: 1px solid var(--border); box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+    .card + .card { margin-top: 10px; }
+    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .section-title { font-size: 18px; font-weight: 700; color: var(--text); }
+
+    /* HOME */
+    .students-row { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; }
+    .students-row::-webkit-scrollbar { display: none; }
+    .student-chip {
+      flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 4px;
+      padding: 10px 14px; border-radius: 14px; border: 2px solid var(--border);
+      background: white; cursor: pointer; transition: all 0.15s; min-width: 70px;
+    }
+    .student-chip.active { border-color: var(--purple); background: var(--purple-light); }
+    .student-chip:active { transform: scale(0.96); }
+    .student-avatar { font-size: 28px; line-height: 1; }
+    .student-chip-name { font-size: 12px; font-weight: 600; color: var(--text); text-align: center; max-width: 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .student-chip-grade { font-size: 11px; color: var(--text-muted); }
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+    .stat-card { background: white; border-radius: 14px; padding: 14px; border: 1px solid var(--border); text-align: center; }
+    .stat-card-num { font-size: 28px; font-weight: 800; color: var(--purple); }
+    .stat-card-label { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .quick-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .action-card {
+      background: white; border-radius: 16px; padding: 18px 14px; border: 1px solid var(--border);
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      cursor: pointer; transition: all 0.15s; text-align: center;
+    }
+    .action-card:hover { border-color: var(--purple); background: var(--purple-light); }
+    .action-card:active { transform: scale(0.97); }
+    .action-icon { font-size: 32px; }
+    .action-title { font-size: 14px; font-weight: 700; color: var(--text); }
+    .action-sub { font-size: 11px; color: var(--text-muted); }
+    .free-plans-banner {
+      background: linear-gradient(135deg, var(--purple-light), var(--blue-light));
+      border: 1px solid #c4b5fd; border-radius: 14px; padding: 12px 16px;
+      display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
+    }
+    .free-plans-icon { font-size: 24px; }
+    .free-plans-text { flex: 1; }
+    .free-plans-title { font-size: 14px; font-weight: 700; color: var(--text); }
+    .free-plans-sub { font-size: 12px; color: var(--text-muted); }
+
+    /* PLANS */
+    .plans-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .plan-card {
+      background: white; border-radius: 16px; padding: 14px; border: 1px solid var(--border);
+      margin-bottom: 10px; cursor: pointer; transition: all 0.15s;
+    }
+    .plan-card:hover { border-color: var(--purple); box-shadow: 0 2px 8px rgba(124,58,237,0.1); }
+    .plan-card:active { transform: scale(0.99); }
+    .plan-card-header { display: flex; align-items: flex-start; gap: 12px; }
+    .plan-subject-icon { font-size: 32px; flex-shrink: 0; }
+    .plan-card-info { flex: 1; min-width: 0; }
+    .plan-card-title { font-size: 15px; font-weight: 700; color: var(--text); }
+    .plan-card-meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .plan-progress-bar { margin-top: 10px; height: 6px; background: #e5e7eb; border-radius: 3px; overflow: hidden; }
+    .plan-progress-fill { height: 100%; background: linear-gradient(90deg, var(--purple), var(--blue)); border-radius: 3px; transition: width 0.4s; }
+    .plan-progress-label { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+    /* FORMS */
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-label { font-size: 13px; font-weight: 600; color: #374151; }
+    .form-input, .form-select, .form-textarea {
+      width: 100%; padding: 10px 14px; border: 1.5px solid var(--border); border-radius: 10px;
+      font-size: 15px; font-family: inherit; color: var(--text); background: white;
+      outline: none; transition: border-color 0.15s;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--purple); }
+    .form-textarea { min-height: 80px; resize: vertical; }
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; background: white; border: 1.5px solid var(--border); border-radius: 10px; padding: 10px 14px; }
+    .toggle-label { font-size: 14px; color: var(--text); }
+    .toggle { position: relative; width: 44px; height: 24px; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; inset: 0; background: #d1d5db; border-radius: 12px; transition: 0.2s; cursor: pointer; }
+    .toggle-slider:before { content: ''; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px; background: white; border-radius: 50%; transition: 0.2s; }
+    .toggle input:checked + .toggle-slider { background: var(--purple); }
+    .toggle input:checked + .toggle-slider:before { transform: translateX(20px); }
+
+    /* QUIZ */
+    .quiz-setup { display: flex; flex-direction: column; gap: 14px; }
+    .quiz-meta { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .quiz-progress { font-size: 13px; color: var(--text-muted); font-weight: 600; }
+    .quiz-timer { font-size: 18px; font-weight: 800; color: var(--purple); font-variant-numeric: tabular-nums; }
+    .quiz-timer.warn { color: #dc2626; }
+    .quiz-question { background: white; border-radius: 16px; padding: 24px 20px; text-align: center; border: 1px solid var(--border); font-size: 20px; font-weight: 700; color: var(--text); line-height: 1.4; }
+    .quiz-choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .choice-btn { padding: 16px 12px; border: 2px solid var(--border); border-radius: 14px; background: white; font-size: 18px; font-weight: 700; color: var(--text); cursor: pointer; transition: all 0.15s; font-family: inherit; }
+    .choice-btn:hover:not(:disabled) { border-color: var(--purple); background: var(--purple-light); }
+    .choice-btn.correct { border-color: #059669; background: #d1fae5; color: #065f46; }
+    .choice-btn.wrong { border-color: #dc2626; background: #fee2e2; color: #991b1b; }
+    .choice-btn.reveal { border-color: #059669; background: #d1fae5; color: #065f46; }
+    .choice-btn:disabled { cursor: default; }
+    .quiz-feedback { text-align: center; padding: 16px; border-radius: 14px; font-size: 18px; font-weight: 700; }
+    .quiz-feedback.correct { background: #d1fae5; color: #065f46; }
+    .quiz-feedback.wrong { background: #fee2e2; color: #991b1b; }
+    .quiz-score-card { background: white; border-radius: 20px; padding: 28px 20px; text-align: center; border: 2px solid var(--purple); }
+    .score-big { font-size: 56px; font-weight: 900; color: var(--purple); line-height: 1; }
+    .score-grade { font-size: 28px; font-weight: 800; color: var(--text); margin: 4px 0; }
+    .score-label { font-size: 16px; color: var(--text-muted); }
+    .quiz-history-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: white; border-radius: 12px; margin-bottom: 8px; border: 1px solid var(--border); }
+    .history-icon { font-size: 24px; }
+    .history-info { flex: 1; }
+    .history-title { font-size: 14px; font-weight: 600; color: var(--text); }
+    .history-sub { font-size: 12px; color: var(--text-muted); }
+    .history-score { font-size: 18px; font-weight: 800; color: var(--purple); }
+
+    /* STUDENTS */
+    .student-card { background: white; border-radius: 16px; padding: 14px 16px; border: 1px solid var(--border); display: flex; align-items: center; gap: 14px; margin-bottom: 10px; }
+    .student-card-avatar { font-size: 40px; }
+    .student-card-info { flex: 1; }
+    .student-card-name { font-size: 16px; font-weight: 700; color: var(--text); }
+    .student-card-grade { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
+    .student-card-actions { display: flex; gap: 8px; }
+
+    /* MODALS */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 100; display: flex; align-items: flex-end; }
+    @media (min-width: 600px) { .modal-overlay { align-items: center; justify-content: center; padding: 20px; } }
+    .modal { background: white; border-radius: 24px 24px 0 0; width: 100%; max-width: 540px; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; }
+    @media (min-width: 600px) { .modal { border-radius: 20px; } }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .modal-header h3 { font-size: 18px; font-weight: 700; color: var(--text); }
+    .modal-close { width: 32px; height: 32px; border: none; background: #f3f4f6; border-radius: 8px; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; color: var(--text-muted); }
+    .modal-body { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+    .modal-footer { padding: 14px 20px; border-top: 1px solid var(--border); display: flex; gap: 10px; flex-shrink: 0; }
+    .modal-footer .btn { flex: 1; padding: 13px; font-size: 15px; }
+    .avatar-picker { display: flex; flex-wrap: wrap; gap: 8px; }
+    .avatar-opt { width: 44px; height: 44px; border-radius: 12px; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; transition: all 0.15s; }
+    .avatar-opt.selected { border-color: var(--purple); background: var(--purple-light); }
+
+    /* PLAN VIEWER */
+    .plan-viewer-text { white-space: pre-wrap; font-size: 14px; line-height: 1.7; color: #374151; font-family: inherit; }
+    .plan-days-checklist { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+    .day-check { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #f9fafb; border-radius: 10px; border: 1px solid var(--border); }
+    .day-check input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--purple); cursor: pointer; }
+    .day-check label { font-size: 14px; font-weight: 600; color: var(--text); cursor: pointer; }
+    .day-check.completed { background: #f0fdf4; border-color: #86efac; }
+    .day-check.completed label { color: #15803d; }
+
+    /* LOADING */
+    .spinner { width: 40px; height: 40px; border: 3px solid var(--purple-light); border-top-color: var(--purple); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-state { text-align: center; padding: 32px 16px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+    .loading-state p { font-size: 14px; color: var(--text-muted); }
+
+    /* EMPTY STATE */
+    .empty-state { text-align: center; padding: 40px 16px; color: var(--text-muted); }
+    .empty-state-icon { font-size: 48px; margin-bottom: 12px; }
+    .empty-state h3 { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .empty-state p { font-size: 14px; margin-bottom: 20px; }
+
+    /* TOAST */
+    #toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px); background: #1e1b4b; color: white; padding: 10px 20px; border-radius: 24px; font-size: 14px; font-weight: 500; z-index: 200; opacity: 0; transition: all 0.3s; white-space: nowrap; max-width: 90vw; }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    #toast.error { background: #dc2626; }
+
+    /* UTILITIES */
+    .hidden { display: none !important; }
+    .mt-4 { margin-top: 16px; }
+    .mt-2 { margin-top: 8px; }
+    .mb-4 { margin-bottom: 16px; }
+    .text-center { text-align: center; }
+    .text-muted { color: var(--text-muted); font-size: 13px; }
+    .divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+    /* REPORT BUTTONS */
+    .report-btns { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+    .btn-green { background: #059669; color: white; box-shadow: 0 4px 12px rgba(5,150,105,0.3); }
+    .btn-green:hover { background: #047857; }
+    .btn-purple-solid { background: var(--purple); color: white; box-shadow: 0 4px 12px rgba(124,58,237,0.3); }
+    .btn-purple-solid:hover { background: var(--purple-dark); }
+    .btn-blue { background: #2563eb; color: white; box-shadow: 0 4px 12px rgba(37,99,235,0.3); }
+    .btn-blue:hover { background: #1d4ed8; }
+    .report-btns .btn { flex: 1; min-width: 130px; padding: 11px 14px; font-size: 14px; }
+
+    /* DESKTOP */
+    @media (min-width: 600px) {
+      .landing-title { font-size: 48px; }
+      .landing-subtitle { font-size: 18px; }
+      .landing-pills { max-width: 600px; }
+      .hero-logo { width: 130px; height: 130px; }
+      .tab-section { padding: 24px 20px; }
+    }
+    @media (min-width: 900px) {
+      .quick-actions { grid-template-columns: 1fr 1fr 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- LANDING (not connected) -->
+<div id="landing">
+  <nav class="landing-nav">
+    <div class="nav-brand">
+      <img src="/orcalearn-logo.png" class="nav-logo" alt="OrcaLearn">
+      <span class="nav-brand-name">OrcaLearn</span>
+      <span id="landing-status-dot" class="status-dot"></span>
+    </div>
+    <button class="btn btn-primary btn-sm" onclick="connectWallet()">&#x1F433; Connect Wallet</button>
+  </nav>
+  <main class="landing-hero">
+    <img src="/orcalearn-logo.png" class="hero-logo" alt="OrcaLearn">
+    <h1 class="landing-title">Homeschooling,<br><span class="title-gradient">Made Simple</span></h1>
+    <p class="landing-subtitle">AI-powered lesson plans, progress tracking, and everything your family needs &#8212; all in one friendly place. Free to start.</p>
+    <div class="landing-pills">
+      <span class="pill">&#x1F916; AI Lesson Plans</span>
+      <span class="pill">&#x1F4CA; Progress Tracking</span>
+      <span class="pill">&#x1F465; Multiple Students</span>
+      <span class="pill">&#x1F30E; Any Subject</span>
+      <span class="pill">&#x1F512; Your Data, Your Wallet</span>
+    </div>
+    <button class="btn btn-primary btn-large" onclick="connectWallet()" id="hero-connect-btn">&#x1F433; Connect Wallet &#8212; It&#x2019;s Free</button>
+    <p class="landing-note">&#x2728; First 3 lesson plans are completely free</p>
+    <div class="landing-stats">
+      <span class="stat-item"><span class="stat-num" id="stat-plans">&#8212;</span> plans generated</span>
+      <span class="stat-divider">&#183;</span>
+      <span class="stat-item"><span class="stat-num" id="stat-wallets">&#8212;</span> families</span>
+    </div>
+  </main>
+</div>
+
+<!-- APP (connected) -->
+<div id="app" style="display:none">
+  <nav class="app-nav">
+    <div class="nav-brand" onclick="el('app').style.display='none';el('landing').style.display='';" style="cursor:pointer" title="Back to home">
+      <img src="/orcalearn-logo.png" class="nav-logo" alt="OrcaLearn">
+      <span class="nav-brand-name">OrcaLearn</span>
+      <span id="app-status-dot" class="status-dot"></span>
+    </div>
+    <div class="nav-wallet">
+      <span id="nav-wallet-addr" class="wallet-addr"></span>
+      <button class="btn btn-outline btn-sm" onclick="disconnectWallet()">Disconnect</button>
+    </div>
+  </nav>
+  <div id="tab-content" class="tab-content">
+    <div id="tab-home" class="tab-section"><div id="home-content"></div></div>
+    <div id="tab-plans" class="tab-section" style="display:none">
+      <div class="plans-header">
+        <h2 class="section-title">&#x1F4DA; Lesson Plans</h2>
+        <button class="btn btn-primary btn-sm" onclick="openGenerateModal()">+ New Plan</button>
+      </div>
+      <div id="plans-list"></div>
+    </div>
+    <div id="tab-quiz" class="tab-section" style="display:none"><div id="quiz-content"></div></div>
+    <div id="tab-students" class="tab-section" style="display:none">
+      <div class="section-header">
+        <h2 class="section-title">&#x1F464; Students</h2>
+        <button class="btn btn-primary btn-sm" onclick="openStudentModal()">+ Add Student</button>
+      </div>
+      <div id="students-list"></div>
+    </div>
+  </div>
+  <nav class="bottom-nav">
+    <button class="bottom-nav-btn active" onclick="showTab('home')" data-tab="home"><span class="nav-icon">&#x1F3E0;</span><span class="nav-label">Home</span></button>
+    <button class="bottom-nav-btn" onclick="showTab('plans')" data-tab="plans"><span class="nav-icon">&#x1F4DA;</span><span class="nav-label">Plans</span></button>
+    <button class="bottom-nav-btn" onclick="showTab('quiz')" data-tab="quiz"><span class="nav-icon">&#x1F9EE;</span><span class="nav-label">Quiz</span></button>
+    <button class="bottom-nav-btn" onclick="showTab('students')" data-tab="students"><span class="nav-icon">&#x1F464;</span><span class="nav-label">Students</span></button>
+  </nav>
+</div>
+
+<!-- STUDENT MODAL -->
+<div id="modal-student" class="modal-overlay" style="display:none" onclick="overlayClose(event,'modal-student')">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-student-title">Add Student</h3>
+      <button class="modal-close" onclick="closeModal('modal-student')">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="student-edit-id">
+      <div class="form-group">
+        <label class="form-label">Name</label>
+        <input type="text" id="student-name" class="form-input" placeholder="Student's name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Grade</label>
+        <select id="student-grade" class="form-select">
+          <option value="1">Grade 1 (age 6-7)</option>
+          <option value="2">Grade 2 (age 7-8)</option>
+          <option value="3" selected>Grade 3 (age 8-9)</option>
+          <option value="4">Grade 4 (age 9-10)</option>
+          <option value="5">Grade 5 (age 10-11)</option>
+          <option value="6">Grade 6 (age 11-12)</option>
+          <option value="7">Grade 7 (age 12-13)</option>
+          <option value="8">Grade 8 (age 13-14)</option>
+          <option value="9">Grade 9 (age 14-15)</option>
+          <option value="10">Grade 10 (age 15-16)</option>
+          <option value="11">Grade 11 (age 16-17)</option>
+          <option value="12">Grade 12 (age 17-18)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Avatar</label>
+        <div class="avatar-picker" id="avatar-picker">
+          <div class="avatar-opt selected" data-emoji="&#x1F981;" onclick="selectAvatar(this)">&#x1F981;</div>
+          <div class="avatar-opt" data-emoji="&#x1F43A;" onclick="selectAvatar(this)">&#x1F43A;</div>
+          <div class="avatar-opt" data-emoji="&#x1F98A;" onclick="selectAvatar(this)">&#x1F98A;</div>
+          <div class="avatar-opt" data-emoji="&#x1F43C;" onclick="selectAvatar(this)">&#x1F43C;</div>
+          <div class="avatar-opt" data-emoji="&#x1F428;" onclick="selectAvatar(this)">&#x1F428;</div>
+          <div class="avatar-opt" data-emoji="&#x1F984;" onclick="selectAvatar(this)">&#x1F984;</div>
+          <div class="avatar-opt" data-emoji="&#x1F436;" onclick="selectAvatar(this)">&#x1F436;</div>
+          <div class="avatar-opt" data-emoji="&#x1F431;" onclick="selectAvatar(this)">&#x1F431;</div>
+          <div class="avatar-opt" data-emoji="&#x1F438;" onclick="selectAvatar(this)">&#x1F438;</div>
+          <div class="avatar-opt" data-emoji="&#x1F98B;" onclick="selectAvatar(this)">&#x1F98B;</div>
+          <div class="avatar-opt" data-emoji="&#x1F42C;" onclick="selectAvatar(this)">&#x1F42C;</div>
+          <div class="avatar-opt" data-emoji="&#x1F985;" onclick="selectAvatar(this)">&#x1F985;</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-student')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveStudent()">Save Student</button>
+    </div>
+  </div>
+</div>
+
+<!-- GENERATE PLAN MODAL -->
+<div id="modal-generate" class="modal-overlay" style="display:none" onclick="overlayClose(event,'modal-generate')">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>&#x1F916; Generate Lesson Plan</h3>
+      <button class="modal-close" onclick="closeModal('modal-generate')">&#x2715;</button>
+    </div>
+    <div class="modal-body" id="generate-modal-body">
+      <div class="form-group">
+        <label class="form-label">Student</label>
+        <select id="gen-student" class="form-select" onchange="updateGenGrade()"></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Subject</label>
+        <select id="gen-subject" class="form-select">
+          <option value="math">&#x1F522; Mathematics</option>
+          <option value="reading">&#x1F4D6; Reading &amp; Language Arts</option>
+          <option value="science">&#x1F52C; Science</option>
+          <option value="history">&#x1F3DB;&#xFE0F; History &amp; Social Studies</option>
+          <option value="writing">&#x270F;&#xFE0F; Writing &amp; Composition</option>
+          <option value="art">&#x1F3A8; Art &amp; Creativity</option>
+          <option value="music">&#x1F3B5; Music</option>
+          <option value="pe">&#x26BD; Physical Education</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Grade</label>
+        <select id="gen-grade" class="form-select">
+          <option value="1">Grade 1</option><option value="2">Grade 2</option>
+          <option value="3" selected>Grade 3</option><option value="4">Grade 4</option>
+          <option value="5">Grade 5</option><option value="6">Grade 6</option>
+          <option value="7">Grade 7</option><option value="8">Grade 8</option>
+          <option value="9">Grade 9</option><option value="10">Grade 10</option>
+          <option value="11">Grade 11</option><option value="12">Grade 12</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Plan Length</label>
+        <select id="gen-days" class="form-select">
+          <option value="5">5 days (1 week)</option>
+          <option value="10">10 days (2 weeks)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Goals / Notes (optional)</label>
+        <textarea id="gen-goals" class="form-textarea" placeholder="e.g. Focus on multiplication tables, struggling with fractions..."></textarea>
+      </div>
+    </div>
+    <div id="generate-modal-footer" class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-generate')">Cancel</button>
+      <button class="btn btn-primary" onclick="startGenerate()">&#x1F680; Generate Plan</button>
+    </div>
+  </div>
+</div>
+
+<!-- PLAN VIEWER MODAL -->
+<div id="modal-plan" class="modal-overlay" style="display:none" onclick="overlayClose(event,'modal-plan')">
+  <div class="modal" style="max-height:92vh">
+    <div class="modal-header">
+      <h3 id="modal-plan-title">Lesson Plan</h3>
+      <button class="modal-close" onclick="closeModal('modal-plan')">&#x2715;</button>
+    </div>
+    <div class="modal-body" id="modal-plan-body"></div>
+    <div class="modal-footer" style="gap:8px;flex-wrap:wrap">
+      <button class="btn btn-blue btn-sm" onclick="printPlan(_viewPlanId)">&#x1F34E; Download Plan</button>
+      <button class="btn btn-green btn-sm" id="btn-certificate" onclick="printCertificate(_viewPlanId)" style="display:none">&#x1F3C6; Certificate</button>
+      <button class="btn btn-danger btn-sm" onclick="confirmDeletePlan()">&#x1F5D1; Delete</button>
+      <button class="btn btn-secondary" onclick="closeModal('modal-plan')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- QUIZ RUNNER MODAL -->
+<div id="modal-quiz-run" class="modal-overlay" style="display:none">
+  <div class="modal" style="max-height:95vh">
+    <div class="modal-header">
+      <h3 id="quiz-run-title">Math Quiz</h3>
+      <button class="modal-close" onclick="abortQuiz()">&#x2715;</button>
+    </div>
+    <div class="modal-body" id="quiz-run-body"></div>
+  </div>
+</div>
+
+<!-- TRANSCRIPT INFO MODAL -->
+<div id="modal-transcript" class="modal-overlay" style="display:none" onclick="overlayClose(event,'modal-transcript')">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>&#x1F393; Generate Transcript</h3>
+      <button class="modal-close" onclick="closeModal('modal-transcript')">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <div style="background:#fef9c3;border:1px solid #fde047;border-radius:10px;padding:12px;font-size:13px;color:#713f12;">
+        &#x1F512; This information is entered locally in your browser and is <strong>never sent to or stored on any server.</strong>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Student Full Name</label>
+        <input type="text" id="tr-student-name" class="form-input" placeholder="e.g. Emily Johnson">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Date of Birth (optional)</label>
+        <input type="text" id="tr-dob" class="form-input" placeholder="e.g. March 15, 2014">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Homeschool Name</label>
+        <input type="text" id="tr-school-name" class="form-input" placeholder="e.g. Johnson Family Academy">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Academic Year</label>
+        <input type="text" id="tr-year" class="form-input" placeholder="e.g. 2025-2026">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Parent / Guardian Name (as School Administrator)</label>
+        <input type="text" id="tr-parent-name" class="form-input" placeholder="e.g. Sarah Johnson">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-transcript')">Cancel</button>
+      <button class="btn btn-purple-solid" onclick="generateTranscript()">&#x1F393; Generate Transcript</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.9.0/ethers.umd.min.js"></script>
+<script>
+'use strict';
+const API = '/api';
+const FREE_PLANS = 3;
+const SUBJECT_ICONS = {math:'&#x1F522;',reading:'&#x1F4D6;',science:'&#x1F52C;',history:'&#x1F3DB;',writing:'&#x270F;',art:'&#x1F3A8;',music:'&#x1F3B5;',pe:'&#x26BD;'};
+const SUBJECT_NAMES = {math:'Mathematics',reading:'Reading & Language Arts',science:'Science',history:'History & Social Studies',writing:'Writing & Composition',art:'Art & Creativity',music:'Music',pe:'Physical Education'};
+const TOPICS = [
+  {id:'mixed',label:'Mixed Practice',emoji:'&#x1F3AF;'},
+  {id:'addition',label:'Addition',emoji:'&#x2795;'},
+  {id:'subtraction',label:'Subtraction',emoji:'&#x2796;'},
+  {id:'multiplication',label:'Multiplication',emoji:'&#x2716;&#xFE0F;'},
+  {id:'division',label:'Division',emoji:'&#x2797;'},
+  {id:'fractions',label:'Fractions',emoji:'&#x1F500;'},
+  {id:'decimals',label:'Decimals',emoji:'&#x1F522;'},
+  {id:'wordproblems',label:'Word Problems',emoji:'&#x1F4DD;'},
+  {id:'prealgebra',label:'Pre-Algebra',emoji:'&#x1F9EE;'},
+];
+
+const S = {
+  addr: null, provider: null, signer: null,
+  students: [], activeId: null,
+  plans: [], progress: {}, quizResults: [], planCount: 0,
+  quizTimer: null,
+};
+
+function el(id){ return document.getElementById(id); }
+function toast(msg, err=false, ms=3000){
+  const t=el('toast'); t.textContent=msg; t.className='show'+(err?' error':'');
+  clearTimeout(toast._t); toast._t=setTimeout(()=>{t.className='';},ms);
+}
+function openModal(id){ el(id).style.display='flex'; }
+function closeModal(id){ el(id).style.display='none'; }
+function overlayClose(e,id){ if(e.target===e.currentTarget) closeModal(id); }
+
+async function pingDot(id){
+  try{
+    const r=await fetch(API+'/health'); const d=await r.json();
+    const dot=el(id); if(dot) dot.className='status-dot '+(d.ok?'online':'warn');
+  } catch { const dot=el(id); if(dot) dot.className='status-dot warn'; }
+}
+async function loadStats(){
+  try{
+    const r=await fetch(API+'/stats'); const d=await r.json();
+    if(el('stat-plans')) el('stat-plans').textContent=(d.totalPlans||0).toLocaleString();
+    if(el('stat-wallets')) el('stat-wallets').textContent=(d.totalWallets||0).toLocaleString();
+  }catch{}
+}
+
+async function connectWallet(){
+  if(!window.ethereum){ toast('MetaMask not found. Please install it.',true,6000); return; }
+  try{
+    const btn=el('hero-connect-btn'); if(btn) btn.textContent='Connecting...';
+    const prov=new ethers.BrowserProvider(window.ethereum);
+    await prov.send('eth_requestAccounts',[]);
+    const sig=await prov.getSigner();
+    S.addr=await sig.getAddress(); S.provider=prov; S.signer=sig;
+    afterConnect();
+  } catch(e){
+    toast('Wallet connection cancelled.',true);
+    const btn=el('hero-connect-btn'); if(btn) btn.textContent='&#x1F433; Connect Wallet — It\'s Free';
+  }
+}
+function disconnectWallet(){
+  S.addr=null; S.students=[]; S.plans=[]; S.progress={}; S.activeId=null;
+  el('app').style.display='none'; el('landing').style.display='flex';
+}
+async function afterConnect(){
+  el('landing').style.display='none'; el('app').style.display='flex';
+  el('nav-wallet-addr').textContent=S.addr.slice(0,6)+'...'+S.addr.slice(-4);
+  pingDot('app-status-dot');
+  await loadAll();
+  renderHome(); renderPlans(); renderQuiz(); renderStudents();
+}
+
+async function loadAll(){
+  try{
+    const [pr,plr,pcr]=await Promise.all([
+      fetch(API+'/profiles?address='+S.addr),
+      fetch(API+'/plans?address='+S.addr),
+      fetch(API+'/plan-count?address='+S.addr),
+    ]);
+    S.students=(await pr.json()).profiles||[];
+    S.plans=(await plr.json()).plans||[];
+    S.planCount=(await pcr.json()).count||0;
+    if(S.students.length>0&&!S.activeId) S.activeId=S.students[0].id;
+    await loadProgress(); await loadQuizResults();
+  }catch(e){console.error(e);}
+}
+async function loadProgress(){
+  if(!S.activeId) return;
+  try{ const r=await fetch(API+'/progress?address='+S.addr+'&studentId='+S.activeId); S.progress=(await r.json()).progress||{}; }catch{}
+}
+async function loadQuizResults(){
+  if(!S.activeId) return;
+  try{ const r=await fetch(API+'/quiz/results?address='+S.addr+'&studentId='+S.activeId); S.quizResults=(await r.json()).results||[]; }catch{}
+}
+async function selectStudent(id){
+  S.activeId=id; await loadProgress(); await loadQuizResults();
+  renderHome(); renderPlans(); renderQuiz();
+}
+
+// ── HOME ──────────────────────────────────────────────────────────────────────
+function renderHome(){
+  const c=el('home-content'); const freeLeft=Math.max(0,FREE_PLANS-S.planCount); let h='';
+  if(freeLeft>0){
+    h+=`<div class="free-plans-banner mb-4"><div class="free-plans-icon">&#x1F381;</div>
+    <div class="free-plans-text"><div class="free-plans-title">${freeLeft} free plan${freeLeft!==1?'s':''} remaining</div>
+    <div class="free-plans-sub">First ${FREE_PLANS} AI lesson plans are always free</div></div></div>`;
+  }
+  h+='<div class="section-header"><div class="section-title">Students</div></div>';
+  if(S.students.length===0){
+    h+=`<div class="card text-center" style="padding:24px"><div style="font-size:40px;margin-bottom:10px">&#x1F44B;</div>
+    <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px">Add your first student</div>
+    <div class="text-muted" style="margin-bottom:16px">Create a profile to start generating lesson plans.</div>
+    <button class="btn btn-primary" onclick="showTab('students');openStudentModal()">+ Add Student</button></div>`;
+  } else {
+    h+='<div class="students-row">';
+    for(const s of S.students){
+      h+=`<div class="student-chip${s.id===S.activeId?' active':''}" onclick="selectStudent('${s.id}')">
+        <span class="student-avatar">${s.avatar||'&#x1F9D2;'}</span>
+        <span class="student-chip-name">${s.name}</span>
+        <span class="student-chip-grade">Grade ${s.grade}</span></div>`;
+    }
+    h+='</div>';
+    const st=S.students.find(s=>s.id===S.activeId);
+    if(st){
+      const myPlans=S.plans.filter(p=>p.studentId===st.id);
+      const doneDays=Object.values(S.progress).reduce((a,p)=>a+(p.completedDays?.length||0),0);
+      const rq=S.quizResults[0];
+      h+=`<div class="stats-grid mt-4">
+        <div class="stat-card"><div class="stat-card-num">${myPlans.length}</div><div class="stat-card-label">Lesson Plans</div></div>
+        <div class="stat-card"><div class="stat-card-num">${doneDays}</div><div class="stat-card-label">Days Completed</div></div>
+        <div class="stat-card"><div class="stat-card-num">${S.quizResults.length}</div><div class="stat-card-label">Quizzes Taken</div></div>
+        <div class="stat-card"><div class="stat-card-num">${rq?rq.pct+'%':'&#x2014;'}</div><div class="stat-card-label">Last Score</div></div>
+      </div>`;
+      h+=`<div class="report-btns">
+        <button class="btn btn-green" onclick="printProgressReport()">&#x1F4CA; Progress Report</button>
+        <button class="btn btn-purple-solid" onclick="openTranscriptModal()">&#x1F393; Transcript</button>
+        <button class="btn btn-blue" onclick="exportPortfolio()">&#x1F4E6; Export Portfolio</button>
+      </div>`;
+      h+=`<div class="section-header mt-4"><div class="section-title">Quick Actions</div></div>
+      <div class="quick-actions">
+        <div class="action-card" onclick="openGenerateModal()"><div class="action-icon">&#x1F916;</div><div class="action-title">New Plan</div><div class="action-sub">AI lesson plan</div></div>
+        <div class="action-card" onclick="showTab('quiz')"><div class="action-icon">&#x1F9EE;</div><div class="action-title">Take Quiz</div><div class="action-sub">Math practice</div></div>
+        <div class="action-card" onclick="showTab('plans')"><div class="action-icon">&#x1F4DA;</div><div class="action-title">My Plans</div><div class="action-sub">${myPlans.length} saved</div></div>
+        <div class="action-card" onclick="showTab('students')"><div class="action-icon">&#x1F464;</div><div class="action-title">Students</div><div class="action-sub">${S.students.length} profile${S.students.length!==1?'s':''}</div></div>
+      </div>`;
+    }
+  }
+  c.innerHTML=h;
+}
+
+// ── PLANS ─────────────────────────────────────────────────────────────────────
+function renderPlans(){
+  const c=el('plans-list');
+  if(S.plans.length===0){
+    c.innerHTML=`<div class="empty-state"><div class="empty-state-icon">&#x1F4DA;</div>
+    <h3>No plans yet</h3><p>Generate your first AI-powered lesson plan &#x2014; completely free.</p>
+    <button class="btn btn-primary" onclick="openGenerateModal()">&#x1F916; Generate First Plan</button></div>`;
+    return;
+  }
+  let h='';
+  const sorted=[...S.plans].sort((a,b)=>b.createdAt-a.createdAt);
+  for(const p of sorted){
+    const st=S.students.find(s=>s.id===p.studentId);
+    const icon=SUBJECT_ICONS[p.subject]||'&#x1F4C4;';
+    const name=SUBJECT_NAMES[p.subject]||p.subject;
+    const prog=S.progress[p.planId]||{};
+    const done=prog.completedDays?.length||0;
+    const total=p.days||5;
+    const pct=Math.round((done/total)*100);
+    const date=new Date(p.createdAt).toLocaleDateString();
+    h+=`<div class="plan-card" onclick="openPlan('${p.planId}')">
+      <div class="plan-card-header">
+        <div class="plan-subject-icon">${icon}</div>
+        <div class="plan-card-info">
+          <div class="plan-card-title">${name} &#x2014; Grade ${p.grade}</div>
+          <div class="plan-card-meta">${st?st.name:'Unknown'} &nbsp;&#183;&nbsp; ${total} days &nbsp;&#183;&nbsp; ${date}</div>
+        </div>
+      </div>
+      <div class="plan-progress-bar"><div class="plan-progress-fill" style="width:${pct}%"></div></div>
+      <div class="plan-progress-label">${done} of ${total} days completed</div>
+    </div>`;
+  }
+  c.innerHTML=h;
+}
+
+let _viewPlanId=null;
+function openPlan(id){
+  const p=S.plans.find(x=>x.planId===id); if(!p) return;
+  _viewPlanId=id;
+  const st=S.students.find(s=>s.id===p.studentId);
+  const icon=SUBJECT_ICONS[p.subject]||'&#x1F4C4;';
+  el('modal-plan-title').textContent=icon+' '+(SUBJECT_NAMES[p.subject]||p.subject)+' — Grade '+p.grade;
+  const prog=S.progress[p.planId]||{completedDays:[]};
+  const done=prog.completedDays||[];
+  const total=p.days||5;
+  let cl='<div class="plan-days-checklist">';
+  for(let d=1;d<=total;d++){
+    const isDone=done.includes(d);
+    cl+=`<div class="day-check${isDone?' completed':''}" id="dc-${d}">
+      <input type="checkbox" id="cb-${d}" ${isDone?'checked':''} onchange="toggleDay(${d},this.checked,'${id}','${p.studentId}')">
+      <label for="cb-${d}">Day ${d}</label></div>`;
+  }
+  cl+='</div>';
+  el('modal-plan-body').innerHTML=`
+    <div style="font-size:13px;color:var(--text-muted);margin-bottom:8px">${st?st.name:''} &nbsp;&#183;&nbsp; ${total} days &nbsp;&#183;&nbsp; ${new Date(p.createdAt).toLocaleDateString()}</div>
+    <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:12px">Progress</div>
+    ${cl}
+    <div class="divider"></div>
+    <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:12px">Lesson Plan</div>
+    <pre class="plan-viewer-text">${esc(p.text||'')}</pre>`;
+  // Show certificate button only when fully complete
+  const certBtn = el('btn-certificate');
+  if (certBtn) certBtn.style.display = (done.length >= total) ? '' : 'none';
+  openModal('modal-plan');
+}
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+async function toggleDay(day,done,planId,studentId){
+  const row=el('dc-'+day); if(row) row.className='day-check'+(done?' completed':'');
+  if(!S.progress[planId]) S.progress[planId]={completedDays:[]};
+  const days=S.progress[planId].completedDays;
+  if(done&&!days.includes(day)) days.push(day);
+  else if(!done){ const i=days.indexOf(day); if(i!==-1) days.splice(i,1); }
+  try{
+    await fetch(API+'/progress/update',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({address:S.addr,studentId,planId,day,completed:done})});
+    renderPlans(); renderHome();
+  }catch{}
+}
+async function confirmDeletePlan(){
+  if(!_viewPlanId) return;
+  if(!confirm('Delete this lesson plan? This cannot be undone.')) return;
+  try{
+    await fetch(API+'/plans/delete',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({address:S.addr,planId:_viewPlanId})});
+    S.plans=S.plans.filter(p=>p.planId!==_viewPlanId);
+    S.planCount=S.plans.length;
+    closeModal('modal-plan'); renderPlans(); renderHome(); toast('Plan deleted.');
+  }catch{ toast('Error deleting plan.',true); }
+}
+
+// ── GENERATE ──────────────────────────────────────────────────────────────────
+function openGenerateModal(){
+  if(S.students.length===0){ toast('Add a student first!',true); showTab('students'); openStudentModal(); return; }
+  const sel=el('gen-student'); sel.innerHTML='';
+  for(const s of S.students){
+    const o=document.createElement('option'); o.value=s.id;
+    o.textContent=(s.avatar||'')+'  '+s.name+' (Grade '+s.grade+')';
+    if(s.id===S.activeId) o.selected=true; sel.appendChild(o);
+  }
+  updateGenGrade();
+  el('gen-goals').value='';
+  el('generate-modal-body').style.display='';
+  el('generate-modal-footer').style.display='';
+  openModal('modal-generate');
+}
+function updateGenGrade(){
+  const id=el('gen-student').value;
+  const st=S.students.find(s=>s.id===id);
+  if(st) el('gen-grade').value=String(st.grade);
+}
+
+let _pollInt=null;
+async function startGenerate(){
+  const studentId=el('gen-student').value;
+  const subject=el('gen-subject').value;
+  const grade=parseInt(el('gen-grade').value);
+  const days=parseInt(el('gen-days').value);
+  const goals=el('gen-goals').value.trim();
+  el('generate-modal-body').innerHTML=`<div class="loading-state"><div class="spinner"></div>
+    <p style="font-size:15px;font-weight:700;color:var(--text)">Generating your lesson plan...</p>
+    <p>The AI is crafting a personalized ${days}-day plan. This usually takes 30&#x2013;90 seconds.</p></div>`;
+  el('generate-modal-footer').style.display='none';
+  try{
+    const r=await fetch(API+'/plan/generate',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({address:S.addr,studentId,subject,grade,days,goals})});
+    const d=await r.json();
+    if(!d.ok||!d.jobId) throw new Error(d.error||'Failed to start');
+    const jid=d.jobId;
+    clearInterval(_pollInt);
+    _pollInt=setInterval(async()=>{
+      try{
+        const jr=await fetch(API+'/job?id='+jid); const jd=await jr.json();
+        if(jd.status==='done'){
+          clearInterval(_pollInt);
+          const pr=await fetch(API+'/plans?address='+S.addr);
+          S.plans=(await pr.json()).plans||[]; S.planCount=S.plans.length;
+          closeModal('modal-generate'); renderPlans(); renderHome();
+          toast('Lesson plan ready! &#x1F389;');
+          if(jd.planId) openPlan(jd.planId);
+        } else if(jd.status==='error'){
+          clearInterval(_pollInt);
+          el('generate-modal-body').innerHTML=`<div class="empty-state"><div class="empty-state-icon">&#x274C;</div>
+            <h3>Generation failed</h3><p>${jd.error||'AI error. Please try again.'}</p></div>`;
+          el('generate-modal-footer').innerHTML='<button class="btn btn-primary" style="flex:1;padding:13px" onclick="closeModal(\'modal-generate\')">Close</button>';
+          el('generate-modal-footer').style.display='';
+        }
+      }catch{}
+    },3000);
+  }catch(e){
+    el('generate-modal-body').innerHTML=`<div class="empty-state"><div class="empty-state-icon">&#x274C;</div>
+      <h3>Could not start generation</h3><p>${e.message}</p></div>`;
+    el('generate-modal-footer').innerHTML='<button class="btn btn-primary" style="flex:1;padding:13px" onclick="closeModal(\'modal-generate\')">Close</button>';
+    el('generate-modal-footer').style.display='';
+  }
+}
+
+// ── STUDENTS ──────────────────────────────────────────────────────────────────
+function renderStudents(){
+  const c=el('students-list');
+  if(S.students.length===0){
+    c.innerHTML=`<div class="empty-state"><div class="empty-state-icon">&#x1F46A;</div>
+    <h3>No students yet</h3><p>Add your first student to get started.</p>
+    <button class="btn btn-primary" onclick="openStudentModal()">+ Add Student</button></div>`; return;
+  }
+  c.innerHTML=S.students.map(s=>`<div class="student-card">
+    <div class="student-card-avatar">${s.avatar||'&#x1F9D2;'}</div>
+    <div class="student-card-info"><div class="student-card-name">${s.name}</div><div class="student-card-grade">Grade ${s.grade}</div></div>
+    <div class="student-card-actions"><button class="btn btn-secondary btn-sm" onclick="openStudentModal('${s.id}')">Edit</button></div>
+  </div>`).join('');
+}
+function openStudentModal(id=null){
+  el('modal-student-title').textContent=id?'Edit Student':'Add Student';
+  el('student-edit-id').value=id||'';
+  if(id){
+    const s=S.students.find(x=>x.id===id);
+    if(s){ el('student-name').value=s.name; el('student-grade').value=String(s.grade); setAvatar(s.avatar||'\u{1F981}'); }
+  } else { el('student-name').value=''; el('student-grade').value='3'; setAvatar('\u{1F981}'); }
+  openModal('modal-student');
+}
+function selectAvatar(el_){ document.querySelectorAll('.avatar-opt').forEach(o=>o.classList.remove('selected')); el_.classList.add('selected'); }
+function setAvatar(emoji){
+  document.querySelectorAll('.avatar-opt').forEach(o=>{
+    o.classList.toggle('selected', o.dataset.emoji===emoji||o.textContent.trim()===emoji);
+  });
+}
+function getAvatar(){ const s=document.querySelector('.avatar-opt.selected'); return s?s.textContent.trim():'\u{1F981}'; }
+
+async function saveStudent(){
+  const name=el('student-name').value.trim();
+  if(!name){ toast('Please enter a name.',true); return; }
+  const grade=parseInt(el('student-grade').value);
+  const avatar=getAvatar();
+  const editId=el('student-edit-id').value;
+  const profile={name,grade,avatar};
+  if(editId) profile.id=editId;
+  try{
+    const r=await fetch(API+'/profiles',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({address:S.addr,profile})});
+    const d=await r.json(); if(!d.ok) throw new Error(d.error||'Save failed');
+    profile.id=d.studentId;
+    const idx=S.students.findIndex(s=>s.id===profile.id);
+    if(idx!==-1) S.students[idx]=profile; else S.students.push(profile);
+    if(!S.activeId) S.activeId=profile.id;
+    closeModal('modal-student'); renderStudents(); renderHome();
+    toast(profile.name+' saved! &#x1F389;');
+  }catch(e){ toast('Error: '+e.message,true); }
+}
+
+// ── QUIZ ──────────────────────────────────────────────────────────────────────
+function renderQuiz(){
+  const c=el('quiz-content');
+  if(S.students.length===0){
+    c.innerHTML=`<div class="empty-state"><div class="empty-state-icon">&#x1F9EE;</div>
+    <h3>Add a student first</h3><p>Quizzes are linked to student progress.</p>
+    <button class="btn btn-primary" onclick="showTab('students');openStudentModal()">+ Add Student</button></div>`; return;
+  }
+  const topicOpts=TOPICS.map(t=>`<option value="${t.id}">${t.emoji} ${t.label}</option>`).join('');
+  const stOpts=S.students.map(s=>`<option value="${s.id}"${s.id===S.activeId?' selected':''}>${s.avatar||''} ${s.name} (Gr.${s.grade})</option>`).join('');
+  let h=`<h2 class="section-title" style="margin-bottom:16px">&#x1F9EE; Math Quiz</h2>
+  <div class="quiz-setup card" style="padding:20px;gap:14px">
+    <div class="form-group"><label class="form-label">Student</label>
+      <select class="form-select" id="quiz-st" onchange="quizStChange(this.value)">${stOpts}</select></div>
+    <div class="form-group"><label class="form-label">Topic</label>
+      <select class="form-select" id="quiz-topic">${topicOpts}</select></div>
+    <div class="form-group"><label class="form-label">Questions</label>
+      <select class="form-select" id="quiz-cnt">
+        <option value="5">5 questions</option><option value="10" selected>10 questions</option><option value="20">20 questions</option>
+      </select></div>
+    <div class="toggle-row"><span class="toggle-label">&#x23F1; Timer (60 sec per question)</span>
+      <label class="toggle"><input type="checkbox" id="quiz-tmr"><span class="toggle-slider"></span></label></div>
+    <button class="btn btn-primary" style="width:100%;padding:14px;font-size:16px" onclick="startQuiz()">&#x1F680; Start Quiz</button>
+  </div>`;
+  if(S.quizResults.length>0){
+    h+=`<div class="section-header mt-4"><div class="section-title">Recent Scores</div>
+      <button class="btn btn-secondary btn-sm" onclick="printQuizHistory()">&#x1F4E5; Download History</button></div>`;
+    for(const r of S.quizResults.slice(0,6)){
+      const t=TOPICS.find(x=>x.id===r.topicId)||{emoji:'&#x1F9EE;',label:r.topicId};
+      h+=`<div class="quiz-history-item">
+        <div class="history-icon">${t.emoji}</div>
+        <div class="history-info"><div class="history-title">${t.label}</div>
+        <div class="history-sub">Grade ${r.gradeLevel} &nbsp;&#183;&nbsp; ${r.correct}/${r.total} &nbsp;&#183;&nbsp; ${new Date(r.savedAt).toLocaleDateString()}</div></div>
+        <div class="history-score">${r.pct}%</div></div>`;
+    }
+  }
+  c.innerHTML=h;
+}
+async function quizStChange(id){ S.activeId=id; await loadQuizResults(); renderQuiz(); renderHome(); }
+
+// Quiz engine
+function rnd(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+function gcd(a,b){ return b===0?a:gcd(b,a%b); }
+function range(g){ if(g<=2)return[1,20]; if(g<=4)return[1,100]; if(g<=6)return[1,500]; if(g<=8)return[1,1000]; return[1,5000]; }
+function qAdd(g){ const[,m]=range(g),a=rnd(1,m),b=rnd(1,m); return{q:`${a} + ${b} = ?`,ans:a+b}; }
+function qSub(g){ const[,m]=range(g);let a=rnd(1,m),b=rnd(1,m);if(g<=4&&b>a)[a,b]=[b,a];return{q:`${a} − ${b} = ?`,ans:a-b}; }
+function qMul(g){ const t=g<=3?5:g<=5?10:g<=7?12:20;const a=rnd(2,t),b=rnd(2,t);return{q:`${a} × ${b} = ?`,ans:a*b}; }
+function qDiv(g){ const t=g<=4?10:g<=6?12:20;const b=rnd(2,t),a=b*rnd(1,t);return{q:`${a} ÷ ${b} = ?`,ans:a/b}; }
+function qFrac(g){
+  if(g<=4){ const d=rnd(2,8),n1=rnd(1,d-1),n2=rnd(1,d-1);
+    if(n1+n2<d) return{q:`${n1}/${d} + ${n2}/${d} = ?/${d}`,ans:n1+n2};
+    const mn=Math.max(n1,n2),mx=Math.min(n1,n2);return{q:`${mn}/${d} − ${mx}/${d} = ?/${d}`,ans:mn-mx};
+  }
+  const d1=rnd(2,6),d2=rnd(2,6),n1=rnd(1,d1),n2=rnd(1,d2);
+  const num=n1*d2+n2*d1,den=d1*d2,g2=gcd(num,den);
+  return{q:`${n1}/${d1} + ${n2}/${d2} = ?`,ans:`${num/g2}/${den/g2}`,txt:true};
+}
+function qDec(g){
+  if(g<=6){ const a=(rnd(1,99)/10).toFixed(1),b=(rnd(1,99)/10).toFixed(1);
+    return{q:`${a} + ${b} = ?`,ans:parseFloat((parseFloat(a)+parseFloat(b)).toFixed(2))}; }
+  const a=(rnd(10,99)/10).toFixed(1),b=rnd(2,9);
+  return{q:`${a} × ${b} = ?`,ans:parseFloat((parseFloat(a)*b).toFixed(2))};
+}
+function qWord(g){
+  const p=g<=3?[
+    ()=>{const a=rnd(5,20),b=rnd(1,a-1);return{q:`Sarah has ${a} apples and gives ${b} away. How many left?`,ans:a-b};},
+    ()=>{const a=rnd(3,15),b=rnd(2,10);return{q:`${a} red balls and ${b} blue balls. How many total?`,ans:a+b};},
+    ()=>{const a=rnd(2,8),b=rnd(2,5);return{q:`${a} friends each have ${b} stickers. How many total?`,ans:a*b};},
+  ]:g<=6?[
+    ()=>{const a=rnd(10,40),b=rnd(2,8);return{q:`${a} students split into groups of ${b}. How many groups?`,ans:Math.floor(a/b)};},
+    ()=>{const r=rnd(3,12),d=rnd(3,8);return{q:`A car travels ${r} miles/hour. Distance in ${d} hours?`,ans:r*d};},
+    ()=>{const p=rnd(20,50),d=rnd(5,p-5);return{q:`A shirt costs $${p}. On sale for $${d} off. Sale price?`,ans:p-d};},
+  ]:[
+    ()=>{const r=rnd(5,20),h=rnd(3,10);return{q:`A worker earns $${r}/hour. Earnings for ${h} hours?`,ans:r*h};},
+    ()=>{const t=rnd(20,60),sp=rnd(2,8);return{q:`A ${t}-mile trip takes ${sp} hours. Average speed (mph)?`,ans:Math.round(t/sp)};},
+    ()=>{const pr=rnd(100,500),pct=rnd(10,40);return{q:`A $${pr} item has ${pct}% discount. Discount amount?`,ans:Math.round(pr*pct/100)};},
+  ];
+  return p[rnd(0,p.length-1)]();
+}
+function qAlg(g){
+  if(g<=6){const x=rnd(1,20),b=rnd(1,20);return{q:`x + ${b} = ${x+b}. Solve for x.`,ans:x};}
+  if(g<=8){const x=rnd(1,15),a=rnd(2,8),b=rnd(1,20);return{q:`${a}x + ${b} = ${a*x+b}. Solve for x.`,ans:x};}
+  const r1=rnd(1,8),r2=rnd(1,8);const b=r1+r2,c=r1*r2;return{q:`x² − ${b}x + ${c} = 0. Smaller root?`,ans:Math.min(r1,r2)};
+}
+function genQ(topicId,grade){
+  const map={addition:qAdd,subtraction:qSub,multiplication:qMul,division:qDiv,
+    fractions:qFrac,decimals:qDec,wordproblems:qWord,prealgebra:qAlg,
+    mixed:g=>{const pool=['addition','subtraction','multiplication','division','decimals'];return genQ(pool[rnd(0,pool.length-1)],g);}};
+  return (map[topicId]||qAdd)(grade);
+}
+function makeChoices(ans,txt){
+  if(txt) return null;
+  const a=typeof ans==='number'?ans:parseFloat(ans);
+  const set=new Set([a]);let tries=0;
+  while(set.size<4&&tries<40){tries++;const off=rnd(1,Math.max(3,Math.abs(Math.round(a*0.3))||5));const w=Math.random()<0.5?a+off:a-off;if(!isNaN(w))set.add(Number(w.toFixed(2)));}
+  return[...set].sort((x,y)=>x-y);
+}
+
+let QZ=null;
+function startQuiz(){
+  const sid=el('quiz-st').value,st=S.students.find(s=>s.id===sid);if(!st)return;
+  const topicId=el('quiz-topic').value,cnt=parseInt(el('quiz-cnt').value),tmr=el('quiz-tmr').checked;
+  const topic=TOPICS.find(t=>t.id===topicId)||TOPICS[0];
+  QZ={sid,st,topicId,topic,cnt,tmr,qs:[],cur:0,ok:0,start:Date.now()};
+  for(let i=0;i<cnt;i++){const q=genQ(topicId,st.grade);q.choices=makeChoices(q.ans,q.txt);QZ.qs.push(q);}
+  el('quiz-run-title').textContent=topic.emoji+' '+topic.label;
+  openModal('modal-quiz-run'); renderQQ();
+}
+function renderQQ(){
+  if(!QZ||QZ.cur>=QZ.qs.length){finishQuiz();return;}
+  const q=QZ.qs[QZ.cur];
+  const timerH=QZ.tmr?`<div class="quiz-timer" id="qtimer">60</div>`:'';
+  let choicesH='';
+  if(q.choices){
+    choicesH=`<div class="quiz-choices">${q.choices.map(c=>`<button class="choice-btn" onclick="ansQ(this,${c},${q.ans})">${c}</button>`).join('')}</div>`;
+  } else {
+    choicesH=`<div style="display:flex;gap:10px;margin-top:4px">
+      <input type="text" id="qtxt" class="form-input" placeholder="Your answer..." style="font-size:18px;text-align:center">
+      <button class="btn btn-primary" style="padding:10px 20px;white-space:nowrap" onclick="ansTxt()">Check</button></div>`;
+  }
+  el('quiz-run-body').innerHTML=`
+    <div class="quiz-meta"><div class="quiz-progress">Q ${QZ.cur+1} of ${QZ.cnt} &nbsp;&#183;&nbsp; &#x2705; ${QZ.ok}</div>${timerH}</div>
+    <div class="quiz-question">${q.q}</div>
+    ${choicesH}
+    <div id="qfb"></div>`;
+  if(QZ.tmr) startQTimer();
+}
+function startQTimer(){
+  clearInterval(S.quizTimer); let sec=60;
+  S.quizTimer=setInterval(()=>{
+    sec--; const d=el('qtimer'); if(!d){clearInterval(S.quizTimer);return;}
+    d.textContent=sec; if(sec<=10) d.className='quiz-timer warn';
+    if(sec<=0){clearInterval(S.quizTimer);disableChoices();showFB(false,QZ.qs[QZ.cur].ans);setTimeout(nextQ,1800);}
+  },1000);
+}
+function disableChoices(){ document.querySelectorAll('.choice-btn').forEach(b=>b.disabled=true); }
+function ansQ(btn,sel,correct){
+  clearInterval(S.quizTimer); disableChoices();
+  const ok=sel===correct; btn.className='choice-btn '+(ok?'correct':'wrong');
+  if(!ok) document.querySelectorAll('.choice-btn').forEach(b=>{if(parseFloat(b.textContent)===correct)b.className='choice-btn reveal';});
+  if(ok) QZ.ok++;
+  showFB(ok,correct); setTimeout(nextQ,1500);
+}
+function ansTxt(){
+  const inp=el('qtxt'); if(!inp)return;
+  const ua=inp.value.trim(),ca=String(QZ.qs[QZ.cur].ans);
+  const ok=ua===ca; if(ok) QZ.ok++;
+  inp.disabled=true; inp.style.borderColor=ok?'#059669':'#dc2626'; inp.style.background=ok?'#d1fae5':'#fee2e2';
+  showFB(ok,ca); setTimeout(nextQ,1800);
+}
+function showFB(ok,correct){
+  const d=el('qfb'); if(!d)return;
+  d.innerHTML=`<div class="quiz-feedback ${ok?'correct':'wrong'}">${ok?'&#x2705; Correct!':'&#x274C; Answer: '+correct}</div>`;
+}
+function nextQ(){ QZ.cur++; if(QZ.cur>=QZ.cnt) finishQuiz(); else renderQQ(); }
+function finishQuiz(){
+  clearInterval(S.quizTimer);
+  const pct=Math.round((QZ.ok/QZ.cnt)*100);
+  const elapsed=Math.round((Date.now()-QZ.start)/1000);
+  const grade=pct>=90?'A':pct>=80?'B':pct>=70?'C':pct>=60?'D':'F';
+  el('quiz-run-body').innerHTML=`
+    <div class="quiz-score-card">
+      <div class="score-big">${pct}%</div><div class="score-grade">${grade}</div>
+      <div class="score-label">${QZ.ok} of ${QZ.cnt} correct &nbsp;&#183;&nbsp; ${QZ.topic.label}</div>
+      <div class="text-muted mt-2">${QZ.st.name} &nbsp;&#183;&nbsp; Grade ${QZ.st.grade}</div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:20px">
+      <button class="btn btn-secondary" style="flex:1;padding:13px" onclick="closeModal('modal-quiz-run');renderQuiz()">Done</button>
+      <button class="btn btn-primary" style="flex:1;padding:13px" onclick="reQuiz()">Try Again</button>
+    </div>`;
+  const res={correct:QZ.ok,total:QZ.cnt,pct,letterGrade:grade,topicId:QZ.topicId,gradeLevel:QZ.st.grade,elapsed};
+  fetch(API+'/quiz/save',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({address:S.addr,studentId:QZ.sid,result:res})})
+    .then(()=>{ S.quizResults.unshift({...res,savedAt:Date.now(),studentId:QZ.sid}); renderQuiz(); renderHome(); }).catch(()=>{});
+}
+function reQuiz(){ closeModal('modal-quiz-run'); setTimeout(startQuiz,100); }
+function abortQuiz(){ clearInterval(S.quizTimer); closeModal('modal-quiz-run'); }
+
+// ── QUIZ HISTORY DOWNLOAD ─────────────────────────────────────────────────────
+function printQuizHistory() {
+  const st = S.students.find(s => s.id === S.activeId); if (!st) return;
+  if (S.quizResults.length === 0) { toast('No quiz history yet.', true); return; }
+  const avgPct = Math.round(S.quizResults.reduce((a,r)=>a+r.pct,0)/S.quizResults.length);
+  const bestPct = Math.max(...S.quizResults.map(r=>r.pct));
+  let rows = S.quizResults.map((r,i) => {
+    const t = TOPICS.find(x=>x.id===r.topicId)||{emoji:'&#x1F9EE;',label:r.topicId};
+    const gc = r.letterGrade?`grade-${r.letterGrade}`:'';
+    const dur = r.elapsed ? (r.elapsed >= 60 ? Math.round(r.elapsed/60)+'m' : r.elapsed+'s') : '—';
+    return `<tr><td>${i+1}</td><td>${t.emoji} ${t.label}</td><td>Grade ${r.gradeLevel}</td>
+      <td>${r.correct}/${r.total}</td><td>${r.pct}%</td>
+      <td><span class="badge-grade ${gc}">${r.letterGrade||'—'}</span></td>
+      <td>${dur}</td><td>${new Date(r.savedAt).toLocaleDateString()}</td></tr>`;
+  }).join('');
+  const body = `
+    <div class="orca-header"><div class="orca-logo">&#x1F433;</div>
+      <div><div class="orca-title">OrcaLearn</div><div class="orca-sub">Quiz History Report</div></div></div>
+    <h1>${st.avatar||''} ${st.name} — Math Quiz History</h1>
+    <p class="meta">Grade ${st.grade} &nbsp;·&nbsp; ${S.quizResults.length} quizzes &nbsp;·&nbsp; Generated ${new Date().toLocaleDateString()}</p>
+    <h2>Summary</h2>
+    <table><tr><th>Total Quizzes</th><th>Average Score</th><th>Best Score</th></tr>
+    <tr><td>${S.quizResults.length}</td><td>${avgPct}%</td><td>${bestPct}%</td></tr></table>
+    <h2>All Quiz Sessions</h2>
+    <table><tr><th>#</th><th>Topic</th><th>Grade</th><th>Correct</th><th>Score</th><th>Grade</th><th>Time</th><th>Date</th></tr>${rows}</table>
+    <div class="footer">Generated by OrcaLearn &nbsp;·&nbsp; orcalearn.ai &nbsp;·&nbsp; ${new Date().toLocaleDateString()}</div>`;
+  printBase(`Quiz History — ${st.name}`, body);
+}
+
+// ── CERTIFICATE OF COMPLETION ──────────────────────────────────────────────────
+function printCertificate(planId) {
+  const p = S.plans.find(x=>x.planId===planId); if(!p) return;
+  const st = S.students.find(s=>s.id===p.studentId);
+  const subj = SUBJECT_NAMES[p.subject]||p.subject;
+  const icon = SUBJECT_ICONS[p.subject]||'&#x1F4DA;';
+  const dateStr = new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+  const w = window.open('','_blank');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Certificate</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:Georgia,serif;background:#faf7ff;display:flex;flex-direction:column;min-height:100vh;}
+    #print-bar{background:#7c3aed;color:white;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;}
+    #print-bar h2{font-size:15px;font-weight:700;font-family:-apple-system,sans-serif;}
+    #print-bar button{background:white;color:#7c3aed;border:none;border-radius:8px;padding:8px 18px;font-size:14px;font-weight:700;cursor:pointer;font-family:-apple-system,sans-serif;}
+    .cert{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 20px;}
+    .cert-inner{background:white;border:8px solid #7c3aed;border-radius:24px;padding:48px 56px;text-align:center;max-width:700px;width:100%;box-shadow:0 8px 40px rgba(124,58,237,0.15);position:relative;}
+    .cert-inner::before{content:'';position:absolute;inset:12px;border:2px solid #ede9fe;border-radius:16px;pointer-events:none;}
+    .cert-logo{font-size:56px;margin-bottom:8px;}
+    .cert-org{font-size:14px;font-weight:700;letter-spacing:3px;color:#7c3aed;text-transform:uppercase;margin-bottom:24px;font-family:-apple-system,sans-serif;}
+    .cert-title{font-size:36px;font-weight:400;color:#1e1b4b;margin-bottom:8px;font-style:italic;}
+    .cert-of{font-size:16px;letter-spacing:2px;text-transform:uppercase;color:#9ca3af;margin-bottom:32px;font-family:-apple-system,sans-serif;}
+    .cert-name{font-size:42px;font-weight:700;color:#7c3aed;margin-bottom:24px;border-bottom:2px solid #ede9fe;padding-bottom:16px;}
+    .cert-body{font-size:18px;color:#374151;line-height:1.7;margin-bottom:32px;}
+    .cert-subject{font-size:24px;font-weight:700;color:#1e1b4b;}
+    .cert-footer{display:flex;justify-content:space-between;align-items:flex-end;margin-top:40px;padding-top:20px;border-top:1px solid #e5e7eb;}
+    .cert-date{font-size:14px;color:#6b7280;font-family:-apple-system,sans-serif;}
+    .cert-seal{font-size:48px;}
+    .cert-issued{font-size:12px;color:#9ca3af;font-family:-apple-system,sans-serif;}
+    @media print{#print-bar{display:none!important;} .cert{padding:0;} .cert-inner{border-radius:0;box-shadow:none;}}
+  </style></head><body>
+  <div id="print-bar"><h2>&#x1F3C6; Certificate of Completion</h2><button onclick="window.print()">&#x1F5A8; Print / Save as PDF</button></div>
+  <div class="cert"><div class="cert-inner">
+    <div class="cert-logo">&#x1F433;</div>
+    <div class="cert-org">OrcaLearn</div>
+    <div class="cert-title">Certificate</div>
+    <div class="cert-of">of Completion</div>
+    <div class="cert-name">${st?st.name:'Student'}</div>
+    <div class="cert-body">
+      has successfully completed all ${p.days} days of the<br>
+      <span class="cert-subject">${icon} ${subj}</span><br>
+      lesson plan for Grade ${p.grade}
+    </div>
+    <div class="cert-footer">
+      <div><div class="cert-date">${dateStr}</div><div class="cert-issued">Date Completed</div></div>
+      <div class="cert-seal">&#x1F3C5;</div>
+      <div style="text-align:right"><div class="cert-date">orcalearn.ai</div><div class="cert-issued">Issued by OrcaLearn</div></div>
+    </div>
+  </div></div>
+  </body></html>`);
+  w.document.close();
+}
+
+// ── EXPORT PORTFOLIO ──────────────────────────────────────────────────────────
+async function exportPortfolio() {
+  const st = S.students.find(s=>s.id===S.activeId); if(!st){toast('Select a student first.',true);return;}
+  if(typeof JSZip==='undefined'){toast('Loading ZIP library...',false,2000);return;}
+  toast('Building portfolio...', false, 10000);
+
+  const myPlans = S.plans.filter(p=>p.studentId===st.id);
+  const zip = new JSZip();
+  const folder = zip.folder(`OrcaLearn_Portfolio_${st.name.replace(/\s+/g,'_')}`);
+
+  // Helper: generate HTML page content (same format as printBase but returns string)
+  function makeHtml(title, bodyHtml) {
+    return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${title}</title>
+    <style>
+      *{box-sizing:border-box;margin:0;padding:0;}
+      body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#1e1b4b;padding:32px 24px;max-width:800px;margin:0 auto;}
+      h1{font-size:22px;font-weight:800;margin-bottom:4px;}
+      h2{font-size:16px;font-weight:700;margin:20px 0 8px;color:#7c3aed;border-bottom:2px solid #ede9fe;padding-bottom:4px;}
+      p,li{font-size:14px;line-height:1.7;} ul{padding-left:20px;}
+      table{width:100%;border-collapse:collapse;font-size:14px;margin:8px 0;}
+      th{background:#f5f3ff;color:#5b21b6;font-weight:700;padding:8px 12px;text-align:left;border:1px solid #e5e7eb;}
+      td{padding:8px 12px;border:1px solid #e5e7eb;}
+      tr:nth-child(even) td{background:#fafafa;}
+      .meta{font-size:13px;color:#6b7280;margin-bottom:20px;}
+      .badge-grade{padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600;}
+      .grade-A{background:#d1fae5;color:#065f46;} .grade-B{background:#dbeafe;color:#1e40af;}
+      .grade-C{background:#fef9c3;color:#713f12;} .grade-D,.grade-F{background:#fee2e2;color:#991b1b;}
+      .badge-pass{background:#d1fae5;color:#065f46;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600;}
+      .footer{margin-top:40px;padding-top:16px;border-top:2px solid #e5e7eb;font-size:12px;color:#9ca3af;text-align:center;}
+      .progress-bar{height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden;margin:4px 0 8px;}
+      .progress-fill{height:100%;background:linear-gradient(90deg,#7c3aed,#2563eb);border-radius:4px;}
+      pre{white-space:pre-wrap;font-family:inherit;font-size:13px;line-height:1.7;background:#f9fafb;border-radius:8px;padding:16px;border:1px solid #e5e7eb;}
+    </style></head><body>${bodyHtml}</body></html>`;
+  }
+
+  // Progress report
+  const totalDone = Object.values(S.progress).reduce((a,p)=>a+(p.completedDays?.length||0),0);
+  const avgScore = S.quizResults.length>0 ? Math.round(S.quizResults.reduce((a,r)=>a+r.pct,0)/S.quizResults.length) : null;
+  let plansRows = myPlans.length===0 ? '<tr><td colspan="4">No plans yet</td></tr>' :
+    myPlans.map(p=>{const prog=S.progress[p.planId]||{};const done=prog.completedDays?.length||0;const total=p.days||5;const pct=Math.round((done/total)*100);
+      return `<tr><td>${SUBJECT_NAMES[p.subject]||p.subject}</td><td>Grade ${p.grade}</td><td>${done}/${total} days</td><td>${pct}%</td></tr>`;}).join('');
+  let qRows = S.quizResults.length===0 ? '<tr><td colspan="5">No quizzes yet</td></tr>' :
+    S.quizResults.map(r=>{const t=TOPICS.find(x=>x.id===r.topicId)||{label:r.topicId};const gc=r.letterGrade?`grade-${r.letterGrade}`:'';
+      return `<tr><td>${t.label}</td><td>Grade ${r.gradeLevel}</td><td>${r.correct}/${r.total}</td><td>${r.pct}%</td><td><span class="badge-grade ${gc}">${r.letterGrade||'—'}</span></td></tr>`;}).join('');
+  const progressBody = `<h1>${st.avatar||''} ${st.name} — Progress Report</h1>
+    <p class="meta">Grade ${st.grade} · Generated ${new Date().toLocaleDateString()}</p>
+    <h2>Summary</h2><table><tr><th>Lesson Plans</th><th>Days Completed</th><th>Quizzes</th><th>Avg Score</th></tr>
+    <tr><td>${myPlans.length}</td><td>${totalDone}</td><td>${S.quizResults.length}</td><td>${avgScore!==null?avgScore+'%':'—'}</td></tr></table>
+    <h2>Lesson Plans</h2><table><tr><th>Subject</th><th>Grade</th><th>Progress</th><th>Completion %</th></tr>${plansRows}</table>
+    <h2>Quiz History</h2><table><tr><th>Topic</th><th>Grade</th><th>Correct</th><th>Score</th><th>Grade</th></tr>${qRows}</table>
+    <div class="footer">Generated by OrcaLearn · orcalearn.ai · ${new Date().toLocaleDateString()}</div>`;
+  folder.file('progress_report.html', makeHtml(`Progress Report — ${st.name}`, progressBody));
+
+  // Each plan
+  const plansFolder = folder.folder('lesson_plans');
+  for (const p of myPlans) {
+    const prog = S.progress[p.planId]||{completedDays:[]};
+    const done = prog.completedDays||[];
+    const total = p.days||5;
+    const pct = Math.round((done.length/total)*100);
+    const subj = SUBJECT_NAMES[p.subject]||p.subject;
+    let daysHtml = '';
+    for(let d=1;d<=total;d++) daysHtml+=`<span style="display:inline-block;margin:2px 6px;font-size:13px;${done.includes(d)?'color:#059669;font-weight:700':'color:#9ca3af'}">${done.includes(d)?'✅':'□'} Day ${d}</span>`;
+    const planBody = `<h1>${subj} — Grade ${p.grade}</h1>
+      <p class="meta">${st.name} · ${total} days · Generated ${new Date(p.createdAt).toLocaleDateString()}</p>
+      <h2>Progress: ${done.length}/${total} days (${pct}%)</h2>
+      <div class="progress-bar" style="max-width:300px"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div style="margin:8px 0 16px">${daysHtml}</div>
+      ${p.goals?`<h2>Goals</h2><p>${p.goals}</p>`:''}
+      <h2>Lesson Plan</h2><pre>${p.text||''}</pre>
+      <div class="footer">OrcaLearn · orcalearn.ai · ${new Date().toLocaleDateString()}</div>`;
+    const fname = `${p.subject}_grade${p.grade}_${new Date(p.createdAt).toISOString().slice(0,10)}.html`;
+    plansFolder.file(fname, makeHtml(`${subj} Grade ${p.grade}`, planBody));
+  }
+
+  // Quiz history
+  if (S.quizResults.length > 0) {
+    const allRows = S.quizResults.map((r,i)=>{
+      const t=TOPICS.find(x=>x.id===r.topicId)||{emoji:'',label:r.topicId};
+      const gc=r.letterGrade?`grade-${r.letterGrade}`:'';
+      return `<tr><td>${i+1}</td><td>${t.label}</td><td>Grade ${r.gradeLevel}</td><td>${r.correct}/${r.total}</td><td>${r.pct}%</td><td><span class="badge-grade ${gc}">${r.letterGrade||'—'}</span></td><td>${new Date(r.savedAt).toLocaleDateString()}</td></tr>`;
+    }).join('');
+    const qhBody = `<h1>${st.avatar||''} ${st.name} — Quiz History</h1>
+      <p class="meta">All ${S.quizResults.length} quiz sessions</p>
+      <table><tr><th>#</th><th>Topic</th><th>Grade Level</th><th>Correct</th><th>Score</th><th>Letter Grade</th><th>Date</th></tr>${allRows}</table>
+      <div class="footer">OrcaLearn · orcalearn.ai · ${new Date().toLocaleDateString()}</div>`;
+    folder.file('quiz_history.html', makeHtml(`Quiz History — ${st.name}`, qhBody));
+  }
+
+  // Add README
+  folder.file('README.txt', `OrcaLearn Student Portfolio\nStudent: ${st.name} (Grade ${st.grade})\nExported: ${new Date().toLocaleDateString()}\n\nFiles:\n- progress_report.html  Open in browser, print to save as PDF\n- lesson_plans/         Individual lesson plan files\n- quiz_history.html     All quiz results\n\nGenerated by OrcaLearn · orcalearn.ai`);
+
+  try {
+    const blob = await zip.generateAsync({type:'blob'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `OrcaLearn_Portfolio_${st.name.replace(/\s+/g,'_')}.zip`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(url), 5000);
+    toast('Portfolio downloaded! Check your Downloads folder. &#x1F389;', false, 4000);
+  } catch(e) { toast('Export failed: '+e.message, true); }
+}
+
+// ── PRINT HELPERS ─────────────────────────────────────────────────────────────
+function printBase(title, bodyHtml) {
+  const w = window.open('', '_blank');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <title>${title}</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#1e1b4b;background:#fff;padding:0;}
+    #print-bar{background:#7c3aed;color:white;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;}
+    #print-bar h2{font-size:15px;font-weight:700;}
+    #print-bar button{background:white;color:#7c3aed;border:none;border-radius:8px;padding:8px 18px;font-size:14px;font-weight:700;cursor:pointer;}
+    .content{max-width:800px;margin:0 auto;padding:32px 24px;}
+    @media print{#print-bar{display:none!important;} .content{padding:0;max-width:100%;}}
+    h1{font-size:22px;font-weight:800;margin-bottom:4px;}
+    h2{font-size:16px;font-weight:700;margin:20px 0 8px;color:#7c3aed;border-bottom:2px solid #ede9fe;padding-bottom:4px;}
+    h3{font-size:14px;font-weight:700;margin:12px 0 6px;}
+    p,li{font-size:14px;line-height:1.7;}
+    ul{padding-left:20px;}
+    table{width:100%;border-collapse:collapse;font-size:14px;margin:8px 0;}
+    th{background:#f5f3ff;color:#5b21b6;font-weight:700;padding:8px 12px;text-align:left;border:1px solid #e5e7eb;}
+    td{padding:8px 12px;border:1px solid #e5e7eb;}
+    tr:nth-child(even) td{background:#fafafa;}
+    .meta{font-size:13px;color:#6b7280;margin-bottom:20px;}
+    .badge-pass{background:#d1fae5;color:#065f46;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600;}
+    .badge-grade{padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600;}
+    .grade-A{background:#d1fae5;color:#065f46;} .grade-B{background:#dbeafe;color:#1e40af;}
+    .grade-C{background:#fef9c3;color:#713f12;} .grade-D,.grade-F{background:#fee2e2;color:#991b1b;}
+    .footer{margin-top:40px;padding-top:16px;border-top:2px solid #e5e7eb;font-size:12px;color:#9ca3af;text-align:center;}
+    .sig-line{display:flex;gap:40px;margin-top:32px;}
+    .sig-item{flex:1;}
+    .sig-item .line{border-bottom:1px solid #374151;height:32px;margin-bottom:4px;}
+    .sig-item .label{font-size:12px;color:#6b7280;}
+    pre{white-space:pre-wrap;font-family:inherit;font-size:13px;line-height:1.7;background:#f9fafb;border-radius:8px;padding:16px;border:1px solid #e5e7eb;}
+    .day-row{display:inline-flex;align-items:center;gap:4px;margin:3px 6px 3px 0;font-size:13px;}
+    .day-done{color:#059669;font-weight:700;} .day-todo{color:#9ca3af;}
+    .progress-bar{height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden;margin:4px 0 8px;}
+    .progress-fill{height:100%;background:linear-gradient(90deg,#7c3aed,#2563eb);border-radius:4px;}
+    .orca-header{display:flex;align-items:center;gap:12px;margin-bottom:20px;padding-bottom:16px;border-bottom:3px solid #7c3aed;}
+    .orca-logo{font-size:40px;}
+    .orca-title{font-size:24px;font-weight:900;color:#1e1b4b;}
+    .orca-sub{font-size:13px;color:#7c3aed;font-weight:600;}
+  </style></head><body>
+  <div id="print-bar"><h2>&#x1F4C4; ${title}</h2><button onclick="window.print()">&#x1F5A8; Print / Save as PDF</button></div>
+  <div class="content">${bodyHtml}</div>
+  </body></html>`);
+  w.document.close();
+}
+
+// ── DOWNLOAD PLAN ─────────────────────────────────────────────────────────────
+function printPlan(planId) {
+  const p = S.plans.find(x => x.planId === planId); if (!p) return;
+  const st = S.students.find(s => s.id === p.studentId);
+  const icon = SUBJECT_ICONS[p.subject] || '';
+  const subj = SUBJECT_NAMES[p.subject] || p.subject;
+  const prog = S.progress[p.planId] || { completedDays: [] };
+  const done = prog.completedDays || [];
+  const total = p.days || 5;
+  const pct = Math.round((done.length / total) * 100);
+  const date = new Date(p.createdAt).toLocaleDateString();
+
+  let daysHtml = '';
+  for (let d = 1; d <= total; d++) {
+    const isDone = done.includes(d);
+    daysHtml += `<span class="day-row"><span class="${isDone ? 'day-done' : 'day-todo'}">${isDone ? '&#x2705;' : '&#x25A1;'} Day ${d}</span></span>`;
+  }
+
+  const body = `
+    <div class="orca-header">
+      <div class="orca-logo">&#x1F433;</div>
+      <div><div class="orca-title">OrcaLearn</div><div class="orca-sub">Lesson Plan</div></div>
+    </div>
+    <h1>${subj} — Grade ${p.grade}</h1>
+    <p class="meta">${st ? st.name : 'Student'} &nbsp;·&nbsp; ${total} days &nbsp;·&nbsp; Generated ${date}</p>
+    <h2>Progress</h2>
+    <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    <p style="font-size:13px;color:#6b7280;margin-bottom:8px">${done.length} of ${total} days completed (${pct}%)</p>
+    <div>${daysHtml}</div>
+    ${p.goals ? `<h2>Goals</h2><p>${p.goals}</p>` : ''}
+    <h2>Lesson Plan</h2>
+    <pre>${p.text || ''}</pre>
+    <div class="footer">Generated by OrcaLearn &nbsp;·&nbsp; orcalearn.ai &nbsp;·&nbsp; ${new Date().toLocaleDateString()}</div>`;
+
+  printBase(`${subj} — Grade ${p.grade}`, body);
+}
+
+// ── PROGRESS REPORT ───────────────────────────────────────────────────────────
+function printProgressReport() {
+  const st = S.students.find(s => s.id === S.activeId); if (!st) { toast('Select a student first.', true); return; }
+  const myPlans = S.plans.filter(p => p.studentId === st.id);
+  const totalDone = Object.values(S.progress).reduce((a, p) => a + (p.completedDays?.length || 0), 0);
+  const avgScore = S.quizResults.length > 0
+    ? Math.round(S.quizResults.reduce((a, r) => a + r.pct, 0) / S.quizResults.length)
+    : null;
+
+  let plansRows = myPlans.length === 0 ? '<tr><td colspan="4" style="text-align:center;color:#9ca3af">No plans yet</td></tr>' :
+    myPlans.map(p => {
+      const prog = S.progress[p.planId] || {};
+      const done = prog.completedDays?.length || 0;
+      const total = p.days || 5;
+      const pct = Math.round((done / total) * 100);
+      return `<tr><td>${SUBJECT_NAMES[p.subject] || p.subject}</td><td>Grade ${p.grade}</td>
+        <td>${done}/${total} days</td>
+        <td><div class="progress-bar" style="width:80px;display:inline-block"><div class="progress-fill" style="width:${pct}%"></div></div> ${pct}%</td></tr>`;
+    }).join('');
+
+  let quizRows = S.quizResults.length === 0 ? '<tr><td colspan="4" style="text-align:center;color:#9ca3af">No quizzes yet</td></tr>' :
+    S.quizResults.slice(0, 10).map(r => {
+      const t = TOPICS.find(x => x.id === r.topicId) || { label: r.topicId };
+      const gc = r.letterGrade ? `grade-${r.letterGrade}` : '';
+      return `<tr><td>${t.label}</td><td>Grade ${r.gradeLevel}</td>
+        <td>${r.correct}/${r.total}</td>
+        <td><span class="badge-grade ${gc}">${r.letterGrade || r.pct + '%'}</span></td></tr>`;
+    }).join('');
+
+  const body = `
+    <div class="orca-header">
+      <div class="orca-logo">&#x1F433;</div>
+      <div><div class="orca-title">OrcaLearn</div><div class="orca-sub">Progress Report</div></div>
+    </div>
+    <h1>${st.avatar || ''} ${st.name}</h1>
+    <p class="meta">Grade ${st.grade} &nbsp;·&nbsp; Report generated ${new Date().toLocaleDateString()}</p>
+    <h2>Summary</h2>
+    <table><tr>
+      <th>Lesson Plans</th><th>Days Completed</th><th>Quizzes Taken</th><th>Avg Quiz Score</th>
+    </tr><tr>
+      <td>${myPlans.length}</td><td>${totalDone}</td><td>${S.quizResults.length}</td>
+      <td>${avgScore !== null ? avgScore + '%' : '—'}</td>
+    </tr></table>
+    <h2>Lesson Plans</h2>
+    <table><tr><th>Subject</th><th>Grade</th><th>Progress</th><th>Completion</th></tr>${plansRows}</table>
+    <h2>Quiz History (Recent)</h2>
+    <table><tr><th>Topic</th><th>Grade Level</th><th>Score</th><th>Grade</th></tr>${quizRows}</table>
+    <div class="footer">Generated by OrcaLearn &nbsp;·&nbsp; orcalearn.ai &nbsp;·&nbsp; ${new Date().toLocaleDateString()}</div>`;
+
+  printBase(`Progress Report — ${st.name}`, body);
+}
+
+// ── TRANSCRIPT ────────────────────────────────────────────────────────────────
+function openTranscriptModal() {
+  const st = S.students.find(s => s.id === S.activeId);
+  if (!st) { toast('Select a student first.', true); return; }
+  el('tr-student-name').value = st.name;
+  el('tr-dob').value = '';
+  el('tr-school-name').value = '';
+  el('tr-year').value = '';
+  el('tr-parent-name').value = '';
+  openModal('modal-transcript');
+}
+
+function generateTranscript() {
+  const st = S.students.find(s => s.id === S.activeId); if (!st) return;
+  const fullName = el('tr-student-name').value.trim() || st.name;
+  const dob = el('tr-dob').value.trim();
+  const schoolName = el('tr-school-name').value.trim() || 'Homeschool';
+  const year = el('tr-year').value.trim() || new Date().getFullYear() + '-' + (new Date().getFullYear() + 1);
+  const parentName = el('tr-parent-name').value.trim();
+  closeModal('modal-transcript');
+
+  const myPlans = S.plans.filter(p => p.studentId === st.id);
+
+  // Build course records: group by subject, calculate credits & grade
+  const courseMap = {};
+  for (const p of myPlans) {
+    if (!courseMap[p.subject]) courseMap[p.subject] = { subject: p.subject, grade: p.grade, totalDays: 0, doneDays: 0, quizScores: [] };
+    const prog = S.progress[p.planId] || {};
+    courseMap[p.subject].totalDays += (p.days || 5);
+    courseMap[p.subject].doneDays += (prog.completedDays?.length || 0);
+  }
+  // Attach quiz scores per subject
+  for (const r of S.quizResults) {
+    // Map topic to subject
+    const subjectForTopic = r.topicId === 'mixed' || r.topicId === 'addition' || r.topicId === 'subtraction' ||
+      r.topicId === 'multiplication' || r.topicId === 'division' || r.topicId === 'fractions' ||
+      r.topicId === 'decimals' || r.topicId === 'wordproblems' || r.topicId === 'prealgebra' ? 'math' : null;
+    if (subjectForTopic && courseMap[subjectForTopic]) {
+      courseMap[subjectForTopic].quizScores.push(r.pct);
+    }
+  }
+
+  const courses = Object.values(courseMap);
+  let totalCredits = 0;
+  let gpaNumerator = 0, gpaCount = 0;
+  const gradePoints = { A: 4.0, B: 3.0, C: 2.0, D: 1.0, F: 0.0 };
+
+  let courseRows = courses.length === 0
+    ? '<tr><td colspan="5" style="text-align:center;color:#9ca3af">No completed subjects yet</td></tr>'
+    : courses.map(c => {
+        // 1 credit per 36 completed lesson days (standard Carnegie unit)
+        const credits = Math.round((c.doneDays / 36) * 2) / 2; // round to nearest 0.5
+        totalCredits += credits;
+        let letterGrade = 'Pass';
+        if (c.quizScores.length > 0) {
+          const avg = Math.round(c.quizScores.reduce((a, b) => a + b, 0) / c.quizScores.length);
+          letterGrade = avg >= 90 ? 'A' : avg >= 80 ? 'B' : avg >= 70 ? 'C' : avg >= 60 ? 'D' : 'F';
+          if (gradePoints[letterGrade] !== undefined) { gpaNumerator += gradePoints[letterGrade]; gpaCount++; }
+        }
+        const gc = letterGrade !== 'Pass' ? `grade-${letterGrade}` : 'badge-pass';
+        return `<tr><td>${SUBJECT_NAMES[c.subject] || c.subject}</td><td>Grade ${c.grade}</td>
+          <td>${c.doneDays} / ${c.totalDays}</td>
+          <td>${credits.toFixed(1)}</td>
+          <td><span class="badge-grade ${gc}">${letterGrade}</span></td></tr>`;
+      }).join('');
+
+  const gpa = gpaCount > 0 ? (gpaNumerator / gpaCount).toFixed(2) : 'N/A';
+  const inProgress = courses.filter(c => c.doneDays < c.totalDays).length;
+
+  const body = `
+    <div class="orca-header">
+      <div class="orca-logo">&#x1F393;</div>
+      <div><div class="orca-title">${schoolName}</div><div class="orca-sub">Official Homeschool Transcript</div></div>
+    </div>
+    <h2>Student Information</h2>
+    <table><tr>
+      <th>Student Name</th><th>Grade Level</th>${dob ? '<th>Date of Birth</th>' : ''}<th>Academic Year</th>
+    </tr><tr>
+      <td><strong>${fullName}</strong></td><td>Grade ${st.grade}</td>${dob ? `<td>${dob}</td>` : ''}<td>${year}</td>
+    </tr></table>
+    ${parentName ? `<p style="font-size:13px;color:#6b7280;margin-top:8px">School Administrator / Parent: <strong>${parentName}</strong></p>` : ''}
+    <h2>Course Record</h2>
+    <table>
+      <tr><th>Subject</th><th>Grade Level</th><th>Days Completed</th><th>Credits Earned</th><th>Grade</th></tr>
+      ${courseRows}
+    </table>
+    <p style="font-size:12px;color:#9ca3af;margin-top:6px">Credits: 1 credit per 36 completed lesson days (Carnegie Unit standard). Grade based on quiz scores for that subject; "Pass" if no quiz data.</p>
+    <h2>Academic Summary</h2>
+    <table><tr>
+      <th>Total Credits Earned</th><th>Cumulative GPA</th><th>Courses in Progress</th><th>Total Subjects</th>
+    </tr><tr>
+      <td><strong>${totalCredits.toFixed(1)}</strong></td>
+      <td><strong>${gpa}</strong></td>
+      <td>${inProgress}</td>
+      <td>${courses.length}</td>
+    </tr></table>
+    <div class="sig-line">
+      ${parentName ? `<div class="sig-item"><div class="line"></div><div class="label">Parent / School Administrator: ${parentName}</div></div>` : '<div class="sig-item"><div class="line"></div><div class="label">Parent / School Administrator Signature</div></div>'}
+      <div class="sig-item"><div class="line"></div><div class="label">Date Issued</div></div>
+    </div>
+    <div class="footer" style="margin-top:24px">
+      Issued by OrcaLearn &nbsp;·&nbsp; orcalearn.ai &nbsp;·&nbsp; ${new Date().toLocaleDateString()}<br>
+      <em>This transcript was generated by OrcaLearn, an AI-powered homeschool platform.</em>
+    </div>`;
+
+  printBase(`Transcript — ${fullName}`, body);
+}
+
+// ── TABS ──────────────────────────────────────────────────────────────────────
+function showTab(name){
+  ['home','plans','quiz','students'].forEach(t=>{ el('tab-'+t).style.display=t===name?'':'none'; });
+  document.querySelectorAll('.bottom-nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));
+  if(name==='home') renderHome();
+  if(name==='plans') renderPlans();
+  if(name==='students') renderStudents();
+  window.scrollTo(0,0);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+(async function init(){
+  pingDot('landing-status-dot'); loadStats();
+  setInterval(()=>{pingDot('landing-status-dot');pingDot('app-status-dot');},30000);
+  if(window.ethereum){
+    try{
+      const p=new ethers.BrowserProvider(window.ethereum);
+      const accs=await p.listAccounts();
+      if(accs.length>0){
+        S.provider=p; S.signer=await p.getSigner(); S.addr=await S.signer.getAddress(); afterConnect();
+      }
+    }catch{}
+    window.ethereum.on('accountsChanged',async accs=>{
+      if(accs.length===0) disconnectWallet();
+      else{ S.addr=accs[0]; await loadAll(); renderHome();renderPlans();renderQuiz();renderStudents(); }
+    });
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OrcaLearn</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background: linear-gradient(135deg, #f8fafc 0%, #e0f2fe 100%); }
+    .orca-card { transition: all 0.3s; }
+    .orca-card:hover { transform: translateY(-4px); }
+  </style>
+</head>
+<body class="min-h-screen pb-12">
+  <div class="max-w-md mx-auto bg-white min-h-screen shadow-xl overflow-hidden">
+
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-cyan-500 to-blue-600 text-white p-6">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-4xl">🐋</div>
+        <div>
+          <h1 class="text-3xl font-bold">OrcaLearn</h1>
+          <p class="text-cyan-100 text-sm">Homeschooling, Made Simple</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Connect Wallet -->
+    <div class="p-6">
+      <button onclick="connectWallet()" 
+              class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-4 rounded-3xl font-semibold flex items-center justify-center gap-3 text-lg">
+        🦊 Connect Wallet
+      </button>
+    </div>
+
+    <!-- Main Content -->
+    <div class="px-6 space-y-8">
+      <div class="text-center">
+        <h2 class="text-4xl font-bold text-slate-800">Homeschooling,<br><span class="text-blue-600">Made Simple</span></h2>
+        <p class="text-slate-600 mt-4 text-lg">AI-powered lesson plans, progress tracking, and everything your family needs — all in one friendly place.</p>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div class="bg-white rounded-3xl p-6 shadow orca-card text-center">
+          <div class="text-4xl mb-3">🤖</div>
+          <div class="font-semibold">AI Lesson Plans</div>
+        </div>
+        <div class="bg-white rounded-3xl p-6 shadow orca-card text-center">
+          <div class="text-4xl mb-3">📊</div>
+          <div class="font-semibold">Progress Tracking</div>
+        </div>
+      </div>
+
+      <div class="text-center pt-8">
+        <p class="text-sm text-slate-500">Free to start • Your data, your wallet</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function connectWallet() {
+      alert("MetaMask / Wallet Connect coming soon! (Mobile friendly version)");
+    }
+  </script>
+</body>
+</html>
