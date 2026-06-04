@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OrcaLearn</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 min-h-screen">
+  <div class="max-w-md mx-auto bg-white min-h-screen shadow-xl">
+    <div class="bg-blue-600 text-white p-8 text-center">
+      <div class="text-6xl mb-4">🐋</div>
+      <h1 class="text-4xl font-bold">OrcaLearn</h1>
+      <p class="text-blue-200 mt-2">Homeschooling, Made Simple</p>
+    </div>
+    
+    <div class="p-6">
+      <button onclick="alert('Wallet connect coming soon!')" 
+              class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-4 rounded-3xl font-semibold text-xl">
+        🦊 Connect Wallet
+      </button>
+    </div>
+
+    <div class="px-6 text-center">
+      <p class="text-lg text-slate-700">AI Lesson Plans • Progress Tracking • Quizzes</p>
+      <p class="text-sm text-slate-500 mt-8">Your data • Your wallet • Free to start</p>
+    </div>
+  </div>
+</body>
+</html>

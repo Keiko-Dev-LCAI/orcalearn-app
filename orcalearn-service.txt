@@ -1,0 +1,31 @@
+# To install/reinstall the OrcaLearn systemd service, run these commands:
+
+sudo tee /etc/systemd/system/orcalearn-server.service > /dev/null << 'EOF'
+[Unit]
+Description=OrcaLearn Homeschool Backend
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=keiko
+WorkingDirectory=/home/keiko
+Environment="LIGHTCHAIN_PRIVATE_KEY=[REDACTED-use-EnvironmentFile]"
+ExecStart=/usr/bin/python3 /home/keiko/Desktop/orcalearn-server.py
+Restart=always
+RestartSec=10
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl enable orcalearn-server
+sudo systemctl start orcalearn-server
+sudo systemctl status orcalearn-server
+
+# Cloudflare tunnel entry (/etc/cloudflared/config.yml):
+# - hostname: orcalearn.ai
+#   service: http://localhost:8182
