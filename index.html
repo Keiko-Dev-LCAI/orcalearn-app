@@ -15,7 +15,7 @@
   --blue:#2563eb;--blue-light:#dbeafe;
   --text:#1e1b4b;--text-muted:#6b7280;--border:#e5e7eb;--bg:#f5f3ff;
 }
-html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:16px;}
+html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;font-size:17px;}
 
 /* LANDING */
 #landing{min-height:100vh;background:linear-gradient(160deg,#fce4ec 0%,#f3e5f5 40%,#ede9fe 65%,#dbeafe 100%);display:flex;flex-direction:column;}
@@ -54,13 +54,15 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Ro
 
 /* APP SHELL */
 #app{height:100vh;background:var(--bg);display:flex;flex-direction:column;overflow:hidden;}
-.app-nav{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:white;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10;gap:8px;}
-.nav-wallet{display:flex;align-items:center;gap:6px;flex-shrink:0;}
-.wallet-addr{font-size:11px;color:var(--text-muted);font-family:monospace;}
-.paid-badge{background:#d1fae5;color:#065f46;border-radius:999px;padding:3px 8px;font-size:11px;font-weight:700;}
-.free-badge{background:#fef9c3;color:#713f12;border-radius:999px;padding:3px 8px;font-size:11px;font-weight:700;}
+.app-nav{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;background:white;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10;gap:8px;}
+.nav-wallet{display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.wallet-addr{font-size:12px;color:var(--text-muted);font-family:monospace;}
+.paid-badge{background:#d1fae5;color:#065f46;border-radius:999px;padding:4px 10px;font-size:12px;font-weight:700;white-space:nowrap;}
+.free-badge{background:#fef9c3;color:#713f12;border-radius:999px;padding:4px 10px;font-size:12px;font-weight:700;white-space:nowrap;}
 .tab-content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
-.tab-section{padding:12px 24px 16px;max-width:1100px;margin:0 auto;width:100%;}
+.tab-section{padding:14px 20px 20px;max-width:1100px;margin:0 auto;width:100%;}
+.home-welcome{font-size:24px;font-weight:800;color:var(--text);margin-bottom:12px;line-height:1.2;}
+.home-welcome-sub{font-size:14px;font-weight:500;color:var(--text-muted);margin:-6px 0 14px;}
 
 /* BOTTOM NAV */
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid var(--border);display:flex;z-index:10;box-shadow:0 -4px 12px rgba(0,0,0,0.06);}
@@ -74,27 +76,28 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Ro
 .card{background:white;border-radius:16px;padding:20px;border:1px solid var(--border);box-shadow:0 1px 4px rgba(0,0,0,0.04);}
 .card+.card{margin-top:14px;}
 .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
-.section-title{font-size:17px;font-weight:700;color:var(--text);}
+.section-title{font-size:20px;font-weight:700;color:var(--text);}
 
 /* HOME */
 .students-row{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;}
 .students-row::-webkit-scrollbar{display:none;}
-.student-chip{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 12px;border-radius:12px;border:2px solid var(--border);background:white;cursor:pointer;transition:all 0.15s;min-width:60px;}
+.student-chip{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 14px;border-radius:14px;border:2px solid var(--border);background:white;cursor:pointer;transition:all 0.15s;min-width:72px;}
 .student-chip.active{border-color:var(--purple);background:var(--purple-light);}
-.student-avatar{font-size:28px;line-height:1;}
-.student-chip-name{font-size:12px;font-weight:600;color:var(--text);text-align:center;max-width:70px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.student-chip-grade{font-size:11px;color:var(--text-muted);}
-.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px;}
-.stat-card{background:white;border-radius:12px;padding:10px 8px;border:1px solid var(--border);text-align:center;}
-.stat-card-num{font-size:22px;font-weight:800;color:var(--purple);}
-.stat-card-label{font-size:11px;color:var(--text-muted);margin-top:2px;}
-.quick-actions{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
-.action-card{background:white;border-radius:14px;padding:12px 8px;border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;transition:all 0.15s;text-align:center;}
+.student-avatar{font-size:32px;line-height:1;}
+.student-chip-name{font-size:14px;font-weight:600;color:var(--text);text-align:center;max-width:84px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.student-chip-grade{font-size:12px;color:var(--text-muted);}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;}
+.stat-card{background:white;border-radius:14px;padding:14px 10px;border:1px solid var(--border);text-align:center;}
+.stat-card-num{font-size:30px;font-weight:800;color:var(--purple);}
+.stat-card-label{font-size:13px;color:var(--text-muted);margin-top:4px;}
+.quick-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+@media(min-width:480px){.quick-actions{grid-template-columns:repeat(5,1fr);}}
+.action-card{background:white;border-radius:14px;padding:16px 10px;border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;transition:all 0.15s;text-align:center;}
 .action-card:hover{border-color:var(--purple);background:var(--purple-light);}
 .action-card:active{transform:scale(0.97);}
-.action-icon{font-size:26px;}
-.action-title{font-size:13px;font-weight:700;color:var(--text);}
-.action-sub{font-size:11px;color:var(--text-muted);}
+.action-icon{font-size:32px;}
+.action-title{font-size:15px;font-weight:700;color:var(--text);}
+.action-sub{font-size:13px;color:var(--text-muted);}
 .free-banner{background:linear-gradient(135deg,var(--purple-light),var(--blue-light));border:1px solid #c4b5fd;border-radius:14px;padding:12px 16px;display:flex;align-items:center;gap:12px;margin-bottom:16px;}
 .free-banner-icon{font-size:24px;}
 .free-banner-text{flex:1;}
@@ -211,7 +214,7 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Ro
 
 /* REPORT BUTTONS */
 .report-btns{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
-.report-btns .btn{flex:1;min-width:100px;padding:8px 10px;font-size:13px;}
+.report-btns .btn{flex:1;min-width:100px;padding:11px 14px;font-size:15px;}
 
 /* UTILS */
 .hidden{display:none!important;}
@@ -227,7 +230,18 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Ro
 @media(min-width:600px){
   .landing-title{font-size:52px;}
   .landing-subtitle{font-size:18px;}
-  .tab-section{padding:16px 20px;}
+  .tab-section{padding:18px 32px 24px;}
+  .home-welcome{font-size:28px;}
+  .section-title{font-size:22px;}
+  .stat-card-num{font-size:34px;}
+  .stat-card{padding:18px 12px;}
+  .stat-card-label{font-size:13px;}
+  .action-icon{font-size:34px;}
+  .action-title{font-size:15px;}
+  .quick-actions{gap:12px;}
+  .nav-icon{font-size:26px;}
+  .nav-label{font-size:13px;}
+  .bottom-nav-btn{padding:12px 6px;}
 }
 
 /* HOW TO USE CARD */
@@ -308,7 +322,7 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Ro
 </div>
 
 <script>
-window.OL_BUILD='76569a';
+window.OL_BUILD='ui-polish';
 window.connectWallet=function(){
   var m=document.getElementById('modal-wallet');
   var t=document.getElementById('toast');
@@ -335,6 +349,7 @@ document.addEventListener('DOMContentLoaded',function(){
     <div class="nav-wallet">
       <button class="btn btn-outline btn-sm" onclick="openModal('modal-help')" title="Help" style="font-size:16px;padding:6px 10px;">❓</button>
       <span id="nav-payment-badge"></span>
+      <button class="btn btn-primary btn-sm" id="btn-app-connect" onclick="connectWallet()" style="display:none">Connect</button>
       <span id="nav-wallet-addr" class="wallet-addr"></span>
       <button class="btn btn-outline btn-sm" id="btn-disconnect" onclick="disconnectWallet()" style="display:none">Disconnect</button>
     </div>
@@ -1366,13 +1381,21 @@ function setConnectButtonsLoading(on){
   if(nav)nav.textContent=on?'Connecting...':'Connect Wallet';
 }
 function updateWalletUI(){
-  if(!S.addr)return;
-  var short=shortAddr(S.addr);
+  var connectBtn=el('btn-app-connect');
+  var disc=el('btn-disconnect');
   var addrEl=el('nav-wallet-addr');
-  if(addrEl){addrEl.textContent=short;addrEl.style.display='';}
-  var disc=el('btn-disconnect');if(disc)disc.style.display='';
+  if(!S.addr){
+    if(connectBtn)connectBtn.style.display='';
+    if(disc)disc.style.display='none';
+    if(addrEl){addrEl.textContent='';addrEl.style.display='none';}
+    updateNavBadge();
+    return;
+  }
+  if(addrEl){addrEl.textContent='';addrEl.style.display='none';}
+  if(disc)disc.style.display='';
+  if(connectBtn)connectBtn.style.display='none';
   var navBtn=el('nav-connect-btn');
-  if(navBtn){navBtn.textContent='\u2713 '+short;navBtn.disabled=false;}
+  if(navBtn){navBtn.textContent='\u2713 '+shortAddr(S.addr);navBtn.disabled=false;}
   updateNavBadge();
 }
 function openWalletPicker(){
@@ -1492,6 +1515,7 @@ function disconnectWallet(){
   S.addr=null;S.provider=null;S.signer=null;_aivmJWT=null;_aivmJWTExp=0;
   setConnectButtonsLoading(false);
   var navBtn=el('nav-connect-btn');if(navBtn){navBtn.textContent='Connect Wallet';navBtn.disabled=false;}
+  var connectBtn=el('btn-app-connect');if(connectBtn)connectBtn.style.display='';
   var addrEl=el('nav-wallet-addr');if(addrEl)addrEl.textContent='';
   var disc=el('btn-disconnect');if(disc)disc.style.display='none';
   // Remember the user explicitly disconnected so init() won't auto-reconnect on refresh
@@ -1515,7 +1539,7 @@ function afterConnect(){
 }
 function enterApp(){
   el('landing').style.display='none';el('app').style.display='flex';
-  updateNavBadge();
+  updateWalletUI();
   // Use showTab to ensure tab visibility is set correctly
   showTab('home');
   renderLessons();renderQuiz();renderStudents();
@@ -1526,7 +1550,11 @@ function updateNavBadge(){
     const days=Math.ceil((S.paidUntil-Date.now())/(86400000));
     b.innerHTML='<span class="paid-badge">&#x2B50; Premium ('+days+'d)</span>';
   }else if(S.addr){
-    b.innerHTML='<span class="paid-badge" style="background:#ecfdf5;color:#065f46">&#x2713; '+shortAddr(S.addr)+'</span>';
+    if(S.freeUsesLeft>0){
+      b.innerHTML='<span class="paid-badge" style="background:#ecfdf5;color:#065f46">&#x2713; '+shortAddr(S.addr)+' &middot; '+S.freeUsesLeft+' free</span>';
+    }else{
+      b.innerHTML='<span class="free-badge" style="cursor:pointer" onclick="openPaymentModal()">&#x2713; '+shortAddr(S.addr)+' &middot; Upgrade</span>';
+    }
   }else if(S.freeUsesLeft>0){
     b.innerHTML='<span class="free-badge">'+S.freeUsesLeft+' free left</span>';
   }else if(S.freeUsesLeft<=0){
@@ -1546,30 +1574,24 @@ function toggleHowTo(){
 function renderHome(){
   const c=el('home-content');if(!c)return;
   let h='';
-  if(S.addr){
-    h+='<div class="free-banner mb-4" style="background:#ecfdf5;border-color:#86efac"><div class="free-banner-icon">&#x2705;</div><div class="free-banner-text"><div class="free-banner-title">Wallet connected</div><div class="free-banner-sub">'+esc(shortAddr(S.addr))+' — you\'re ready to use OrcaLearn</div></div></div>';
-  }
-  if(!isPaid()&&!S.addr&&S.freeUsesLeft>0){
-    h+='<div class="free-banner mb-4"><div class="free-banner-icon">&#x1F381;</div><div class="free-banner-text"><div class="free-banner-title">'+S.freeUsesLeft+' free use'+(S.freeUsesLeft!==1?'s':'')+' remaining</div><div class="free-banner-sub">First '+FREE_USES+' AI lessons &amp; quizzes are always free</div></div></div>';
-  }else if(!isPaid()&&S.freeUsesLeft<=0){
-    h+='<div class="pay-banner mb-4" onclick="openPaymentModal()"><div class="free-banner-icon">&#x26A1;</div><div class="free-banner-text"><div class="free-banner-title">Unlock Premium AI &#x2014; $4.99/month</div><div class="free-banner-sub">Pay in LCAI on Lightchain. Tap to unlock.</div></div><div>&#x1F449;</div></div>';
-  }
   if(S.students.length===0){
     h+='<div class="card text-center" style="padding:24px"><div style="font-size:40px;margin-bottom:10px">&#x1F44B;</div><div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px">Add your first student</div><div class="text-muted" style="margin-bottom:16px">Create a student profile to get started.</div><button class="btn btn-primary" onclick="showTab(\'students\');openStudentModal()">+ Add Student</button></div>';
   }else{
-    h+='<div class="section-header"><div class="section-title">Students</div></div>';
-    h+='<div class="students-row">';
-    for(const s of S.students){
-      h+='<div class="student-chip'+(s.id===S.activeStudentId?' active':'')+'" onclick="selectStudent(\''+s.id+'\')">';
-      h+='<span class="student-avatar">'+s.avatar+'</span><span class="student-chip-name">'+esc(s.name)+'</span><span class="student-chip-grade">Grade '+s.grade+'</span></div>';
-    }
-    h+='</div>';
+    const st0=S.students.find(s=>s.id===S.activeStudentId)||S.students[0];
+    h+='<div class="home-welcome">'+st0.avatar+' Hi, '+esc(st0.name)+'!</div>';
     const st=S.students.find(s=>s.id===S.activeStudentId);
     if(st){
       const myPlans=S.plans.filter(p=>p.studentId===st.id);
       const doneDays=Object.values(S.progress[st.id]||{}).reduce((a,p)=>a+(p.completedDays?.length||0),0);
       const myQ=S.quizHistory.filter(q=>q.studentId===st.id);
       const lastQ=myQ[0];
+      h+='<div class="section-header"><div class="section-title">Quick Actions</div></div><div class="quick-actions">';
+      h+='<div class="action-card" onclick="openGenerateModal()"><div class="action-icon">&#x1F916;</div><div class="action-title">New Lesson</div><div class="action-sub">AI lesson plan</div></div>';
+      h+='<div class="action-card" onclick="showTab(\'quiz\')"><div class="action-icon">&#x1F9EE;</div><div class="action-title">Take Quiz</div><div class="action-sub">Any subject</div></div>';
+      h+='<div class="action-card" onclick="showTab(\'vocab\')"><div class="action-icon">&#x1F4D6;</div><div class="action-title">VOGRABULARY</div><div class="action-sub">Spelling &amp; sentences</div></div>';
+      h+='<div class="action-card" onclick="showTab(\'lessons\')"><div class="action-icon">&#x1F4DA;</div><div class="action-title">My Lessons</div><div class="action-sub">'+myPlans.length+' saved</div></div>';
+      h+='<div class="action-card" onclick="showTab(\'students\')"><div class="action-icon">&#x1F464;</div><div class="action-title">Students</div><div class="action-sub">'+S.students.length+' profile'+(S.students.length!==1?'s':'')+'</div></div>';
+      h+='</div>';
       h+='<div class="stats-grid mt-4">';
       h+='<div class="stat-card"><div class="stat-card-num">'+myPlans.length+'</div><div class="stat-card-label">Lesson Plans</div></div>';
       h+='<div class="stat-card"><div class="stat-card-num">'+doneDays+'</div><div class="stat-card-label">Days Completed</div></div>';
@@ -1577,6 +1599,13 @@ function renderHome(){
       h+='<div class="stat-card"><div class="stat-card-num">'+(lastQ?lastQ.pct+'%':'&#x2014;')+'</div><div class="stat-card-label">Last Score</div></div>';
       h+='</div>';
       h+='<div class="report-btns"><button class="btn btn-green" onclick="printProgressReport()">&#x1F4CA; Progress Report</button><button class="btn btn-purple-solid" onclick="openTranscriptModal()">&#x1F393; Transcript</button><button class="btn btn-blue" onclick="exportPortfolio()">&#x1F4E6; Portfolio</button></div>';
+      h+='<div class="section-header mt-4"><div class="section-title">Students</div></div>';
+      h+='<div class="students-row">';
+      for(const s of S.students){
+        h+='<div class="student-chip'+(s.id===S.activeStudentId?' active':'')+'" onclick="selectStudent(\''+s.id+'\')">';
+        h+='<span class="student-avatar">'+s.avatar+'</span><span class="student-chip-name">'+esc(s.name)+'</span><span class="student-chip-grade">Grade '+s.grade+'</span></div>';
+      }
+      h+='</div>';
       h+='<div class="how-to-card mt-4">';
       h+='<div class="how-to-header" onclick="toggleHowTo()">';
       h+='<span class="how-to-title">&#x2753; How to Use OrcaLearn</span>';
@@ -1591,13 +1620,6 @@ function renderHome(){
       h+='<div class="how-to-step"><div class="how-to-num">5</div><div class="how-to-step-text"><strong>Free vs. paid</strong> — everyone gets 5 free sessions. Connect your Trust Wallet and pay ~1 LCAI/month for unlimited access for all your students.</div></div>';
       h+='<div class="how-to-tip"><strong>Tip:</strong> Use the built-in browser inside Trust Wallet for the smoothest wallet connection on mobile.</div>';
       h+='</div></div></div>';
-      h+='<div class="section-header mt-4"><div class="section-title">Quick Actions</div></div><div class="quick-actions">';
-      h+='<div class="action-card" onclick="openGenerateModal()"><div class="action-icon">&#x1F916;</div><div class="action-title">New Lesson</div><div class="action-sub">AI lesson plan</div></div>';
-      h+='<div class="action-card" onclick="showTab(\'quiz\')"><div class="action-icon">&#x1F9EE;</div><div class="action-title">Take Quiz</div><div class="action-sub">Any subject</div></div>';
-      h+='<div class="action-card" onclick="showTab(\'vocab\')"><div class="action-icon">&#x1F4D6;</div><div class="action-title">VOGRABULARY</div><div class="action-sub">Spelling &amp; sentences</div></div>';
-      h+='<div class="action-card" onclick="showTab(\'lessons\')"><div class="action-icon">&#x1F4DA;</div><div class="action-title">My Lessons</div><div class="action-sub">'+myPlans.length+' saved</div></div>';
-      h+='<div class="action-card" onclick="showTab(\'students\')"><div class="action-icon">&#x1F464;</div><div class="action-title">Students</div><div class="action-sub">'+S.students.length+' profile'+(S.students.length!==1?'s':'')+'</div></div>';
-      h+='</div>';
     }
   }
   h+='<div style="height:60px"></div><div style="text-align:center"><div class="aivm-badge" style="display:inline-flex">&#x26A1; Powered by Lightchain AIVM</div></div>';
