@@ -322,7 +322,7 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Ro
 </div>
 
 <script>
-window.OL_BUILD='ui-polish';
+window.OL_BUILD='aivm-relay';
 window.connectWallet=function(){
   var m=document.getElementById('modal-wallet');
   var t=document.getElementById('toast');
@@ -992,20 +992,36 @@ async function getAivmJWT(){
   return _aivmJWT;
 }
 
-// ── AIVM INFERENCE ────────────────────────────────────────────────────────
+// ── AIVM INFERENCE (server-side relay → official gateway) ─────────────────
+const AIVM_RELAY='https://web-production-aaaba.up.railway.app';
 async function aivmInference(prompt,onProgress){
-  onProgress('Connecting to Lightchain AI... (this takes 1-2 minutes)');
-  const res=await fetch('https://web-production-0ccfe.up.railway.app/api/chat',{
+  onProgress('Connecting to Lightchain AIVM... (1–2 minutes)');
+  const res=await fetch(AIVM_RELAY+'/api/chat',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({prompt})
+    body:JSON.stringify({message:prompt,mode:'chat'})
   });
   if(!res.ok){
     const txt=await res.text().catch(()=>'');
     throw new Error('AI error '+res.status+(txt?': '+txt:''));
   }
-  const data=await res.json();
-  return data.reply||'';
+  const start=await res.json();
+  const jobId=start.job_id;
+  if(!jobId){
+    if(start.reply)return start.reply;
+    throw new Error('No job ID from AIVM relay');
+  }
+  const deadline=Date.now()+150000;
+  while(Date.now()<deadline){
+    await new Promise(r=>setTimeout(r,5000));
+    onProgress('Lightchain worker processing...');
+    const poll=await fetch(AIVM_RELAY+'/api/chat/status?job_id='+encodeURIComponent(jobId));
+    if(!poll.ok)throw new Error('Poll error '+poll.status);
+    const d=await poll.json();
+    if(d.status==='done')return d.reply||'';
+    if(d.status==='error')throw new Error(d.error||'AIVM failed');
+  }
+  throw new Error('AI took too long (150s). Try again.');
 }
 </script>
 <script>
