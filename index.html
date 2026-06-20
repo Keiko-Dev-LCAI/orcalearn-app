@@ -1281,46 +1281,138 @@ function makeMathChoices(ans,txt){
 </script>
 <script>
 // ── WALLET ────────────────────────────────────────────────────────────────
+const OL_DAPP_URL='https://orcalearn.ai';
 let _wcProv=null;
+let _activeProvider=null;
+let _eip6963Providers=[];
+window.addEventListener('eip6963:announceProvider',function(e){
+  if(!e.detail?.provider)return;
+  var rdns=e.detail.info?.rdns||e.detail.info?.uuid||'';
+  if(!_eip6963Providers.some(function(d){return(d.info?.rdns||d.info?.uuid||'')===rdns;})){
+    _eip6963Providers.push(e.detail);
+  }
+});
+window.dispatchEvent(new Event('eip6963:requestProvider'));
+
+function getWalletIcon(name,rdns){
+  var n=(name||'').toLowerCase(),r=(rdns||'').toLowerCase();
+  if(n.includes('trust')||r.includes('trust'))return'🛡️';
+  if(n.includes('metamask')||r.includes('metamask'))return'🦊';
+  if(n.includes('coinbase')||r.includes('coinbase'))return'🔵';
+  if(n.includes('brave')||r.includes('brave'))return'🦁';
+  if(n.includes('rabby')||r.includes('rabby'))return'🐰';
+  if(n.includes('rainbow')||r.includes('rainbow'))return'🌈';
+  if(n.includes('okx')||n.includes('okex')||r.includes('okx'))return'⭕';
+  return'🌐';
+}
+function getWalletInfo(p){
+  if(p.isTrust||p.isTrustWallet)return{name:'Trust Wallet',icon:'🛡️'};
+  if(p.isCoinbaseWallet||p.isCoinbase)return{name:'Coinbase Wallet',icon:'🔵'};
+  if(p.isMetaMask)return{name:'MetaMask',icon:'🦊'};
+  return{name:'Browser Wallet',icon:'🌐'};
+}
+function setConnectButtonsLoading(on){
+  var hero=el('hero-connect-btn'),nav=el('nav-connect-btn');
+  var idle='&#x1F433; Connect Wallet &#x2014; It\'s Free';
+  if(hero)hero.innerHTML=on?'Connecting...':idle;
+  if(nav)nav.textContent=on?'Connecting...':'Connect Wallet';
+}
+function openWalletPicker(){
+  window.dispatchEvent(new Event('eip6963:requestProvider'));
+  var list=el('ol-wallet-list');if(!list)return;
+  list.innerHTML='';
+  var items=[];
+  if(_eip6963Providers.length>0){
+    _eip6963Providers.forEach(function(d){
+      items.push({provider:d.provider,name:d.info?.name||'Browser Wallet',icon:getWalletIcon(d.info?.name,d.info?.rdns)});
+    });
+  }else if(window.ethereum){
+    var legacy=window.ethereum.providers?.length?Array.from(window.ethereum.providers):[window.ethereum];
+    legacy.forEach(function(p){var i=getWalletInfo(p);items.push({provider:p,name:i.name,icon:i.icon});});
+  }
+  items.forEach(function(item){
+    var btn=document.createElement('button');
+    btn.style.cssText='display:flex;align-items:center;gap:14px;background:#f9fafb;border:1.5px solid var(--border);border-radius:14px;padding:14px 16px;width:100%;text-align:left;color:var(--text);cursor:pointer;margin-bottom:10px;font-family:inherit;';
+    btn.innerHTML='<span style="font-size:28px;flex-shrink:0">'+item.icon+'</span><div><div style="font-size:17px;font-weight:700">'+esc(item.name)+'</div><div style="font-size:14px;color:var(--text-muted)">Connect using '+esc(item.name)+'</div></div>';
+    (function(provider){btn.onclick=function(){connectWithProvider(provider);};})(item.provider);
+    list.appendChild(btn);
+  });
+  if(window.WCEthereumProvider){
+    var isMobile=/iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    var wcBtn=document.createElement('button');
+    wcBtn.style.cssText='display:flex;align-items:center;gap:14px;background:#eff6ff;border:1.5px solid #3b82f6;border-radius:14px;padding:14px 16px;width:100%;text-align:left;color:var(--text);cursor:pointer;margin-bottom:10px;font-family:inherit;';
+    wcBtn.innerHTML='<span style="font-size:28px;flex-shrink:0">🔗</span><div><div style="font-size:17px;font-weight:700">WalletConnect</div><div style="font-size:14px;color:var(--text-muted)">'+(isMobile?'Open any wallet app':'Scan QR with Trust Wallet or any wallet')+'</div></div>';
+    wcBtn.onclick=connectViaWalletConnect;
+    list.appendChild(wcBtn);
+  }
+  openModal('modal-wallet');
+}
+function closeWalletPicker(){closeModal('modal-wallet');}
+function copyOrcaLearnLink(){
+  navigator.clipboard.writeText(OL_DAPP_URL).then(function(){
+    var btn=el('ol-copy-link-btn');if(!btn)return;
+    var orig=btn.innerHTML;
+    btn.innerHTML='<span style="font-size:28px;flex-shrink:0">✅</span><div><div style="font-size:17px;font-weight:700">Copied!</div><div style="font-size:14px;color:var(--text-muted)">Paste into your wallet browser</div></div>';
+    setTimeout(function(){btn.innerHTML=orig;},2000);
+  }).catch(function(){alert(OL_DAPP_URL);});
+}
+async function ensureLightchainOn(rawProvider){
+  try{
+    await rawProvider.request({method:'wallet_switchEthereumChain',params:[{chainId:AIVM_CHAIN_HEX}]});
+  }catch(e){
+    if(e.code===4902){
+      await rawProvider.request({method:'wallet_addEthereumChain',params:[{
+        chainId:AIVM_CHAIN_HEX,chainName:'Lightchain AI',
+        rpcUrls:[LC_RPC],
+        nativeCurrency:{name:'Lightchain AI',symbol:'LCAI',decimals:18},
+        blockExplorerUrls:['https://mainnet.lightscan.app']
+      }]});
+    }else if(e.code!==4001)throw e;
+  }
+}
+async function connectWithProvider(rawProvider,skipLoading){
+  if(!rawProvider){toast('Wallet not detected. Use WalletConnect or copy the link below.',true,5000);return;}
+  closeWalletPicker();
+  if(!skipLoading)setConnectButtonsLoading(true);
+  try{
+    await rawProvider.request({method:'eth_requestAccounts'});
+    const prov=new ethers.BrowserProvider(rawProvider);
+    const sig=await prov.getSigner();
+    S.addr=await sig.getAddress();S.provider=prov;S.signer=sig;
+    _activeProvider=rawProvider;
+    window.ethereum=rawProvider;
+    try{await ensureLightchainOn(rawProvider);}catch(e){
+      if(e.code!==4001)toast('Connected — please switch to Lightchain in your wallet for payments.',true,6000);
+    }
+    bindWalletEvents(rawProvider);
+    setConnectButtonsLoading(false);
+    toast('Wallet connected! '+S.addr.slice(0,6)+'...'+S.addr.slice(-4));
+    afterConnect();
+  }catch(e){
+    setConnectButtonsLoading(false);
+    if(e.code!==4001)toast('Connection failed: '+(e.message||e),true,6000);
+  }
+}
 async function connectViaWalletConnect(){
+  closeWalletPicker();
   if(!window.WCEthereumProvider){toast('WalletConnect not loaded yet. Try again.',true);return;}
+  setConnectButtonsLoading(true);
   try{
     _wcProv=await window.WCEthereumProvider.init({
       projectId:'3c6a0da53258912a28923198ddac3333',
       chains:[9200],optionalChains:[1],showQrModal:true,
-      metadata:{name:'OrcaLearn',description:'Decentralized Learning on Lightchain',url:'https://orcalearn.ai',icons:['https://orcalearn.ai/orca-icon.png']},
-      rpcMap:{9200:'https://rpc.mainnet.lightchain.ai'}
+      metadata:{name:'OrcaLearn',description:'Decentralized Learning on Lightchain',url:OL_DAPP_URL,icons:[OL_DAPP_URL+'/orca-icon.png']},
+      rpcMap:{9200:LC_RPC}
     });
     await _wcProv.enable();
-    window.ethereum=_wcProv;
-    await doConnect();
+    await connectWithProvider(_wcProv,true);
   }catch(e){
+    setConnectButtonsLoading(false);
     if(!e||e.message?.includes('User rejected')||e.message?.includes('rejected')||e.code===4001)return;
-    toast('WalletConnect failed. Try a different wallet.',true);
+    toast('WalletConnect failed. Try Copy Link and open in Trust Wallet browser.',true,7000);
   }
 }
-async function connectWallet(){
-  if(!window.ethereum){
-    if(window.WCEthereumProvider){await connectViaWalletConnect();return;}
-    toast('No wallet found. Install a browser wallet extension or use WalletConnect.',true,7000);
-    return;
-  }
-  await doConnect();
-}
-async function doConnect(){
-  try{
-    const btn=el('hero-connect-btn');if(btn)btn.textContent='Connecting...';
-    const prov=new ethers.BrowserProvider(window.ethereum);
-    await prov.send('eth_requestAccounts',[]);
-    const sig=await prov.getSigner();
-    S.addr=await sig.getAddress();S.provider=prov;S.signer=sig;
-    const btn2=el('hero-connect-btn');if(btn2)btn2.innerHTML='&#x1F433; Connect Wallet &#x2014; It\'s Free';
-    afterConnect();
-  }catch(e){
-    toast('Wallet connection cancelled.',true);
-    const btn=el('hero-connect-btn');if(btn)btn.innerHTML='&#x1F433; Connect Wallet &#x2014; It\'s Free';
-  }
-}
+async function connectWallet(){openWalletPicker();}
 function startFree(){
   S.addr=null;S.provider=null;S.signer=null;
   enterApp();
@@ -1331,7 +1423,9 @@ function goLanding(){
 }
 function disconnectWallet(){
   if(_wcProv){try{_wcProv.disconnect();}catch{}_wcProv=null;}
+  _activeProvider=null;
   S.addr=null;S.provider=null;S.signer=null;_aivmJWT=null;_aivmJWTExp=0;
+  setConnectButtonsLoading(false);
   // Remember the user explicitly disconnected so init() won't auto-reconnect on refresh
   try{const d=JSON.parse(localStorage.getItem(LS_KEY)||'{}');d.manualDisconnect=true;localStorage.setItem(LS_KEY,JSON.stringify(d));}catch{}
   el('app').style.display='none';el('landing').style.display='flex';
@@ -2331,25 +2425,63 @@ function vocabClearHistory(){
   S.vocabHistory[sid]=[];saveData();renderVocab();
 }
 
+function detectProvider(){
+  if(_activeProvider)return _activeProvider;
+  if(_eip6963Providers.length>0)return _eip6963Providers[0].provider;
+  if(window.ethereum?.providers?.length){
+    var mm=window.ethereum.providers.find(function(p){return p.isMetaMask&&!p.isTrust&&!p.isBraveWallet;});
+    return mm||window.ethereum.providers[0];
+  }
+  return window.ethereum||null;
+}
+function bindWalletEvents(rawProvider){
+  if(!rawProvider?.on)return;
+  rawProvider.on('accountsChanged',async accs=>{
+    if(accs.length===0)disconnectWallet();
+    else{S.addr=accs[0];if(S.provider){S.signer=await S.provider.getSigner();}renderHome();renderLessons();renderQuiz();renderStudents();updateNavBadge();}
+  });
+}
 // ── INIT ──────────────────────────────────────────────────────────────────
 (async function init(){
   loadData();
-  if(window.ethereum){
+  window.dispatchEvent(new Event('eip6963:requestProvider'));
+  const prov=detectProvider();
+  if(prov){
     try{
       const stored=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
       if(!stored.manualDisconnect){
-        const p=new ethers.BrowserProvider(window.ethereum);
+        const p=new ethers.BrowserProvider(prov);
         const accs=await p.listAccounts();
-        if(accs.length>0){S.provider=p;S.signer=await p.getSigner();S.addr=await S.signer.getAddress();afterConnect();}
+        if(accs.length>0){_activeProvider=prov;window.ethereum=prov;S.provider=p;S.signer=await p.getSigner();S.addr=await S.signer.getAddress();afterConnect();}
       }
     }catch{}
-    window.ethereum.on('accountsChanged',async accs=>{
-      if(accs.length===0)disconnectWallet();
-      else{S.addr=accs[0];if(S.provider){S.signer=await S.provider.getSigner();}renderHome();renderLessons();renderQuiz();renderStudents();updateNavBadge();}
-    });
+    bindWalletEvents(prov);
   }
 })();
 </script>
+
+<div id="modal-wallet" class="modal-overlay" style="display:none" onclick="overlayClose(event,'modal-wallet')">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header">
+      <h3>🔗 Connect Wallet</h3>
+      <button class="modal-close" onclick="closeWalletPicker()">&#x2715;</button>
+    </div>
+    <div class="modal-body" style="gap:0">
+      <p style="font-size:15px;color:var(--text-muted);line-height:1.6;text-align:center;margin-bottom:18px">Choose a wallet extension, scan a QR code with WalletConnect, or copy the link and open it in Trust Wallet's browser.</p>
+      <div id="ol-wallet-list"></div>
+      <button id="ol-copy-link-btn" onclick="copyOrcaLearnLink()" style="display:flex;align-items:center;gap:14px;background:#f9fafb;border:1.5px solid var(--border);border-radius:14px;padding:14px 16px;width:100%;text-align:left;color:var(--text);cursor:pointer;margin-bottom:10px;font-family:inherit">
+        <span style="font-size:28px;flex-shrink:0">🔗</span>
+        <div>
+          <div style="font-size:17px;font-weight:700">Copy Link</div>
+          <div style="font-size:14px;color:var(--text-muted)">Paste into Trust Wallet browser</div>
+        </div>
+      </button>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeWalletPicker()">Cancel</button>
+    </div>
+  </div>
+</div>
 
 <div id="modal-terms" class="modal-overlay" style="display:none" onclick="overlayClose(event,'modal-terms')">
   <div class="modal" style="max-width:620px;max-height:92vh">
