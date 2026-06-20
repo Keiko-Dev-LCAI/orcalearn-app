@@ -1311,11 +1311,22 @@ function getWalletInfo(p){
   if(p.isMetaMask)return{name:'MetaMask',icon:'🦊'};
   return{name:'Browser Wallet',icon:'🌐'};
 }
+function shortAddr(addr){return addr?addr.slice(0,6)+'...'+addr.slice(-4):'';}
 function setConnectButtonsLoading(on){
   var hero=el('hero-connect-btn'),nav=el('nav-connect-btn');
   var idle='&#x1F433; Connect Wallet &#x2014; It\'s Free';
   if(hero)hero.innerHTML=on?'Connecting...':idle;
   if(nav)nav.textContent=on?'Connecting...':'Connect Wallet';
+}
+function updateWalletUI(){
+  if(!S.addr)return;
+  var short=shortAddr(S.addr);
+  var addrEl=el('nav-wallet-addr');
+  if(addrEl){addrEl.textContent=short;addrEl.style.display='';}
+  var disc=el('btn-disconnect');if(disc)disc.style.display='';
+  var navBtn=el('nav-connect-btn');
+  if(navBtn){navBtn.textContent='\u2713 '+short;navBtn.disabled=false;}
+  updateNavBadge();
 }
 function openWalletPicker(){
   window.dispatchEvent(new Event('eip6963:requestProvider'));
@@ -1375,22 +1386,23 @@ async function connectWithProvider(rawProvider,skipLoading){
   closeWalletPicker();
   if(!skipLoading)setConnectButtonsLoading(true);
   try{
-    await rawProvider.request({method:'eth_requestAccounts'});
-    const prov=new ethers.BrowserProvider(rawProvider);
-    const sig=await prov.getSigner();
-    S.addr=await sig.getAddress();S.provider=prov;S.signer=sig;
+    const accounts=await rawProvider.request({method:'eth_requestAccounts'});
+    if(!accounts?.length)throw new Error('No account returned from wallet');
+    S.addr=accounts[0];
+    S.provider=new ethers.BrowserProvider(rawProvider);
+    S.signer=await S.provider.getSigner(S.addr);
     _activeProvider=rawProvider;
     window.ethereum=rawProvider;
-    try{await ensureLightchainOn(rawProvider);}catch(e){
-      if(e.code!==4001)toast('Connected — please switch to Lightchain in your wallet for payments.',true,6000);
-    }
     bindWalletEvents(rawProvider);
     setConnectButtonsLoading(false);
-    toast('Wallet connected! '+S.addr.slice(0,6)+'...'+S.addr.slice(-4));
     afterConnect();
+    toast('Wallet connected! '+shortAddr(S.addr),false,5000);
+    ensureLightchainOn(rawProvider).catch(function(e){
+      if(e?.code!==4001)toast('Tip: switch to Lightchain in Trust Wallet when you pay.',true,7000);
+    });
   }catch(e){
     setConnectButtonsLoading(false);
-    if(e.code!==4001)toast('Connection failed: '+(e.message||e),true,6000);
+    if(e?.code!==4001)toast('Connection failed: '+(e?.message||e),true,6000);
   }
 }
 async function connectViaWalletConnect(){
@@ -1426,6 +1438,9 @@ function disconnectWallet(){
   _activeProvider=null;
   S.addr=null;S.provider=null;S.signer=null;_aivmJWT=null;_aivmJWTExp=0;
   setConnectButtonsLoading(false);
+  var navBtn=el('nav-connect-btn');if(navBtn){navBtn.textContent='Connect Wallet';navBtn.disabled=false;}
+  var addrEl=el('nav-wallet-addr');if(addrEl)addrEl.textContent='';
+  var disc=el('btn-disconnect');if(disc)disc.style.display='none';
   // Remember the user explicitly disconnected so init() won't auto-reconnect on refresh
   try{const d=JSON.parse(localStorage.getItem(LS_KEY)||'{}');d.manualDisconnect=true;localStorage.setItem(LS_KEY,JSON.stringify(d));}catch{}
   el('app').style.display='none';el('landing').style.display='flex';
@@ -1433,10 +1448,17 @@ function disconnectWallet(){
 function afterConnect(){
   // Clear manual-disconnect flag so refresh works normally
   try{const d=JSON.parse(localStorage.getItem(LS_KEY)||'{}');delete d.manualDisconnect;localStorage.setItem(LS_KEY,JSON.stringify(d));}catch{}
-  enterApp();
-  el('nav-wallet-addr').textContent=S.addr.slice(0,6)+'...'+S.addr.slice(-4);
-  el('btn-disconnect').style.display='';
-  saveData();
+  try{
+    enterApp();
+    updateWalletUI();
+    saveData();
+  }catch(e){
+    console.error('afterConnect',e);
+    el('landing').style.display='none';
+    el('app').style.display='flex';
+    updateWalletUI();
+    toast('Wallet connected! '+shortAddr(S.addr),false,5000);
+  }
 }
 function enterApp(){
   el('landing').style.display='none';el('app').style.display='flex';
@@ -1450,7 +1472,9 @@ function updateNavBadge(){
   if(isPaid()){
     const days=Math.ceil((S.paidUntil-Date.now())/(86400000));
     b.innerHTML='<span class="paid-badge">&#x2B50; Premium ('+days+'d)</span>';
-  }else if(S.freeUsesLeft>0&&!S.addr){
+  }else if(S.addr){
+    b.innerHTML='<span class="paid-badge" style="background:#ecfdf5;color:#065f46">&#x2713; '+shortAddr(S.addr)+'</span>';
+  }else if(S.freeUsesLeft>0){
     b.innerHTML='<span class="free-badge">'+S.freeUsesLeft+' free left</span>';
   }else if(S.freeUsesLeft<=0){
     b.innerHTML='<span class="free-badge" style="cursor:pointer" onclick="openPaymentModal()">&#x1F511; Upgrade</span>';
@@ -1469,6 +1493,9 @@ function toggleHowTo(){
 function renderHome(){
   const c=el('home-content');if(!c)return;
   let h='';
+  if(S.addr){
+    h+='<div class="free-banner mb-4" style="background:#ecfdf5;border-color:#86efac"><div class="free-banner-icon">&#x2705;</div><div class="free-banner-text"><div class="free-banner-title">Wallet connected</div><div class="free-banner-sub">'+esc(shortAddr(S.addr))+' — you\'re ready to use OrcaLearn</div></div></div>';
+  }
   if(!isPaid()&&!S.addr&&S.freeUsesLeft>0){
     h+='<div class="free-banner mb-4"><div class="free-banner-icon">&#x1F381;</div><div class="free-banner-text"><div class="free-banner-title">'+S.freeUsesLeft+' free use'+(S.freeUsesLeft!==1?'s':'')+' remaining</div><div class="free-banner-sub">First '+FREE_USES+' AI lessons &amp; quizzes are always free</div></div></div>';
   }else if(!isPaid()&&S.freeUsesLeft<=0){
@@ -2438,7 +2465,7 @@ function bindWalletEvents(rawProvider){
   if(!rawProvider?.on)return;
   rawProvider.on('accountsChanged',async accs=>{
     if(accs.length===0)disconnectWallet();
-    else{S.addr=accs[0];if(S.provider){S.signer=await S.provider.getSigner();}renderHome();renderLessons();renderQuiz();renderStudents();updateNavBadge();}
+    else{S.addr=accs[0];if(S.provider){S.signer=await S.provider.getSigner(S.addr);}updateWalletUI();renderHome();renderLessons();renderQuiz();renderStudents();}
   });
 }
 // ── INIT ──────────────────────────────────────────────────────────────────
@@ -2452,7 +2479,7 @@ function bindWalletEvents(rawProvider){
       if(!stored.manualDisconnect){
         const p=new ethers.BrowserProvider(prov);
         const accs=await p.listAccounts();
-        if(accs.length>0){_activeProvider=prov;window.ethereum=prov;S.provider=p;S.signer=await p.getSigner();S.addr=await S.signer.getAddress();afterConnect();}
+        if(accs.length>0){_activeProvider=prov;window.ethereum=prov;S.addr=accs[0].address||accs[0];S.provider=p;S.signer=await p.getSigner(S.addr);afterConnect();}
       }
     }catch{}
     bindWalletEvents(prov);
