@@ -1,4 +1,11 @@
 # To install/reinstall the OrcaLearn systemd service, run these commands:
+# SECURITY: set LIGHTCHAIN_PRIVATE_KEY in the EnvironmentFile below — never commit the real key.
+
+sudo mkdir -p /etc/orcalearn
+sudo tee /etc/orcalearn/dapp-wallet.env > /dev/null << 'EOF'
+LIGHTCHAIN_PRIVATE_KEY=PASTE_DAPP_KEY_HERE
+EOF
+sudo chmod 600 /etc/orcalearn/dapp-wallet.env
 
 sudo tee /etc/systemd/system/orcalearn-server.service > /dev/null << 'EOF'
 [Unit]
@@ -10,7 +17,7 @@ Wants=network-online.target
 Type=simple
 User=keiko
 WorkingDirectory=/home/keiko
-Environment="LIGHTCHAIN_PRIVATE_KEY=[REDACTED-use-EnvironmentFile]"
+EnvironmentFile=/etc/orcalearn/dapp-wallet.env
 ExecStart=/usr/bin/python3 /home/keiko/Desktop/orcalearn-server.py
 Restart=always
 RestartSec=10
