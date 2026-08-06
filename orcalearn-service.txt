@@ -1,7 +1,8 @@
 # To install/reinstall the OrcaLearn systemd service, run these commands:
-# SECURITY: set LIGHTCHAIN_PRIVATE_KEY in the EnvironmentFile below — never commit the real key.
+# SECURITY: never put a real private key in this file or commit it.
 
 sudo mkdir -p /etc/orcalearn
+# Create env file ON THE SERVER only (chmod 600). Do not commit this file.
 sudo tee /etc/orcalearn/dapp-wallet.env > /dev/null << 'EOF'
 LIGHTCHAIN_PRIVATE_KEY=PASTE_DAPP_KEY_HERE
 EOF
