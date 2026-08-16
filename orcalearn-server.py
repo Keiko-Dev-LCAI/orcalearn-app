@@ -37,8 +37,8 @@ MIME = {
     '.ico':  'image/x-icon',
 }
 
-FREE_PLANS    = 3       # free AI plans per wallet before LCAI required
-LCAI_PER_PLAN = 5       # LCAI cost per plan beyond free tier (informational — enforced on-chain)
+FREE_PLANS    = 5       # free starter plans (templates on live site; keep aligned with FREE_USES in index.html)
+LCAI_PER_PLAN = 5       # LCAI cost per plan beyond free tier (informational — premium is monthly on live site)
 
 SERVER_START      = time.time()
 MAINTENANCE_FLAG  = os.path.expanduser("~/MAINTENANCE_MODE")
