@@ -335,7 +335,7 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Ro
 </div>
 
 <script>
-window.OL_BUILD='20260816b';
+window.OL_BUILD='20260816c';
 // Early stub so the button works even if a later script errors during load
 window.startFree=function(){
   try{
@@ -540,7 +540,7 @@ document.addEventListener('DOMContentLoaded',function(){
   </div>
 </div>
 
-<!-- MODAL: PAYMENT -->
+<!-- MODAL: PAYMENT — one-click wallet pay (native LCAI on Lightchain) -->
 <div id="modal-payment" class="modal-overlay" style="display:none" onclick="overlayClose(event,'modal-payment')">
   <div class="modal">
     <div class="modal-header">
@@ -548,28 +548,28 @@ document.addEventListener('DOMContentLoaded',function(){
       <button class="modal-close" onclick="closeModal('modal-payment')">&#x2715;</button>
     </div>
     <div class="modal-body" id="payment-modal-body">
-      <div class="info-box">&#x26A1; OrcaLearn Premium uses Lightchain AIVM for decentralized AI inference. Pay once per month in LCAI &#x2014; no credit cards, no accounts.</div>
+      <div class="info-box">&#x26A1; Personalized AI lessons &amp; quizzes via Lightchain AIVM. One tap in your wallet — no credit cards, no paste-hash.</div>
       <div class="card" style="text-align:center;padding:20px">
-        <div style="font-size:36px;font-weight:900;color:var(--purple)" id="lcai-price-display">Loading...</div>
-        <div style="font-size:14px;color:var(--text-muted);margin-top:4px">LCAI per month ($4.99 USD equivalent)</div>
-        <div style="font-size:12px;color:var(--text-muted);margin-top:8px" id="lcai-rate-display"></div>
+        <div style="font-size:32px;font-weight:900;color:var(--purple)">$4.99<span style="font-size:16px;font-weight:700;color:var(--text-muted)"> / month</span></div>
+        <div style="font-size:15px;color:var(--text-muted);margin-top:8px" id="lcai-price-display">≈ … LCAI</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:6px" id="lcai-rate-display"></div>
       </div>
-      <div class="form-group">
-        <label class="form-label">Send LCAI to this address:</label>
-        <div style="background:#f9fafb;border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-family:monospace;font-size:13px;word-break:break-all;cursor:pointer" onclick="copyKeiko()" title="Click to copy">
-          0x6518fD26a7aD2Fe1bA80De5f279Ee59F55C0A9bA &#x1F4CB;
+      <div class="warn-box">Pays in <strong>native LCAI</strong> on <strong>Lightchain Mainnet (9200)</strong>. The app will switch networks and open your wallet to confirm.</div>
+      <div id="payment-status" style="font-size:13px;color:var(--text-muted);min-height:1.2em"></div>
+      <details style="margin-top:8px;font-size:13px;color:var(--text-muted)">
+        <summary style="cursor:pointer;font-weight:600;color:var(--purple)">Advanced: pay manually / verify hash</summary>
+        <div style="margin-top:12px;display:flex;flex-direction:column;gap:10px">
+          <div style="background:#f9fafb;border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-family:monospace;font-size:12px;word-break:break-all;cursor:pointer" onclick="copyKeiko()" title="Click to copy">
+            0x6518fD26a7aD2Fe1bA80De5f279Ee59F55C0A9bA &#x1F4CB;
+          </div>
+          <input type="text" id="payment-txhash" class="form-input" placeholder="Paste tx hash 0x..." style="font-family:monospace;font-size:13px">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="submitPayment()" id="btn-verify-payment">Verify hash</button>
         </div>
-      </div>
-      <div class="warn-box">Make sure you are on the <strong>Lightchain</strong> network (chain ID 9200) when sending. LCAI is the native token.</div>
-      <div class="form-group">
-        <label class="form-label">Paste your payment transaction hash:</label>
-        <input type="text" id="payment-txhash" class="form-input" placeholder="0x..." style="font-family:monospace;font-size:13px">
-      </div>
-      <div id="payment-status" style="font-size:13px;color:var(--text-muted)"></div>
+      </details>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="closeModal('modal-payment')">Cancel</button>
-      <button class="btn btn-primary" onclick="submitPayment()" id="btn-verify-payment">&#x2705; Verify Payment</button>
+    <div class="modal-footer" style="flex-direction:column;gap:8px">
+      <button type="button" class="btn btn-primary" style="width:100%;padding:14px" onclick="payWithWallet()" id="btn-pay-wallet">&#x1F4B3; Pay with Wallet</button>
+      <button type="button" class="btn btn-secondary" style="width:100%" onclick="closeModal('modal-payment')">Cancel</button>
     </div>
   </div>
 </div>
@@ -670,8 +670,7 @@ document.addEventListener('DOMContentLoaded',function(){
       <div style="margin-bottom:20px">
         <div style="font-size:16px;font-weight:800;color:#7c3aed;margin-bottom:12px">💳 Subscribing ($4.99/month)</div>
         <div style="font-size:15px;color:#374151;line-height:1.75">
-          After your 5 free uses, you'll see a payment prompt. Connect your MetaMask or Trust Wallet, then tap <strong>Pay Now</strong>. The app calculates the current LCAI equivalent of $4.99 automatically.<br><br>
-          Send the LCAI from your wallet to complete the payment. Once confirmed on the blockchain, your access is unlocked for 30 days — no accounts, no passwords, no middleman.
+          After your 5 free starter plans, open <strong>Upgrade</strong>. Connect MetaMask or Trust Wallet, then tap <strong>Pay with Wallet</strong>. The app switches to Lightchain, quotes ~$4.99 in native LCAI, and opens one confirm in your wallet. Premium lasts 31 days — no paste-hash needed.
         </div>
       </div>
       <div style="height:1px;background:#e5e7eb;margin-bottom:20px"></div>
@@ -947,47 +946,131 @@ async function verifyPaymentTx(txHash,requiredWei){
   if(!tx.to||tx.to.toLowerCase()!==KEIKO_WALLET.toLowerCase())
     throw new Error('Payment was not sent to the correct address.');
   const val=BigInt(tx.value||'0x0');
-  if(val<requiredWei)throw new Error('Payment amount is too low. Required: '+ethers.formatEther(requiredWei)+' LCAI');
+  // 5% slack for price drift between quote and send
+  const minOk=(requiredWei*95n)/100n;
+  if(val<minOk)throw new Error('Payment amount is too low. Required about '+ethers.formatEther(requiredWei)+' LCAI');
+  if(!tx.blockNumber)throw new Error('Transaction not confirmed yet. Wait a few seconds and try again.');
   const block=await rpc('eth_getBlockByNumber',[tx.blockNumber,false]);
   const ts=parseInt(block.timestamp,16)*1000;
   if(Date.now()-ts>31*24*3600*1000)throw new Error('Payment is more than 31 days old. Please renew.');
   return ts;
 }
 
+function unlockPremium(txHash, paidAtMs){
+  S.paidUntil=(paidAtMs||Date.now())+(31*24*3600*1000);
+  S.paymentTxHash=txHash||S.paymentTxHash;
+  saveData();
+  closeModal('modal-payment');
+  updateNavBadge();
+  toast('&#x1F389; Premium AI unlocked for 31 days!');
+}
+
 // ── PAYMENT MODAL ─────────────────────────────────────────────────────────
 async function openPaymentModal(){
   openModal('modal-payment');
-  el('lcai-price-display').textContent='Loading...';
+  el('lcai-price-display').textContent='≈ … LCAI';
   el('lcai-rate-display').textContent='';
   el('payment-status').textContent='';
+  const payBtn=el('btn-pay-wallet');
+  if(payBtn){payBtn.disabled=false;payBtn.textContent='\uD83D\uDCB3 Pay with Wallet';}
   try{
     const price=await getLCAIPrice();
     const lcai=(SUB_USD/price).toFixed(2);
-    el('lcai-price-display').textContent=lcai+' LCAI';
-    el('lcai-rate-display').textContent='1 LCAI = $'+price.toFixed(4)+' USD';
-  }catch{el('lcai-price-display').textContent='~1250 LCAI';}
+    el('lcai-price-display').textContent='\u2248 '+lcai+' LCAI';
+    el('lcai-rate-display').textContent='1 LCAI \u2248 $'+price.toFixed(4)+' USD \u00b7 billed as native LCAI on Lightchain';
+  }catch{
+    el('lcai-price-display').textContent='\u2248 LCAI (price loading failed \u2014 wallet will show amount)';
+  }
 }
 function copyKeiko(){
   navigator.clipboard?.writeText(KEIKO_WALLET).then(()=>toast('Address copied! &#x1F4CB;'));
 }
+
+/** One-click: switch to Lightchain → send native LCAI → unlock premium */
+async function payWithWallet(){
+  const status=el('payment-status');
+  const btn=el('btn-pay-wallet');
+  if(btn)btn.disabled=true;
+  try{
+    if(status)status.textContent='Preparing payment...';
+    // Need a browser wallet
+    if(!window.ethereum&&!_activeProvider){
+      if(status)status.textContent='Connect a wallet first (MetaMask / Trust)...';
+      openModal('modal-wallet');
+      if(typeof openWalletPicker==='function')openWalletPicker();
+      toast('Connect your wallet, then tap Pay with Wallet again.',false,5000);
+      return;
+    }
+    // Ensure connected account
+    if(!S.addr||!S.signer){
+      if(status)status.textContent='Connecting wallet...';
+      const raw=_activeProvider||window.ethereum;
+      const accounts=await raw.request({method:'eth_requestAccounts'});
+      if(!accounts?.length)throw new Error('No wallet account returned');
+      S.addr=accounts[0];
+      S.provider=new ethers.BrowserProvider(raw);
+      S.signer=await S.provider.getSigner(S.addr);
+      _activeProvider=raw;
+      window.ethereum=raw;
+      updateWalletUI();
+    }
+    if(status)status.textContent='Switching to Lightchain Mainnet (9200)...';
+    await switchToLightchain();
+    // Refresh signer on new chain
+    const raw2=_activeProvider||window.ethereum;
+    S.provider=new ethers.BrowserProvider(raw2);
+    S.signer=await S.provider.getSigner();
+    S.addr=await S.signer.getAddress();
+
+    if(status)status.textContent='Getting price...';
+    const reqWei=await getRequiredLCAIWei();
+    if(reqWei<=0n)throw new Error('Could not calculate LCAI amount. Try again.');
+
+    const bal=await S.provider.getBalance(S.addr);
+    if(bal<reqWei){
+      const need=Number(ethers.formatEther(reqWei)).toFixed(2);
+      const have=Number(ethers.formatEther(bal)).toFixed(2);
+      throw new Error('Not enough native LCAI (need ~'+need+', wallet has ~'+have+'). Bridge or buy native LCAI on Lightchain, then try again.');
+    }
+
+    const amt=Number(ethers.formatEther(reqWei)).toFixed(2);
+    if(status)status.textContent='Confirm ~'+amt+' LCAI in your wallet...';
+    const tx=await S.signer.sendTransaction({
+      to:KEIKO_WALLET,
+      value:reqWei
+    });
+    if(status)status.textContent='Waiting for confirmation...';
+    const receipt=await tx.wait();
+    if(!receipt||receipt.status!==1)throw new Error('Transaction failed on-chain.');
+    unlockPremium(tx.hash, Date.now());
+  }catch(e){
+    console.error('payWithWallet',e);
+    const msg=(e?.code===4001||/user rejected|denied/i.test(String(e?.message||e)))
+      ?'Cancelled in wallet.'
+      :(e?.shortMessage||e?.message||'Payment failed');
+    if(status)status.textContent=msg;
+    toast(msg,true,7000);
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent='\uD83D\uDCB3 Pay with Wallet';}
+  }
+}
+window.payWithWallet=payWithWallet;
+
 async function submitPayment(){
-  const txHash=el('payment-txhash').value.trim();
-  if(!txHash||!txHash.startsWith('0x')){toast('Please enter a valid transaction hash (starts with 0x)',true);return;}
-  el('payment-status').textContent='Verifying on Lightchain...';
-  el('btn-verify-payment').disabled=true;
+  const txHash=el('payment-txhash')?.value?.trim()||'';
+  if(!txHash||!txHash.startsWith('0x')){toast('Enter a valid transaction hash (0x...)',true);return;}
+  const st=el('payment-status');
+  if(st)st.textContent='Verifying on Lightchain...';
+  const vbtn=el('btn-verify-payment');
+  if(vbtn)vbtn.disabled=true;
   try{
     const reqWei=await getRequiredLCAIWei();
     const ts=await verifyPaymentTx(txHash,reqWei);
-    S.paidUntil=ts+(31*24*3600*1000);
-    S.paymentTxHash=txHash;
-    saveData();
-    closeModal('modal-payment');
-    updateNavBadge();
-    toast('&#x1F389; Payment verified! Premium AI unlocked for 31 days.');
+    unlockPremium(txHash, ts);
   }catch(e){
-    el('payment-status').textContent='';
+    if(st)st.textContent='';
     toast(e.message||'Verification failed',true,6000);
-  }finally{el('btn-verify-payment').disabled=false;}
+  }finally{if(vbtn)vbtn.disabled=false;}
 }
 
 // ── NETWORK SWITCH ────────────────────────────────────────────────────────
