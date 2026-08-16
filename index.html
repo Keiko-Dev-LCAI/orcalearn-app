@@ -59,7 +59,7 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Ro
 .wallet-addr{font-size:12px;color:var(--text-muted);font-family:monospace;}
 .paid-badge{background:#d1fae5;color:#065f46;border-radius:999px;padding:4px 10px;font-size:12px;font-weight:700;white-space:nowrap;}
 .free-badge{background:#fef9c3;color:#713f12;border-radius:999px;padding:4px 10px;font-size:12px;font-weight:700;white-space:nowrap;}
-.tab-content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+.tab-content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:88px;}
 .tab-section{padding:14px 20px 20px;max-width:1100px;margin:0 auto;width:100%;}
 .home-welcome{font-size:24px;font-weight:800;color:var(--text);margin-bottom:12px;line-height:1.2;}
 .home-welcome-sub{font-size:14px;font-weight:500;color:var(--text-muted);margin:-6px 0 14px;}
@@ -319,29 +319,51 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Ro
       <button class="btn btn-primary btn-large" id="hero-connect-btn" type="button">🐋 Connect Wallet — It's Free</button>
       <p class="landing-note">✨ Free: 5 starter lesson plans + unlimited math quizzes (templates, no wallet needed)<br>⚡ Premium (~$4.99/mo in native LCAI): personalized AI lessons &amp; quizzes via Lightchain AIVM</p>
       <p id="landing-wallet-hint" class="landing-note" style="display:none;color:#059669;font-weight:600;"></p>
-      <button class="btn btn-secondary btn-sm mt-2" onclick="startFree()">📚 Continue Without Wallet</button>
+      <button type="button" class="btn btn-secondary btn-sm mt-2" id="btn-continue-free" onclick="window.startFree&&window.startFree()">📚 Continue Without Wallet</button>
       <div class="aivm-badge mt-2">⚡ Premium AI on Lightchain AIVM · Free tier = starter templates</div>
       <a href="#" onclick="openModal('modal-terms');return false;" style="font-size:12px;color:#9ca3af;text-decoration:none;margin-top:6px;">📋 Terms &amp; Disclaimer</a>
-      <span id="ol-version" style="font-size:11px;color:#d1d5db;margin-top:4px;"></span>
+      <div style="margin-top:18px;display:flex;flex-direction:column;align-items:center;gap:10px;width:100%;">
+        <a href="https://keiko-dev-lcai.github.io/orcapod/" target="_blank" rel="noopener" style="color:#7c3aed;font-size:14px;text-decoration:none;font-weight:700;">🐬 Other Orca dApps →</a>
+        <div style="font-size:13px;opacity:0.75;">
+          <a href="https://x.com/KeikoDevLCAI" target="_blank" rel="noopener" style="color:#9b7fe8;text-decoration:none;font-weight:600;">𝕏 @KeikoDevLCAI</a>
+          <span style="color:#c4b5fd;margin:0 8px;">·</span>
+          <a href="https://orcamail.ai" target="_blank" rel="noopener" style="color:#6c47ff;text-decoration:none;font-weight:600;">Contact via OrcaMail 🐬</a>
+        </div>
+      </div>
     </div>
   </main>
 </div>
 
 <script>
-window.OL_BUILD='20260816-promo';
+window.OL_BUILD='20260816b';
+// Early stub so the button works even if a later script errors during load
+window.startFree=function(){
+  try{
+    var land=document.getElementById('landing');
+    var app=document.getElementById('app');
+    if(land)land.style.display='none';
+    if(app)app.style.display='flex';
+    if(typeof showTab==='function')showTab('home');
+    if(typeof renderHome==='function')renderHome();
+    if(typeof renderLessons==='function')renderLessons();
+    if(typeof renderQuiz==='function')renderQuiz();
+    if(typeof renderStudents==='function')renderStudents();
+  }catch(e){console.error(e);alert('Could not open free mode — hard-refresh (Ctrl+Shift+R).');}
+};
 window.connectWallet=function(){
   var m=document.getElementById('modal-wallet');
   var t=document.getElementById('toast');
   if(t){t.textContent='Opening wallet picker...';t.className='show';clearTimeout(t._t);t._t=setTimeout(function(){t.className='';},2500);}
-  if(!m){alert('OrcaLearn v'+window.OL_BUILD+': hard-refresh this page (Ctrl+Shift+R)');return;}
+  if(!m){alert('OrcaLearn: hard-refresh this page (Ctrl+Shift+R)');return;}
   m.style.display='flex';
   if(typeof openWalletPicker==='function'){try{openWalletPicker();}catch(e){console.error('openWalletPicker',e);}}
 };
 document.addEventListener('DOMContentLoaded',function(){
-  var v=document.getElementById('ol-version');if(v)v.textContent='build '+window.OL_BUILD;
   ['hero-connect-btn','nav-connect-btn'].forEach(function(id){
     var b=document.getElementById(id);if(b)b.addEventListener('click',function(e){e.preventDefault();window.connectWallet();});
   });
+  var freeBtn=document.getElementById('btn-continue-free');
+  if(freeBtn)freeBtn.addEventListener('click',function(e){e.preventDefault();window.startFree&&window.startFree();});
 });
 </script>
 
@@ -378,8 +400,14 @@ document.addEventListener('DOMContentLoaded',function(){
       <div id="students-list"></div>
     </div>
     <div id="tab-vocab" class="tab-section" style="display:none"><div id="vocab-content"></div></div>
-    <div style="text-align:center;padding:16px 20px;border-top:1px solid rgba(0,0,0,0.06);">
-      <a href="https://keiko-dev-lcai.github.io/orcapod/" target="_blank" style="color:#7c3aed;font-size:13px;text-decoration:none;font-weight:600;letter-spacing:.02em;">🐬 Other Orca dApps →</a>
+    <div style="text-align:center;padding:16px 20px 28px;border-top:1px solid rgba(0,0,0,0.06);display:flex;flex-direction:column;gap:10px;align-items:center;">
+      <a href="https://keiko-dev-lcai.github.io/orcapod/" target="_blank" rel="noopener" style="color:#7c3aed;font-size:14px;text-decoration:none;font-weight:700;">🐬 Other Orca dApps →</a>
+      <div style="font-size:13px;opacity:0.75;">
+        <a href="https://x.com/KeikoDevLCAI" target="_blank" rel="noopener" style="color:#9b7fe8;text-decoration:none;font-weight:600;">𝕏 @KeikoDevLCAI</a>
+        <span style="color:#c4b5fd;margin:0 8px;">·</span>
+        <a href="https://orcamail.ai" target="_blank" rel="noopener" style="color:#6c47ff;text-decoration:none;font-weight:600;">Contact via OrcaMail 🐬</a>
+      </div>
+      <a href="OrcaLearn.apk" download style="font-size:12px;color:#6b7280;text-decoration:none;margin-top:4px;">📲 Android APK</a>
     </div>
   </div>
   <nav class="bottom-nav">
@@ -999,11 +1027,12 @@ async function getAivmJWT(){
 }
 
 // ── AIVM INFERENCE (shared Railway relay; mode=orcalearn = teacher persona) ─
-const AIVM_RELAY='https://web-production-aaaba.up.railway.app';
+// Reuse name AIVM_RELAY for HTTP relay (const above is the WS URL — reassign via let-style overwrite)
+var AIVM_HTTP_RELAY='https://web-production-aaaba.up.railway.app';
 async function aivmInference(prompt,onProgress){
   onProgress('Connecting to Lightchain AIVM... (1–2 minutes)');
   // mode orcalearn → server uses OrcaLearn teacher system prompt (not OrcaAppBuilder)
-  const res=await fetch(AIVM_RELAY+'/api/chat',{
+  const res=await fetch(AIVM_HTTP_RELAY+'/api/chat',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({message:prompt,mode:'orcalearn',lang:'en'})
@@ -1022,7 +1051,7 @@ async function aivmInference(prompt,onProgress){
   while(Date.now()<deadline){
     await new Promise(r=>setTimeout(r,5000));
     onProgress('Lightchain worker processing...');
-    const poll=await fetch(AIVM_RELAY+'/api/chat/status?job_id='+encodeURIComponent(jobId));
+    const poll=await fetch(AIVM_HTTP_RELAY+'/api/chat/status?job_id='+encodeURIComponent(jobId));
     if(!poll.ok)throw new Error('Poll error '+poll.status);
     const d=await poll.json();
     if(d.status==='done')return d.reply||'';
@@ -1525,9 +1554,21 @@ async function connectWallet(){
 }
 window.connectWallet=connectWallet;
 function startFree(){
-  S.addr=null;S.provider=null;S.signer=null;
-  enterApp();
+  try{
+    S.addr=null;S.provider=null;S.signer=null;
+    enterApp();
+  }catch(e){
+    console.error('startFree',e);
+    try{
+      var land=document.getElementById('landing');
+      var app=document.getElementById('app');
+      if(land)land.style.display='none';
+      if(app)app.style.display='flex';
+    }catch(e2){}
+    alert('Could not open free mode. Hard-refresh (Ctrl+Shift+R) and try again.');
+  }
 }
+window.startFree=startFree;
 function goLanding(){
   if(S.addr){showTab('home');return;}
   el('app').style.display='none';el('landing').style.display='';
@@ -2014,15 +2055,19 @@ function generateTranscript(){
 // ── PRINT / EXPORT ────────────────────────────────────────────────────────
 function printBase(title,bodyHtml){
   const w=window.open('','_blank');
-  const footer='<div style="text-align:center;padding:6px 16px 12px;font-size:13px;opacity:0.65;"><a href="https://x.com/KeikoDevLCAI" target="_blank" rel="noopener" style="color:#9b7fe8;text-decoration:none;font-weight:600;">X @KeikoDevLCAI</a></div>
-<div style="text-align:center;padding:4px 16px 12px;font-size:13px;opacity:0.75;"><a href="https://lightdex.app/" target="_blank" rel="noopener" style="color:#7ec8e3;text-decoration:none;font-weight:600;">Get LCAI · LCAI Swap ↗</a></div><div style="text-align:center;padding:8px 16px 16px;font-size:13px;opacity:0.5;">Questions or ideas? <a href="https://orcamail.ai" target="_blank" rel="noopener" style="color:#6c47ff;font-weight:600;text-decoration:none;">Contact Developer via OrcaMail &#x1F42C;</a></div>';
-  w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+title+'</title><style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:-apple-system,sans-serif;color:#1e1b4b;background:#fff;}#pb{background:#7c3aed;color:white;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;}#pb h2{font-size:15px;font-weight:700;}#pb button{background:white;color:#7c3aed;border:none;border-radius:8px;padding:8px 18px;font-size:14px;font-weight:700;cursor:pointer;}.content{max-width:800px;margin:0 auto;padding:32px 24px;}@media print{#pb{display:none!important;}.content{padding:0;max-width:100%;}}h1{font-size:22px;font-weight:800;margin-bottom:4px;}h2{font-size:16px;font-weight:700;margin:20px 0 8px;color:#7c3aed;border-bottom:2px solid #ede9fe;padding-bottom:4px;}p,li{font-size:14px;line-height:1.7;}table{width:100%;border-collapse:collapse;font-size:14px;margin:8px 0;}th{background:#f5f3ff;color:#5b21b6;font-weight:700;padding:8px 12px;text-align:left;border:1px solid #e5e7eb;}td{padding:8px 12px;border:1px solid #e5e7eb;}tr:nth-child(even) td{background:#fafafa;}.meta{font-size:13px;color:#6b7280;margin-bottom:20px;}.badge-grade{padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600;}.grade-A{background:#d1fae5;color:#065f46;}.grade-B{background:#dbeafe;color:#1e40af;}.grade-C{background:#fef9c3;color:#713f12;}.grade-D,.grade-F{background:#fee2e2;color:#991b1b;}.badge-pass{background:#d1fae5;color:#065f46;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600;}.footer{margin-top:40px;padding-top:16px;border-top:2px solid #e5e7eb;font-size:12px;color:#9ca3af;text-align:center;}.sig-line{display:flex;gap:40px;margin-top:32px;}.sig-item{flex:1;}.sig-item .line{border-bottom:1px solid #374151;height:32px;margin-bottom:4px;}.sig-item .label{font-size:12px;color:#6b7280;}.progress-bar{height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden;margin:4px 0 8px;}.progress-fill{height:100%;background:linear-gradient(90deg,#7c3aed,#2563eb);border-radius:4px;}pre{white-space:pre-wrap;font-family:inherit;font-size:13px;line-height:1.7;background:#f9fafb;border-radius:8px;padding:16px;border:1px solid #e5e7eb;}.orca-header{display:flex;align-items:center;gap:12px;margin-bottom:20px;padding-bottom:16px;border-bottom:3px solid #7c3aed;}.orca-logo{font-size:40px;}.orca-title{font-size:24px;font-weight:900;color:#1e1b4b;}.orca-sub{font-size:13px;color:#7c3aed;font-weight:600;}</style></head><body><div id="pb"><h2>&#x1F4C4; '+title+'</h2><button onclick="window.print()">&#x1F5A8; Print / Save as PDF</button></div><div class="content">'+bodyHtml+'</div>'+footer+'
-<div class="keiko-android-install">
-  <a href="OrcaLearn.apk" download>📲 Download Android App</a>
-  <p>Download → open file → Install. Allow unknown apps if asked.</p>
-</div>
-
-</body></html>');
+  if(!w){toast('Allow pop-ups to print/export',true);return;}
+  const footer=
+    '<div style="text-align:center;padding:12px 16px;font-size:13px;opacity:0.75;">'+
+    '<a href="https://x.com/KeikoDevLCAI" target="_blank" rel="noopener" style="color:#9b7fe8;text-decoration:none;font-weight:600;">𝕏 @KeikoDevLCAI</a>'+
+    ' &nbsp;·&nbsp; '+
+    '<a href="https://lightdex.app/" target="_blank" rel="noopener" style="color:#7ec8e3;text-decoration:none;font-weight:600;">Get LCAI · LCAI Swap ↗</a>'+
+    ' &nbsp;·&nbsp; '+
+    '<a href="https://orcamail.ai" target="_blank" rel="noopener" style="color:#6c47ff;font-weight:600;text-decoration:none;">Contact via OrcaMail 🐬</a>'+
+    ' &nbsp;·&nbsp; '+
+    '<a href="https://keiko-dev-lcai.github.io/orcapod/" target="_blank" rel="noopener" style="color:#7c3aed;font-weight:600;text-decoration:none;">Other Orca dApps →</a>'+
+    '</div>';
+  const styles='*{box-sizing:border-box;margin:0;padding:0;}body{font-family:-apple-system,sans-serif;color:#1e1b4b;background:#fff;}#pb{background:#7c3aed;color:white;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;}#pb h2{font-size:15px;font-weight:700;}#pb button{background:white;color:#7c3aed;border:none;border-radius:8px;padding:8px 18px;font-size:14px;font-weight:700;cursor:pointer;}.content{max-width:800px;margin:0 auto;padding:32px 24px;}@media print{#pb{display:none!important;}.content{padding:0;max-width:100%;}}h1{font-size:22px;font-weight:800;margin-bottom:4px;}h2{font-size:16px;font-weight:700;margin:20px 0 8px;color:#7c3aed;border-bottom:2px solid #ede9fe;padding-bottom:4px;}p,li{font-size:14px;line-height:1.7;}table{width:100%;border-collapse:collapse;font-size:14px;margin:8px 0;}th{background:#f5f3ff;color:#5b21b6;font-weight:700;padding:8px 12px;text-align:left;border:1px solid #e5e7eb;}td{padding:8px 12px;border:1px solid #e5e7eb;}tr:nth-child(even) td{background:#fafafa;}.meta{font-size:13px;color:#6b7280;margin-bottom:20px;}.badge-pass{background:#d1fae5;color:#065f46;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600;}.grade-A{background:#d1fae5;color:#065f46;}.grade-B{background:#dbeafe;color:#1e40af;}.grade-C{background:#fef9c3;color:#713f12;}.grade-D,.grade-F{background:#fee2e2;color:#991b1b;}.footer{margin-top:40px;padding-top:16px;border-top:2px solid #e5e7eb;font-size:12px;color:#9ca3af;text-align:center;}.sig-line{display:flex;gap:40px;margin-top:32px;}.sig-item{flex:1;}.sig-item .line{border-bottom:1px solid #374151;height:32px;margin-bottom:4px;}.sig-item .label{font-size:12px;color:#6b7280;}.progress-bar{height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden;margin:4px 0 8px;}.progress-fill{height:100%;background:linear-gradient(90deg,#7c3aed,#2563eb);border-radius:4px;}pre{white-space:pre-wrap;font-family:inherit;font-size:13px;line-height:1.7;background:#f9fafb;border-radius:8px;padding:16px;border:1px solid #e5e7eb;}.orca-header{display:flex;align-items:center;gap:12px;margin-bottom:20px;padding-bottom:16px;border-bottom:3px solid #7c3aed;}.orca-logo{font-size:40px;}.orca-title{font-size:24px;font-weight:900;color:#1e1b4b;}.orca-sub{font-size:13px;color:#7c3aed;font-weight:600;}';
+  w.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>'+title+'</title><style>'+styles+'</style></head><body><div id="pb"><h2>&#x1F4C4; '+title+'</h2><button onclick="window.print()">&#x1F5A8; Print / Save as PDF</button></div><div class="content">'+bodyHtml+'</div>'+footer+'</body></html>');
   w.document.close();
 }
 
