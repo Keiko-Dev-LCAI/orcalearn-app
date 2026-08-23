@@ -557,6 +557,42 @@ def is_valid_address(addr: str) -> bool:
 _jobs: dict = {}
 _jobs_lock  = threading.Lock()
 
+# ── AIVM abuse guards (open-endpoints audit 2026-08-22) ─────────────────────
+from datetime import datetime, timezone as _tz
+_CHAT_RATE_PER_MIN = int(os.environ.get("CHAT_RATE_PER_MIN", "5"))
+_CHAT_RATE_PER_DAY = int(os.environ.get("CHAT_RATE_PER_DAY", "30"))
+_DAILY_LCAI_CAP = float(os.environ.get("DAILY_LCAI_CAP", "50"))
+_LCAI_PER_JOB = float(os.environ.get("LCAI_PER_JOB", "0.02"))
+_MAX_CONCURRENT = int(os.environ.get("MAX_CONCURRENT_JOBS", "8"))
+_rate_lock = threading.Lock(); _rate_hits = {}
+_spend_lock = threading.Lock(); _spend_day = ""; _spend_jobs = 0
+
+def _gate_ai(handler):
+    global _spend_day, _spend_jobs
+    xff = (handler.headers.get("X-Forwarded-For") or "").split(",")[0].strip()
+    ip = xff or (handler.client_address[0] if handler.client_address else "unknown")
+    now = time.time(); day = datetime.now(_tz.utc).strftime("%Y-%m-%d")
+    with _rate_lock:
+        rec = _rate_hits.get(ip)
+        if not rec or rec.get("day") != day:
+            rec = {"day": day, "hits": []}; _rate_hits[ip] = rec
+        hits = [t for t in rec["hits"] if now - t < 86400]
+        if len([t for t in hits if now - t < 60]) >= _CHAT_RATE_PER_MIN:
+            return False, 429, "Too many requests — wait a minute and try again."
+        if len(hits) >= _CHAT_RATE_PER_DAY:
+            return False, 429, "Daily limit reached — try again tomorrow."
+        hits.append(now); rec["hits"] = hits
+    with _jobs_lock:
+        pending = sum(1 for v in _jobs.values() if v.get("status") == "pending")
+        if pending >= _MAX_CONCURRENT:
+            return False, 503, "AI is busy right now — give it a moment and try again."
+    with _spend_lock:
+        if _spend_day != day: _spend_day = day; _spend_jobs = 0
+        if _spend_jobs * _LCAI_PER_JOB >= _DAILY_LCAI_CAP:
+            return False, 503, "AI is at capacity for today — please try again tomorrow."
+        _spend_jobs += 1
+    return True, 200, ""
+
 def _cleanup_old_jobs():
     cutoff = time.time() - 3600
     with _jobs_lock:
@@ -634,11 +670,21 @@ class Handler(BaseHTTPRequestHandler):
     def log_message(self, fmt, *args):
         pass  # suppress default Apache-style logs
 
+    def _cors(self):
+        origins = [o.strip() for o in __import__('os').environ.get(
+            'CORS_ORIGINS', 'https://orcalearn.ai,https://keiko-dev-lcai.github.io,http://localhost:8080'
+        ).split(',') if o.strip()]
+        origin = (self.headers.get('Origin') or '').strip()
+        if origin in origins:
+            return origin
+        return origins[0] if origins else 'https://orcalearn.ai'
+
     def _send_json(self, obj, code=200):
         body = json.dumps(obj).encode()
         self.send_response(code)
         self.send_header('Content-Type', 'application/json')
-        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Origin', self._cors())
+        self.send_header('Vary', 'Origin')
         self.send_header('Content-Length', str(len(body)))
         self.end_headers()
         self.wfile.write(body)
@@ -654,9 +700,10 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_OPTIONS(self):
         self.send_response(204)
-        self.send_header('Access-Control-Allow-Origin', '*')
+        self.send_header('Access-Control-Allow-Origin', self._cors())
         self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
         self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        self.send_header('Vary', 'Origin')
         self.end_headers()
 
     # ── Static file serving ───────────────────────────────────────────
@@ -846,6 +893,10 @@ class Handler(BaseHTTPRequestHandler):
             self._send_error("Subject required"); return
         if not (1 <= grade <= 12):
             self._send_error("Grade must be 1–12"); return
+
+        ok, code, err = _gate_ai(self)
+        if not ok:
+            self._send_error(err, code); return
 
         address = normalize_address(address)
 
