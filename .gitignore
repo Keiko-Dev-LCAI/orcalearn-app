@@ -3,3 +3,4 @@
 *.pem
 __pycache__/
 *.pyc
+.grok/
