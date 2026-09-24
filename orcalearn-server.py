@@ -722,6 +722,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._serve_file('/home/keiko/Desktop/orcamail-logo.png')
         if path == '/orcalearn-logo.png':
             return self._serve_file('/home/keiko/Desktop/orcalearn/orcalearn-logo.png')
+        if path.startswith('/getlcai/') and path.endswith('.js'):
+            return self._serve_file('/home/keiko/Desktop/orcalearn/getlcai/' + os.path.basename(path))
 
         if path == '/api/health':
             uptime = int(time.time() - SERVER_START)
