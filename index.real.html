@@ -1114,11 +1114,26 @@ async function getAivmJWT(){
 var AIVM_HTTP_RELAY='https://web-production-aaaba.up.railway.app';
 async function aivmInference(prompt,onProgress){
   onProgress('Connecting to Lightchain AIVM... (1–2 minutes)');
+  if(!S.addr||!S.signer) throw new Error('Connect your wallet to use premium AI.');
+  if(!S.paymentTxHash) throw new Error('Premium payment was not found on this device.');
+  const text=String(prompt||'').trim();
+  const promptHash=ethers.sha256(ethers.toUtf8Bytes(text)).slice(2);
+  const ts=Math.floor(Date.now()/1000);
+  const authMessage='OrcaLearn|chat|'+S.addr.toLowerCase()+'|'+ts+'|'+promptHash;
+  const signature=await S.signer.signMessage(authMessage);
   // mode orcalearn → server uses OrcaLearn teacher system prompt (not OrcaAppBuilder)
   const res=await fetch(AIVM_HTTP_RELAY+'/api/chat',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({message:prompt,mode:'orcalearn',lang:'en'})
+    body:JSON.stringify({
+      message:text,
+      mode:'orcalearn',
+      lang:'en',
+      address:S.addr,
+      auth_message:authMessage,
+      signature:signature,
+      payment_tx:S.paymentTxHash
+    })
   });
   if(!res.ok){
     const txt=await res.text().catch(()=>'');
