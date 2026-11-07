@@ -2717,8 +2717,7 @@ function showLandingWalletHint(){
     var stored=JSON.parse(localStorage.getItem(LS_KEY)||'{}');
     var hint=el('landing-wallet-hint');
     if(!hint||stored.manualDisconnect||!stored.wallet||S.addr)return;
-    hint.style.display='';
-    hint.textContent='Last wallet: '+shortAddr(stored.wallet)+' — tap Connect Wallet to reconnect';
+    hint.style.display='none';
   }catch{}
 }
 // ── INIT ──────────────────────────────────────────────────────────────────
